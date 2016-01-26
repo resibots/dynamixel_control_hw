@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(dynamixel_hardware_interface)
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  message_generation
+  hardware_interface
+  controller_manager
+)
+
+find_package(Boost 1.55)
+
+add_service_files(
+  FILES
+)
+
+catkin_package(
+ CATKIN_DEPENDS roscpp std_msgs message_runtime
+)
+
+if ("$ENV{RESIBOTS_DIR}" STREQUAL "")
+  set(libdynamixel_dir "~")
+else()
+  set(libdynamixel_dir "$ENV{RESIBOTS_DIR}")
+endif()
+
+link_directories("${libdynamixel_dir}/lib")
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  "${libdynamixel_dir}/include"
+  ${Boost_INCLUDE_DIR}
+  include
+)
+
+add_executable(dynamixel_control_renewed src/dynamixel_main.cpp src/dynamixel_loop.cpp src/dynamixel_hardware_interface.cpp)
+target_link_libraries(dynamixel_control_renewed ${catkin_LIBRARIES} ${Boost_LIBRARIES} dynamixel)
