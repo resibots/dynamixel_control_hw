@@ -27,7 +27,7 @@ namespace dynamixel
     class DynamixelHardwareInterface : public hardware_interface::RobotHW
     {
     public:
-        DynamixelHardwareInterface(const std::string& usb_serial_interface, int baudrate, std::map<byte_t, std::string> dynamixel_map);
+        DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate, std::map<byte_t, std::string> dynamixel_map);
         ~DynamixelHardwareInterface();
 
         /// Find all connected devices and register those refered in dynamixel_map in the
@@ -55,6 +55,9 @@ namespace dynamixel
         std::vector<double> _joint_velocities; // actual joint velocity
         std::vector<double> _joint_efforts; // compulsory but not used
 
+        // USB to serial connexion settings
+        const std::string& _usb_serial_interface;
+        const int _baudrate;
         // Dynamixel's low level controller
         Usb2Dynamixel _dynamixel_controller;
 

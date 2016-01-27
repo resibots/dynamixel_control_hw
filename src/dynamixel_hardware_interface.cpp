@@ -6,15 +6,9 @@
 
 namespace dynamixel
 {
-    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface, int baudrate, std::map<byte_t, std::string> dynamixel_map)
-    try: _dynamixel_controller(usb_serial_interface, baudrate), _dynamixel_map(dynamixel_map)
+    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate, std::map<byte_t, std::string> dynamixel_map)
+        : _dynamixel_map(dynamixel_map), _usb_serial_interface(usb_serial_interface), _baudrate(baudrate)
     { // to catch eventual exception from initialisation list
-    }
-    catch (Error& e)
-    {
-        ROS_FATAL_STREAM("Caught an exception while trying to initialise the Dynamixels:\n"
-            << e.msg());
-        throw e;
     }
 
     DynamixelHardwareInterface::~DynamixelHardwareInterface()
@@ -26,9 +20,19 @@ namespace dynamixel
     void DynamixelHardwareInterface::init()
     {
         // get the list of available actuators
-        _dynamixel_controller.scan_ax12s();
-        _dynamixel_ids = _dynamixel_controller.ax12_ids();
-        ROS_DEBUG_STREAM(_dynamixel_ids.size() << "Dynamixel actuators are connected");
+        try
+        {
+            _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
+            _dynamixel_controller.scan_ax12s();
+            _dynamixel_ids = _dynamixel_controller.ax12_ids();
+            ROS_WARN_STREAM(_dynamixel_ids.size() << " Dynamixel actuators are connected");
+        }
+        catch (Error& e)
+        {
+            ROS_FATAL_STREAM("Caught an exception while trying to initialise the Dynamixels:\n"
+                << e.msg());
+            throw e;
+        }
 
         _joint_commands.resize(_dynamixel_ids.size(), 0.0);
         _joint_angles.resize(_dynamixel_ids.size(), 0.0);

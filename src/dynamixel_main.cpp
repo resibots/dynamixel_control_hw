@@ -44,16 +44,16 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     std::string usb_serial_interface = "/dev/ttyUSB0";
-    int baudrate = 0;
+    int baudrate = B1000000;
     std::map<dynamixel::byte_t, std::string> dynamixel_map;
     dynamixel_map[1] = "first";
 
     // NOTE: We run the ROS loop in a separate thread as external calls such
     // as service callbacks to load controllers can block the (main) control loop
-    ros::MultiThreadedSpinner spinner(2);
+    // ros::MultiThreadedSpinner spinner(2);
     // TODO: use the following instead, as soon as we use ROS Jade
-    // ros::AsyncSpinner spinner(2);
-    // spinner.start();
+    ros::AsyncSpinner spinner(2);
+    spinner.start();
 
     // Create the hardware interface specific to your robot
     boost::shared_ptr<dynamixel::DynamixelHardwareInterface>
@@ -66,10 +66,12 @@ int main(int argc, char** argv)
 
     dynamixel::DynamixelLoop control_loop(nh, dynamixel_hw_interface);
 
+    ROS_DEBUG_STREAM("Node launched !");
+
     // Wait until shutdown signal recieved
-    spinner.spin();
+    // spinner.spin();
     // TODO: use the following instead, as soon as we use ROS Jade
-    // ros::waitForShutdown();
+    ros::waitForShutdown();
 
     return 0;
 }

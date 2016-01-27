@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- URDF robot description -->
+  <param name="robot_description" command="cat $(find dynamixel_hardware_interface)/urdf/test.urdf" />
+
+  <!-- Parameters for the hardware interface -->
+  <param name="dynamixel_loop/loop_hz" value="100" />
+  <param name="dynamixel_loop/cycle_time_error_threshold" value="100" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
+
+  <!-- To move the dummy robot with a gui, bypassing the controller manager -->
+  <!-- <param name="use_gui" value="true"/>
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="dummy_robot" /> -->
+
+  <!-- launch our hardware interface -->
+  <node pkg="dynamixel_hardware_interface" type="dynamixel_control_renewed" name="dynamixel_hardware_interface" />
+
+  <!-- Start a controller for our dummy robot -->
+  <rosparam file="$(find dynamixel_hardware_interface)/config/dummy_position.yaml"/>
+  <node name="first_position_controoler" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/dynamixel_loop" args="/dynamixel_loop/first_position_controller /dynamixel_loop/joint_state_controller" />
+</launch>

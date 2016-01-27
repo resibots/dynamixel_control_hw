@@ -57,7 +57,7 @@ namespace dynamixel
         error += !local_node_handle.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
         if(error > 0)
         {
-            char error_message[] = "could not retrieve one of the required parameters (loop_hz and cycle_time_error_threshold)";
+            char error_message[] = "could not retrieve one of the required parameters (dynamixel_loop/loop_hz and dynamixel_loop/cycle_time_error_threshold)";
             ROS_ERROR_STREAM(error_message);
             throw std::runtime_error(error_message);
         }
@@ -78,7 +78,7 @@ namespace dynamixel
             _current_time.tv_sec - _last_time.tv_sec +
             (_current_time.tv_nsec - _last_time.tv_nsec) / BILLION);
         _last_time = _current_time;
-        // FIXME: remove the following commented code
+        // TODO: remove the following commented code
         // ROS_DEBUG_STREAM_THROTTLE_NAMED(1, "generic_hw_main",
         //    "Sampled update loop with elapsed time " << elapsed_time.toSec());
 
@@ -90,6 +90,8 @@ namespace dynamixel
             << cycle_time_error << ", cycle time: " << _elapsed_time
             << ", threshold: " << _cycle_time_error_threshold);
         }
+
+        //ROS_WARN_STREAM("dynamixel loop");
 
         // Input
         // get the hardware's state
