@@ -4,12 +4,13 @@
 
   <!-- URDF robot description -->
   <param name="robot_description" command="cat $(find dynamixel_hardware_interface)/urdf/test.urdf" />
+  <!-- Publish robot's state in the tf tree -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
 
   <!-- Parameters for the hardware interface -->
-  <param name="dynamixel_loop/loop_hz" value="100" />
+  <param name="dynamixel_loop/loop_hz" value="10" />
   <param name="dynamixel_loop/cycle_time_error_threshold" value="100" />
 
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
 
   <!-- To move the dummy robot with a gui, bypassing the controller manager -->
   <!-- <param name="use_gui" value="true"/>
@@ -20,6 +21,6 @@
 
   <!-- Start a controller for our dummy robot -->
   <rosparam file="$(find dynamixel_hardware_interface)/config/dummy_position.yaml"/>
-  <node name="first_position_controoler" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/dynamixel_loop" args="/dynamixel_loop/first_position_controller /dynamixel_loop/joint_state_controller" />
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="/dynamixel_loop/first_position_controller /dynamixel_loop/joint_state_controller /dynamixel_loop/second_position_controller" />
 </launch>

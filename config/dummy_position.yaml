@@ -1,8 +1,12 @@
 dynamixel_loop:
   joint_state_controller:
-    type: joint_state_controller/JointeStateController
-    publish_rate: 50
+    type: joint_state_controller/JointStateController
+    publish_rate: 10
 
-  first_position_controoler:
+  first_position_controller:
     type: position_controllers/JointPositionController
     joint: first
+
+  second_position_controller:
+    type: position_controllers/JointPositionController
+    joint: second
