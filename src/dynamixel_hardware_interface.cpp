@@ -6,15 +6,32 @@
 
 namespace dynamixel
 {
-    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate, std::map<byte_t, std::string> dynamixel_map)
-        : _dynamixel_map(dynamixel_map), _usb_serial_interface(usb_serial_interface), _baudrate(baudrate)
-    { // to catch eventual exception from initialisation list
+    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
+        const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map)
+        : _dynamixel_map(dynamixel_map), _usb_serial_interface(usb_serial_interface), _baudrate(baudrate),
+          _read_timeout(dynamixel_timeout)
+    {
     }
 
     DynamixelHardwareInterface::~DynamixelHardwareInterface()
     {
-        // stop all actuators -> power them off ?
-        // close dynamixel connexion
+        // stop all actuators
+        try
+        {
+            std::vector<byte_t>::iterator dynamixel_id;
+            for (dynamixel_id=_dynamixel_ids.begin(); dynamixel_id!=_dynamixel_ids.end(); dynamixel_id++)
+            {
+                dynamixel::Status status;
+                _dynamixel_controller.send(dynamixel::ax12::TorqueEnable(*dynamixel_id, false));
+                _dynamixel_controller.recv(_read_timeout, status);
+            }
+        }
+        catch (Error& e)
+        {
+            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to power them off:\n"
+                << e.msg());
+            throw e;
+        }
     }
 
     void DynamixelHardwareInterface::init()
@@ -25,11 +42,10 @@ namespace dynamixel
             _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
             _dynamixel_controller.scan_ax12s();
             _dynamixel_ids = _dynamixel_controller.ax12_ids();
-            ROS_WARN_STREAM(_dynamixel_ids.size() << " Dynamixel actuators are connected");
         }
         catch (Error& e)
         {
-            ROS_FATAL_STREAM("Caught an exception while trying to initialise the Dynamixels:\n"
+            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to initialise them:\n"
                 << e.msg());
             throw e;
         }
@@ -39,6 +55,9 @@ namespace dynamixel
         _joint_velocities.resize(_dynamixel_ids.size(), 0.0);
         _joint_efforts.resize(_dynamixel_ids.size(), 0.0);
 
+        // declare all available actuators to the control manager, provided a
+        // name has been given for them
+        // also enable the torque output on the actuators (sort of power up)
         try
         {
             for (unsigned i=0; i<_dynamixel_ids.size(); i++)
@@ -65,7 +84,7 @@ namespace dynamixel
                     // enable the actuator
                     dynamixel::Status status;
                     _dynamixel_controller.send(dynamixel::ax12::TorqueEnable(_dynamixel_ids[i],true));
-                    _dynamixel_controller.recv(_read_duration, status);
+                    _dynamixel_controller.recv(_read_timeout, status);
                 }
             }
 
@@ -76,6 +95,12 @@ namespace dynamixel
         catch(const ros::Exception& e)
         {
             ROS_ERROR_STREAM("Could not initialize hardware interface:\n\tTrace: " << e.what());
+            throw e;
+        }
+        catch (Error& e)
+        {
+            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to enable them:\n"
+                << e.msg());
             throw e;
         }
     }
@@ -96,12 +121,12 @@ namespace dynamixel
                 dynamixel::Status status;
                 // current position
                 _dynamixel_controller.send(dynamixel::ax12::GetPosition(_dynamixel_ids[i]));
-                _dynamixel_controller.recv(_read_duration, status);
+                _dynamixel_controller.recv(_read_timeout, status);
                 _joint_angles[i] = status.decode16(); // TODO: convert value to SI units
 
                 // current speed
                 _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
-                _dynamixel_controller.recv(_read_duration, status);
+                _dynamixel_controller.recv(_read_timeout, status);
                 _joint_velocities[i] = status.decode16(); // TODO: convert value to SI units
             }
         }
@@ -125,15 +150,14 @@ namespace dynamixel
         for(unsigned int i=0; i<_dynamixel_ids.size(); i++)
         {
             // TODO: enforce joint limits (from URDF ?)
-            // TODO: actually convert from angle to tics
-            command_int[i] = (int)(_joint_commands[i]*M_PI/2048.0);
+            command_int[i] = (int)(_joint_commands[i]*2048/M_PI) + 2048;
         }
 
         try
         {
             dynamixel::Status status;
             _dynamixel_controller.send(dynamixel::ax12::SetPositions(_dynamixel_ids, command_int));
-            _dynamixel_controller.recv(_read_duration, status);
+            _dynamixel_controller.recv(_read_timeout, status);
         }
         catch (Error& e)
         {

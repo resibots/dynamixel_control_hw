@@ -51,13 +51,13 @@ namespace dynamixel
         _controller_manager.reset(new controller_manager::ControllerManager(_hardware_interface.get(), _nh));
 
         // Load rosparams
-        ros::NodeHandle local_node_handle(nh, "dynamixel_loop");
+        ros::NodeHandle local_node_handle(nh, "dynamixel_hw");
         int error = 0;
         error += !local_node_handle.getParam("loop_hz", _loop_hz);
         error += !local_node_handle.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
         if(error > 0)
         {
-            char error_message[] = "could not retrieve one of the required parameters (dynamixel_loop/loop_hz and dynamixel_loop/cycle_time_error_threshold)";
+            char error_message[] = "could not retrieve one of the required parameters\n\tdynamixel_hw/loop_hz or dynamixel_hw/cycle_time_error_threshold";
             ROS_ERROR_STREAM(error_message);
             throw std::runtime_error(error_message);
         }
@@ -78,9 +78,6 @@ namespace dynamixel
             _current_time.tv_sec - _last_time.tv_sec +
             (_current_time.tv_nsec - _last_time.tv_nsec) / BILLION);
         _last_time = _current_time;
-        // TODO: remove the following commented code
-        // ROS_DEBUG_STREAM_THROTTLE_NAMED(1, "generic_hw_main",
-        //    "Sampled update loop with elapsed time " << elapsed_time.toSec());
 
         // Check cycle time for excess delay
         const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
@@ -91,14 +88,12 @@ namespace dynamixel
             << ", threshold: " << _cycle_time_error_threshold);
         }
 
-        //ROS_WARN_STREAM("dynamixel loop");
-
         // Input
         // get the hardware's state
         _hardware_interface->read_joints();
 
         // Control
-        // let the controller compute the new command (via controlelr manager)
+        // let the controller compute the new command (via the controller manager)
         _controller_manager->update(ros::Time::now(), _elapsed_time);
 
         // Output

@@ -27,7 +27,19 @@ namespace dynamixel
     class DynamixelHardwareInterface : public hardware_interface::RobotHW
     {
     public:
-        DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate, std::map<byte_t, std::string> dynamixel_map);
+        /** Set the essential parameters for communication with the hardware.
+
+            @param usb_serial_interface: name of the USB to serial interface;
+                for example "/dev/ttyUSB0"
+            @param baudrate: baud-rate for the serial communication with actuators;
+                the actual value is defined in Linux C header "termios.h"
+            @param dynamixel_timeout: timeout in seconds to wait for a message
+                to arrive on seria bus
+            @param dynamixel_map: map from actuator's ID and its name, as to be
+                used in the controller list and in URDF
+        **/
+        DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
+            const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map);
         ~DynamixelHardwareInterface();
 
         /// Find all connected devices and register those refered in dynamixel_map in the
@@ -58,16 +70,15 @@ namespace dynamixel
         // USB to serial connexion settings
         const std::string& _usb_serial_interface;
         const int _baudrate;
+        const float _read_timeout; // in seconds
         // Dynamixel's low level controller
         Usb2Dynamixel _dynamixel_controller;
 
-        // List of actuator's IDs (as we receive it from them)
+        // List of actuator's IDs (collected at init. from the actuators)
         std::vector<byte_t> _dynamixel_ids;
         // Map from dynamixel ID to actuator's name
         std::map<byte_t, std::string> _dynamixel_map;
 
-        // FIXME: make _read_duration parameterizable
-        static const float _read_duration=0.02;
     };
 }
 

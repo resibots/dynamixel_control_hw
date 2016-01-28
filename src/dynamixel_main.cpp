@@ -38,20 +38,22 @@
 #include <dynamixel_hardware_interface/dynamixel_loop.hpp>
 #include <dynamixel_hardware_interface/dynamixel_hardware_interface.hpp>
 
+// FIXME: rename the package and node
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "dynamixel_control_renewed");
     ros::NodeHandle nh;
 
-    std::string usb_serial_interface = "/dev/ttyUSB0";
-    int baudrate = B1000000;
+    // FIXME: use the parameter server to get these values
+    static const std::string usb_serial_interface = "/dev/ttyUSB0";
+    static const int baudrate = B1000000;
+    static const float dynamixel_read_duration = 0.2; // in seconds
     std::map<dynamixel::byte_t, std::string> dynamixel_map;
     dynamixel_map[1] = "first";
+    dynamixel_map[26] = "second";
 
-    // NOTE: We run the ROS loop in a separate thread as external calls such
+    // We run the ROS loop in a separate thread as external calls such
     // as service callbacks to load controllers can block the (main) control loop
-    // ros::MultiThreadedSpinner spinner(2);
-    // TODO: use the following instead, as soon as we use ROS Jade
     ros::AsyncSpinner spinner(2);
     spinner.start();
 
@@ -60,17 +62,14 @@ int main(int argc, char** argv)
         dynamixel_hw_interface (new dynamixel::DynamixelHardwareInterface(
             usb_serial_interface,
             baudrate,
+            dynamixel_read_duration,
             dynamixel_map));
     dynamixel_hw_interface->init();
-    // Start the control loop
 
+    // Start the control loop
     dynamixel::DynamixelLoop control_loop(nh, dynamixel_hw_interface);
 
-    ROS_DEBUG_STREAM("Node launched !");
-
     // Wait until shutdown signal recieved
-    // spinner.spin();
-    // TODO: use the following instead, as soon as we use ROS Jade
     ros::waitForShutdown();
 
     return 0;
