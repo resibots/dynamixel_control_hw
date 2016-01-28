@@ -51,7 +51,7 @@
 #include <controller_manager/controller_manager.h>
 
 // The hardware interface to dynamixels
-#include <dynamixel_hardware_interface/dynamixel_hardware_interface.hpp>
+#include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
 namespace dynamixel
 {

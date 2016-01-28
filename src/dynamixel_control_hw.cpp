@@ -35,13 +35,16 @@
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
 
-#include <dynamixel_hardware_interface/dynamixel_loop.hpp>
-#include <dynamixel_hardware_interface/dynamixel_hardware_interface.hpp>
+#include <dynamixel_control_hw/dynamixel_loop.hpp>
+#include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
-// FIXME: rename the package and node
+// FIXME: remove URDF, configuration and launch file
+// FIXME: find uniform parameterisation (without duplication of information)
+// FIXME: finish implementation of the hardware interface (see the boilerplate and code for that)
+// TODO: manage cases where hardware becomes unavailable (when we "break" a leg)
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "dynamixel_control_renewed");
+    ros::init(argc, argv, "dynamixel_control_hw");
     ros::NodeHandle nh;
 
     // FIXME: use the parameter server to get these values

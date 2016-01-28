@@ -1,5 +1,5 @@
-#ifndef DYNAMIXEL_HARDWARE_INTERFACE
-#define DYNAMIXEL_HARDWARE_INTERFACE
+#ifndef dynamixel_hardware_interface
+#define dynamixel_hardware_interface
 
 // ROS
 #include <ros/ros.h>

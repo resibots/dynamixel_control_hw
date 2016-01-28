@@ -3,7 +3,7 @@
 <launch>
 
   <!-- URDF robot description -->
-  <param name="robot_description" command="cat $(find dynamixel_hardware_interface)/urdf/test.urdf" />
+  <param name="robot_description" command="cat $(find dynamixel_control_hw)/urdf/test.urdf" />
   <!-- Publish robot's state in the tf tree -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
 
@@ -17,10 +17,10 @@
   <node pkg="joint_state_publisher" type="joint_state_publisher" name="dummy_robot" /> -->
 
   <!-- launch our hardware interface -->
-  <node pkg="dynamixel_hardware_interface" type="dynamixel_control_renewed" name="dynamixel_hardware_interface" />
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw" name="dynamixel_control_hw" />
 
   <!-- Start a controller for our dummy robot -->
-  <rosparam file="$(find dynamixel_hardware_interface)/config/dummy_position.yaml"/>
+  <rosparam file="$(find dynamixel_control_hw)/config/dummy_position.yaml"/>
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args="/dynamixel_loop/first_position_controller /dynamixel_loop/joint_state_controller /dynamixel_loop/second_position_controller" />
 </launch>

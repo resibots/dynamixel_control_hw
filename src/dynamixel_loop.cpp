@@ -38,7 +38,7 @@
 // for runtime_error
 #include <stdexcept>
 
-#include <dynamixel_hardware_interface/dynamixel_loop.hpp>
+#include <dynamixel_control_hw/dynamixel_loop.hpp>
 
 namespace dynamixel
 {
