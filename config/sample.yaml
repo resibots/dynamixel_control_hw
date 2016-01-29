@@ -12,6 +12,8 @@ dynamixel_controllers:
     joint: second
 
 dynamixel_control_hw:
+  loop_frequency: 10
+  cycle_time_error_threshold: 0.2
   serial_interface: /dev/ttyUSB0
   baudrate: 1000000 # in bauds
   dynamixel_timeout: 0.2 # in seconds

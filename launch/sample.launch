@@ -7,10 +7,8 @@
   <!-- Publish robot's state in the tf tree -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
 
-  <!-- Parameters for the hardware interface -->
-  <param name="dynamixel_hw/loop_hz" value="10" />
-  <param name="dynamixel_hw/cycle_time_error_threshold" value="100" />
-
+  <!-- Parameters for the hardware interface and controllers -->
+  <rosparam file="$(find dynamixel_control_hw)/config/sample.yaml"/>
 
   <!-- To move the dummy robot with a gui, bypassing the controller manager -->
   <!-- <param name="use_gui" value="true"/>
@@ -20,7 +18,6 @@
   <node pkg="dynamixel_control_hw" type="dynamixel_control_hw" name="dynamixel_control_hw" />
 
   <!-- Start a controller for our dummy robot -->
-  <rosparam file="$(find dynamixel_control_hw)/config/sample.yaml"/>
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args="/dynamixel_controllers/first_position_controller /dynamixel_controllers/joint_state_controller /dynamixel_controllers/second_position_controller /dynamixel_controllers/third_position_controller" />
 </launch>

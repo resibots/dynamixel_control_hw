@@ -51,10 +51,9 @@ namespace dynamixel
         _controller_manager.reset(new controller_manager::ControllerManager(_hardware_interface.get(), _nh));
 
         // Load rosparams
-        ros::NodeHandle local_node_handle(nh, "dynamixel_hw");
         int error = 0;
-        error += !local_node_handle.getParam("loop_hz", _loop_hz);
-        error += !local_node_handle.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
+        error += !_nh.getParam("loop_frequency", _loop_hz);
+        error += !_nh.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
         if(error > 0)
         {
             char error_message[] = "could not retrieve one of the required parameters\n\tdynamixel_hw/loop_hz or dynamixel_hw/cycle_time_error_threshold";
