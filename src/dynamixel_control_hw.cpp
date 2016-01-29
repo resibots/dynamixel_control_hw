@@ -38,22 +38,47 @@
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
-// FIXME: remove URDF, configuration and launch file
-// FIXME: find uniform parameterisation (without duplication of information)
-// FIXME: finish implementation of the hardware interface (see the boilerplate and code for that)
-// TODO: manage cases where hardware becomes unavailable (when we "break" a leg)
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "dynamixel_control_hw");
     ros::NodeHandle nh;
 
-    // FIXME: use the parameter server to get these values
-    static const std::string usb_serial_interface = "/dev/ttyUSB0";
-    static const int baudrate = B1000000;
-    static const float dynamixel_read_duration = 0.2; // in seconds
+    // Get parameters for the hardware
+    // -------------------------------
+
+    std::string sub_namespace = "dynamixel_control_hw";
+    ros::NodeHandle nhParams(nh, sub_namespace);
+    bool got_all_params = true;
+
+    std::string usb_serial_interface;
+    got_all_params &= nhParams.getParam("serial_interface", usb_serial_interface);
+    int baudrate; // in bauds
+    got_all_params &= nhParams.getParam("baudrate", baudrate);
+    float dynamixel_timeout; // in seconds
+    got_all_params &= nhParams.getParam("dynamixel_timeout", dynamixel_timeout);
+
+    // Retrieve the map from joint name to hardware-related ID
+    // It has to be inverted, putting the ID as a key, for later use
     std::map<dynamixel::byte_t, std::string> dynamixel_map;
-    dynamixel_map[1] = "first";
-    dynamixel_map[26] = "second";
+    std::map<std::string, int> map_param; // temporary map, from parameter server
+    got_all_params &= nhParams.getParam("hardware_mapping", map_param);
+    std::map<std::string, int>::iterator map_param_i;
+    for (map_param_i=map_param.begin(); map_param_i!=map_param.end(); map_param_i++)
+    {
+        dynamixel_map[map_param_i->second] = map_param_i->first;
+    }
+
+    if (!got_all_params)
+    {
+        std::string error_message = "One or more of the following parameters were not set:\n"
+            "\t/"+sub_namespace+"/serial_interface /"+sub_namespace+"/baudrate"
+            "/"+sub_namespace+"/dynamixel_timeout /"+sub_namespace+"/hardware_mapping";
+        ROS_FATAL_STREAM(error_message);
+        return 1;
+    }
+
+    // Run the hardware interface node
+    // -------------------------------
 
     // We run the ROS loop in a separate thread as external calls such
     // as service callbacks to load controllers can block the (main) control loop
@@ -65,7 +90,7 @@ int main(int argc, char** argv)
         dynamixel_hw_interface (new dynamixel::DynamixelHardwareInterface(
             usb_serial_interface,
             baudrate,
-            dynamixel_read_duration,
+            dynamixel_timeout,
             dynamixel_map));
     dynamixel_hw_interface->init();
 

@@ -1,4 +1,4 @@
-dynamixel_loop:
+dynamixel_controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
     publish_rate: 10
@@ -10,3 +10,12 @@ dynamixel_loop:
   second_position_controller:
     type: position_controllers/JointPositionController
     joint: second
+
+dynamixel_control_hw:
+  serial_interface: /dev/ttyUSB0
+  baudrate: 1000000 # in bauds
+  dynamixel_timeout: 0.2 # in seconds
+  # correspondance between hardware IDs of the actuators and their names in ROS
+  hardware_mapping:
+    first: 1
+    second: 26
