@@ -31,8 +31,7 @@ namespace dynamixel
 
             @param usb_serial_interface: name of the USB to serial interface;
                 for example "/dev/ttyUSB0"
-            @param baudrate: baud-rate for the serial communication with actuators;
-                the actual value is defined in Linux C header "termios.h"
+            @param baudrate: baud-rate for the serial communication with actuators (in bauds)
             @param dynamixel_timeout: timeout in seconds to wait for a message
                 to arrive on seria bus
             @param dynamixel_map: map from actuator's ID and its name, as to be

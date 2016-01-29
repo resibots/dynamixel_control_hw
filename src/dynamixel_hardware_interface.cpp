@@ -6,10 +6,10 @@
 
 namespace dynamixel
 {
-    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-        const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map)
-        : _dynamixel_map(dynamixel_map), _usb_serial_interface(usb_serial_interface), _baudrate(baudrate),
-          _read_timeout(dynamixel_timeout)
+    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface,
+        const int& baudrate, const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map)
+        : _dynamixel_map(dynamixel_map), _usb_serial_interface(usb_serial_interface),
+        _baudrate(get_baudrate(baudrate)), _read_timeout(dynamixel_timeout)
     {
     }
 
@@ -122,12 +122,12 @@ namespace dynamixel
                 // current position
                 _dynamixel_controller.send(dynamixel::ax12::GetPosition(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
-                _joint_angles[i] = status.decode16(); // TODO: convert value to SI units
+                _joint_angles[i] = status.decode16();
 
                 // current speed
                 _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
-                _joint_velocities[i] = status.decode16(); // TODO: convert value to SI units
+                _joint_velocities[i] = status.decode16();
             }
         }
         catch (Error& e)
@@ -149,7 +149,6 @@ namespace dynamixel
 
         for(unsigned int i=0; i<_dynamixel_ids.size(); i++)
         {
-            // TODO: enforce joint limits (from URDF ?)
             command_int[i] = (int)(_joint_commands[i]*2048/M_PI) + 2048;
         }
 
