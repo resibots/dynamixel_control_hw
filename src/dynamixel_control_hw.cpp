@@ -80,8 +80,8 @@ int main(int argc, char** argv)
     // Run the hardware interface node
     // -------------------------------
 
-    // We run the ROS loop in a separate thread as external calls such
-    // as service callbacks to load controllers can block the (main) control loop
+    // We run the ROS loop in a separate thread as external calls, such
+    // as service callbacks loading controllers, can block the (main) control loop
     ros::AsyncSpinner spinner(2);
     spinner.start();
 
