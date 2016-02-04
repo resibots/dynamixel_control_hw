@@ -52,8 +52,9 @@ namespace dynamixel
 
         // Load rosparams
         int error = 0;
-        error += !_nh.getParam("loop_frequency", _loop_hz);
-        error += !_nh.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
+        ros::NodeHandle np("~");
+        error += !np.getParam("loop_frequency", _loop_hz);
+        error += !np.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
         if(error > 0)
         {
             char error_message[] = "could not retrieve one of the required parameters\n\tdynamixel_hw/loop_hz or dynamixel_hw/cycle_time_error_threshold";
