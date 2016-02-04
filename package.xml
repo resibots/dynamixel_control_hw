@@ -14,16 +14,16 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>message_generation</build_depend>
 
-  <build_depend>ros_control</build_depend>
-  <build_depend>ros_controllers</build_depend>
+  <build_depend>hardware_interface</build_depend>
+  <build_depend>controller_manager</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
-  
-  <run_depend>ros_control</run_depend>
-  <run_depend>ros_controllers</run_depend>
+
+  <run_depend>hardware_interface</run_depend>
+  <run_depend>controller_manager</run_depend>
 
   <export>
   </export>
