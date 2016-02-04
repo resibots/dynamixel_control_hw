@@ -45,8 +45,8 @@ int main(int argc, char** argv)
     // Get parameters for the hardware
     // -------------------------------
 
-    std::string sub_namespace = "dynamixel_control_hw";
-    ros::NodeHandle nhParams(nh, sub_namespace);
+    ros::NodeHandle nhParams("~");
+    std::string sub_namespace = nhParams.getNamespace();
     bool got_all_params = true;
 
     std::string usb_serial_interface;
