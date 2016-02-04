@@ -34,14 +34,12 @@
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
-
 // for runtime_error
 #include <stdexcept>
 
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 
-namespace dynamixel
-{
+namespace dynamixel {
     DynamixelLoop::DynamixelLoop(
         ros::NodeHandle& nh,
         boost::shared_ptr<dynamixel::DynamixelHardwareInterface> hardware_interface)
@@ -55,8 +53,7 @@ namespace dynamixel
         ros::NodeHandle np("~");
         error += !np.getParam("loop_frequency", _loop_hz);
         error += !np.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
-        if(error > 0)
-        {
+        if (error > 0) {
             char error_message[] = "could not retrieve one of the required parameters\n\tdynamixel_hw/loop_hz or dynamixel_hw/cycle_time_error_threshold";
             ROS_ERROR_STREAM(error_message);
             throw std::runtime_error(error_message);
@@ -75,17 +72,15 @@ namespace dynamixel
         // Get change in time
         clock_gettime(CLOCK_MONOTONIC, &_current_time);
         _elapsed_time = ros::Duration(
-            _current_time.tv_sec - _last_time.tv_sec +
-            (_current_time.tv_nsec - _last_time.tv_nsec) / BILLION);
+            _current_time.tv_sec - _last_time.tv_sec + (_current_time.tv_nsec - _last_time.tv_nsec) / BILLION);
         _last_time = _current_time;
 
         // Check cycle time for excess delay
         const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
-        if (cycle_time_error > _cycle_time_error_threshold)
-        {
+        if (cycle_time_error > _cycle_time_error_threshold) {
             ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
-            << cycle_time_error << ", cycle time: " << _elapsed_time
-            << ", threshold: " << _cycle_time_error_threshold);
+                << cycle_time_error << ", cycle time: " << _elapsed_time
+                << ", threshold: " << _cycle_time_error_threshold);
         }
 
         // Input
@@ -100,5 +95,4 @@ namespace dynamixel
         // send the new command to hardware
         _hardware_interface->write_joints();
     }
-
 }

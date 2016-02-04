@@ -34,7 +34,6 @@
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
-
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
@@ -63,16 +62,14 @@ int main(int argc, char** argv)
     std::map<std::string, int> map_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("hardware_mapping", map_param);
     std::map<std::string, int>::iterator map_param_i;
-    for (map_param_i=map_param.begin(); map_param_i!=map_param.end(); map_param_i++)
-    {
+    for (map_param_i = map_param.begin(); map_param_i != map_param.end(); map_param_i++) {
         dynamixel_map[map_param_i->second] = map_param_i->first;
     }
 
-    if (!got_all_params)
-    {
+    if (!got_all_params) {
         std::string error_message = "One or more of the following parameters were not set:\n"
-            "\t/"+sub_namespace+"/serial_interface /"+sub_namespace+"/baudrate"
-            "/"+sub_namespace+"/dynamixel_timeout /"+sub_namespace+"/hardware_mapping";
+                                    "\t/" + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
+                                                                                                    "/" + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }
@@ -87,7 +84,7 @@ int main(int argc, char** argv)
 
     // Create the hardware interface specific to your robot
     boost::shared_ptr<dynamixel::DynamixelHardwareInterface>
-        dynamixel_hw_interface (new dynamixel::DynamixelHardwareInterface(
+        dynamixel_hw_interface(new dynamixel::DynamixelHardwareInterface(
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
