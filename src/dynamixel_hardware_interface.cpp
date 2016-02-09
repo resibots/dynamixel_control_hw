@@ -109,12 +109,18 @@ namespace dynamixel {
                 // current position
                 _dynamixel_controller.send(dynamixel::ax12::GetPosition(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
-                _joint_angles[i] = status.decode16();
+                _joint_angles[i] = (status.decode16() - 2048.0) * M_PI / 2048.0;
 
                 // current speed
                 _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
                 _joint_velocities[i] = status.decode16();
+                if (_joint_velocities[i] < 1024) {
+                    _joint_velocities[i] *= 0.01151917305;
+                }
+                else {
+                    _joint_velocities[i] = (_joint_velocities[i] - 1024) * -0.01151917305;
+                }
             }
         }
         catch (Error& e) {
