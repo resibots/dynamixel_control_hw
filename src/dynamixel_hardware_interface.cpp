@@ -115,6 +115,8 @@ namespace dynamixel {
                 _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
                 _joint_velocities[i] = status.decode16();
+                // <1024 ccw, >=1024 cw, 0.11rpm is the unit
+                // we convert it to rad/s
                 if (_joint_velocities[i] < 1024) {
                     _joint_velocities[i] *= 0.01151917305;
                 }
