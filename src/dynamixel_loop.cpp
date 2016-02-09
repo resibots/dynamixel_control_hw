@@ -79,7 +79,7 @@ namespace dynamixel {
         const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
         if (cycle_time_error > _cycle_time_error_threshold) {
             ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
-                << cycle_time_error << ", cycle time: " << _elapsed_time
+                << cycle_time_error - _cycle_time_error_threshold << ", cycle time: " << _elapsed_time
                 << ", threshold: " << _cycle_time_error_threshold);
         }
 

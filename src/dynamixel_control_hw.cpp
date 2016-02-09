@@ -84,11 +84,11 @@ int main(int argc, char** argv)
 
     // Create the hardware interface specific to your robot
     boost::shared_ptr<dynamixel::DynamixelHardwareInterface>
-        dynamixel_hw_interface(new dynamixel::DynamixelHardwareInterface(
+        dynamixel_hw_interface = boost::make_shared<dynamixel::DynamixelHardwareInterface>(
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
-            dynamixel_map));
+            dynamixel_map);
     dynamixel_hw_interface->init();
 
     // Start the control loop
