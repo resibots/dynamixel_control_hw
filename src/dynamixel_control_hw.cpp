@@ -67,7 +67,7 @@ int main(int argc, char** argv)
         dynamixel_map[map_param_i->second] = map_param_i->first;
     }
 
-    // Retrieve the map with angle corrections (ID: correction)
+    // Retrieve the map with angle corrections (ID: correction in ticks)
     std::map<dynamixel::byte_t, int> dynamixel_corrections;
     std::map<std::string, int> map_corrections; // temporary map, from parameter server
     nhParams.getParam("hardware_corrections", map_corrections);
