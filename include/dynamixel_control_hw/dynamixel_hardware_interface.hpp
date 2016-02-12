@@ -36,7 +36,8 @@ namespace dynamixel {
                 used in the controller list and in URDF
         **/
         DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-            const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map);
+            const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map,
+            std::map<byte_t, int> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
         /// Find all connected devices and register those refered in dynamixel_map in the
@@ -76,6 +77,8 @@ namespace dynamixel {
         std::vector<byte_t> _dynamixel_ids;
         // Map from dynamixel ID to actuator's name
         std::map<byte_t, std::string> _dynamixel_map;
+        // Map for hardware corrections
+        std::map<byte_t, int> _dynamixel_corrections;
     };
 }
 

@@ -6,8 +6,9 @@
 
 namespace dynamixel {
     DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface,
-        const int& baudrate, const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map)
-        : _dynamixel_map(dynamixel_map), _usb_serial_interface(usb_serial_interface), _baudrate(get_baudrate(baudrate)), _read_timeout(dynamixel_timeout)
+        const int& baudrate, const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map,
+        std::map<byte_t, int> dynamixel_corrections)
+        : _dynamixel_map(dynamixel_map), _dynamixel_corrections(dynamixel_corrections), _usb_serial_interface(usb_serial_interface), _baudrate(get_baudrate(baudrate)), _read_timeout(dynamixel_timeout)
     {
     }
 
@@ -109,7 +110,11 @@ namespace dynamixel {
                 // current position
                 _dynamixel_controller.send(dynamixel::ax12::GetPosition(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
-                _joint_angles[i] = (status.decode16() - 2048.0) * M_PI / 2048.0;
+                _joint_angles[i] = status.decode16();
+                if (_dynamixel_corrections.size() != 0) {
+                    _joint_angles[i] -= _dynamixel_corrections[_dynamixel_ids[i]];
+                }
+                _joint_angles[i] = (_joint_angles[i] - 2048.0) * M_PI / 2048.0;
 
                 // current speed
                 _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
@@ -143,6 +148,9 @@ namespace dynamixel {
 
         for (unsigned int i = 0; i < _dynamixel_ids.size(); i++) {
             command_int[i] = (int)(_joint_commands[i] * 2048 / M_PI) + 2048;
+            if (_dynamixel_corrections.size() != 0) {
+                command_int[i] += _dynamixel_corrections[_dynamixel_ids[i]];
+            }
         }
 
         try {

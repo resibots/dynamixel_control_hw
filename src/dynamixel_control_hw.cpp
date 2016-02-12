@@ -33,6 +33,7 @@
 *********************************************************************/
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
+#include <sstream>
 
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
@@ -66,6 +67,17 @@ int main(int argc, char** argv)
         dynamixel_map[map_param_i->second] = map_param_i->first;
     }
 
+    // Retrieve the map with angle corrections (ID: correction)
+    std::map<dynamixel::byte_t, int> dynamixel_corrections;
+    std::map<std::string, int> map_corrections; // temporary map, from parameter server
+    nhParams.getParam("hardware_corrections", map_corrections);
+    std::map<std::string, int>::iterator map_cor_i;
+    for (map_cor_i = map_corrections.begin(); map_cor_i != map_corrections.end(); map_cor_i++) {
+        int k;
+        std::istringstream(map_cor_i->first) >> k;
+        dynamixel_corrections[k] = map_cor_i->second;
+    }
+
     if (!got_all_params) {
         std::string error_message = "One or more of the following parameters were not set:\n"
                                     "\t/" + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
@@ -88,7 +100,8 @@ int main(int argc, char** argv)
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
-            dynamixel_map);
+            dynamixel_map,
+            dynamixel_corrections);
     dynamixel_hw_interface->init();
 
     // Start the control loop
