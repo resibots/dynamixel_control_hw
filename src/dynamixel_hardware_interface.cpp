@@ -93,6 +93,13 @@ namespace dynamixel {
                 << e.msg());
             throw e;
         }
+
+        // At startup robot should keep the pose it has
+        read_joints();
+
+        for (unsigned i = 0; i < _dynamixel_ids.size(); i++) {
+            _joint_commands[i] = _joint_angles[i];
+        }
     }
 
     /** Copy joint's information to memory
