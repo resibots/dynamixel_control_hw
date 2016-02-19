@@ -61,6 +61,7 @@ namespace dynamixel {
         // Memory space shared with the controller
         // It reads here the latest robot's state and put here the next desired values
         std::vector<std::string> _joint_names;
+        std::vector<double> _prev_commands;
         std::vector<double> _joint_commands; // target joint angle
         std::vector<double> _joint_angles; // actual joint angle
         std::vector<double> _joint_velocities; // actual joint velocity

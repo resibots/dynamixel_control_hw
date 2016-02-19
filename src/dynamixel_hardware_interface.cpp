@@ -1,6 +1,7 @@
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
 #include <stdexcept>
+#include <limits>
 
 #include <math.h>
 
@@ -44,6 +45,7 @@ namespace dynamixel {
             throw e;
         }
 
+        _prev_commands.resize(_dynamixel_ids.size(), 0.0);
         _joint_commands.resize(_dynamixel_ids.size(), 0.0);
         _joint_angles.resize(_dynamixel_ids.size(), 0.0);
         _joint_velocities.resize(_dynamixel_ids.size(), 0.0);
@@ -151,18 +153,20 @@ namespace dynamixel {
     void DynamixelHardwareInterface::write_joints()
     {
         std::vector<int> command_int;
-        command_int.resize(_dynamixel_ids.size());
+        std::vector<byte_t> dyn_ids;
 
         for (unsigned int i = 0; i < _dynamixel_ids.size(); i++) {
-            command_int[i] = (int)(_joint_commands[i] * 2048 / M_PI) + 2048;
-            if (_dynamixel_corrections.size() != 0) {
-                command_int[i] += _dynamixel_corrections[_dynamixel_ids[i]];
-            }
+            // Sending commands only when needed
+            if (std::abs(_joint_commands[i] - _prev_commands[i]) < std::numeric_limits<double>::epsilon())
+                continue;
+            command_int.push_back((int)(_joint_commands[i] * 2048 / M_PI) + 2048 + ((_dynamixel_corrections.size() != 0) ? _dynamixel_corrections[_dynamixel_ids[i]] : 0));
+            _prev_commands[i] = _joint_commands[i];
+            dyn_ids.push_back(_dynamixel_ids[i]);
         }
 
         try {
             dynamixel::Status status;
-            _dynamixel_controller.send(dynamixel::ax12::SetPositions(_dynamixel_ids, command_int));
+            _dynamixel_controller.send(dynamixel::ax12::SetPositions(dyn_ids, command_int));
             _dynamixel_controller.recv(_read_timeout, status);
         }
         catch (Error& e) {
