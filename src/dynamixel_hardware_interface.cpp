@@ -119,6 +119,10 @@ namespace dynamixel {
                 // current position
                 _dynamixel_controller.send(dynamixel::ax12::GetPosition(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
+                if (status.get_params().size() == 0) {
+                    ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_ids[i]] << "'s position");
+                    continue;
+                }
                 _joint_angles[i] = status.decode16();
                 if (_dynamixel_corrections.size() != 0) {
                     _joint_angles[i] -= _dynamixel_corrections[_dynamixel_ids[i]];
@@ -128,6 +132,10 @@ namespace dynamixel {
                 // current speed
                 _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
                 _dynamixel_controller.recv(_read_timeout, status);
+                if (status.get_params().size() == 0) {
+                    ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_ids[i]] << "'s velocity");
+                    continue;
+                }
                 _joint_velocities[i] = status.decode16();
                 // <1024 ccw, >=1024 cw, 0.11rpm is the unit
                 // we convert it to rad/s
