@@ -59,21 +59,21 @@ int main(int argc, char** argv)
 
     // Retrieve the map from joint name to hardware-related ID
     // It has to be inverted, putting the ID as a key, for later use
-    std::map<dynamixel::byte_t, std::string> dynamixel_map;
+    std::map<long long int, std::string> dynamixel_map;
     std::map<std::string, int> map_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("hardware_mapping", map_param);
     std::map<std::string, int>::iterator map_param_i;
     for (map_param_i = map_param.begin(); map_param_i != map_param.end(); map_param_i++) {
-        dynamixel_map[map_param_i->second] = map_param_i->first;
+        dynamixel_map[(long long int)map_param_i->second] = map_param_i->first;
     }
 
     // Retrieve the map with angle corrections (ID: correction in ticks)
-    std::map<dynamixel::byte_t, int> dynamixel_corrections;
-    std::map<std::string, int> map_corrections; // temporary map, from parameter server
+    std::map<long long int, double> dynamixel_corrections;
+    std::map<std::string, double> map_corrections; // temporary map, from parameter server
     nhParams.getParam("hardware_corrections", map_corrections);
-    std::map<std::string, int>::iterator map_cor_i;
+    std::map<std::string, double>::iterator map_cor_i;
     for (map_cor_i = map_corrections.begin(); map_cor_i != map_corrections.end(); map_cor_i++) {
-        int k;
+        long long int k;
         std::istringstream(map_cor_i->first) >> k;
         dynamixel_corrections[k] = map_cor_i->second;
     }

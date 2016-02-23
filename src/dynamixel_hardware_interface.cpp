@@ -7,8 +7,8 @@
 
 namespace dynamixel {
     DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface,
-        const int& baudrate, const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map,
-        std::map<byte_t, int> dynamixel_corrections)
+        const int& baudrate, const float& dynamixel_timeout, std::map<long long int, std::string> dynamixel_map,
+        std::map<long long int, double> dynamixel_corrections)
         : _dynamixel_map(dynamixel_map), _dynamixel_corrections(dynamixel_corrections), _usb_serial_interface(usb_serial_interface), _baudrate(get_baudrate(baudrate)), _read_timeout(dynamixel_timeout)
     {
     }
@@ -17,14 +17,13 @@ namespace dynamixel {
     {
         // stop all actuators
         try {
-            std::vector<byte_t>::iterator dynamixel_id;
-            for (dynamixel_id = _dynamixel_ids.begin(); dynamixel_id != _dynamixel_ids.end(); dynamixel_id++) {
-                dynamixel::Status status;
-                _dynamixel_controller.send(dynamixel::ax12::TorqueEnable(*dynamixel_id, false));
-                _dynamixel_controller.recv(_read_timeout, status);
+            for (auto dynamixel_servo : _dynamixel_servos) {
+                dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
+                _dynamixel_controller.send(dynamixel_servo->set_torque_enable(0));
+                _dynamixel_controller.recv(status);
             }
         }
-        catch (Error& e) {
+        catch (dynamixel::errors::Error& e) {
             ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to power them off:\n"
                 << e.msg());
             throw e;
@@ -35,28 +34,27 @@ namespace dynamixel {
     {
         // get the list of available actuators
         try {
-            _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
-            _dynamixel_controller.scan_ax12s();
-            _dynamixel_ids = _dynamixel_controller.ax12_ids();
+            _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate, _read_timeout);
+            _dynamixel_servos = dynamixel::auto_detect<dynamixel::protocols::Protocol1>(_dynamixel_controller);
         }
-        catch (Error& e) {
+        catch (dynamixel::errors::Error& e) {
             ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to initialise them:\n"
                 << e.msg());
             throw e;
         }
 
-        _prev_commands.resize(_dynamixel_ids.size(), 0.0);
-        _joint_commands.resize(_dynamixel_ids.size(), 0.0);
-        _joint_angles.resize(_dynamixel_ids.size(), 0.0);
-        _joint_velocities.resize(_dynamixel_ids.size(), 0.0);
-        _joint_efforts.resize(_dynamixel_ids.size(), 0.0);
+        _prev_commands.resize(_dynamixel_servos.size(), 0.0);
+        _joint_commands.resize(_dynamixel_servos.size(), 0.0);
+        _joint_angles.resize(_dynamixel_servos.size(), 0.0);
+        _joint_velocities.resize(_dynamixel_servos.size(), 0.0);
+        _joint_efforts.resize(_dynamixel_servos.size(), 0.0);
 
         // declare all available actuators to the control manager, provided a
         // name has been given for them
         // also enable the torque output on the actuators (sort of power up)
         try {
-            for (unsigned i = 0; i < _dynamixel_ids.size(); i++) {
-                std::map<byte_t, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_ids[i]);
+            for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
+                std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
                 if (dynamixel_iterator != _dynamixel_map.end()) // check that the actuator's name is in the map
                 {
                     // give the memory address for the information on joint angle,
@@ -76,9 +74,9 @@ namespace dynamixel {
                     _jnt_pos_interface.registerHandle(pos_handle);
 
                     // enable the actuator
-                    dynamixel::Status status;
-                    _dynamixel_controller.send(dynamixel::ax12::TorqueEnable(_dynamixel_ids[i], true));
-                    _dynamixel_controller.recv(_read_timeout, status);
+                    dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
+                    _dynamixel_controller.send(_dynamixel_servos[i]->set_torque_enable(1));
+                    _dynamixel_controller.recv(status);
                 }
             }
 
@@ -90,7 +88,7 @@ namespace dynamixel {
             ROS_ERROR_STREAM("Could not initialize hardware interface:\n\tTrace: " << e.what());
             throw e;
         }
-        catch (Error& e) {
+        catch (dynamixel::errors::Error& e) {
             ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to enable them:\n"
                 << e.msg());
             throw e;
@@ -99,7 +97,7 @@ namespace dynamixel {
         // At startup robot should keep the pose it has
         read_joints();
 
-        for (unsigned i = 0; i < _dynamixel_ids.size(); i++) {
+        for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
             _joint_commands[i] = _joint_angles[i];
         }
     }
@@ -113,43 +111,48 @@ namespace dynamixel {
     **/
     void DynamixelHardwareInterface::read_joints()
     {
-        try {
-            for (unsigned i = 0; i < _dynamixel_ids.size(); i++) {
-                dynamixel::Status status;
+        for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
+            std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
+            if (dynamixel_iterator == _dynamixel_map.end())
+                continue;
+            dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
+            try {
                 // current position
-                _dynamixel_controller.send(dynamixel::ax12::GetPosition(_dynamixel_ids[i]));
-                _dynamixel_controller.recv(_read_timeout, status);
-                if (status.get_params().size() == 0) {
-                    ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_ids[i]] << "'s position");
-                    continue;
-                }
-                _joint_angles[i] = status.decode16();
+                _dynamixel_controller.send(_dynamixel_servos[i]->get_present_position_angle());
+                _dynamixel_controller.recv(status);
+            }
+            catch (dynamixel::errors::Error& e) {
+                ROS_ERROR_STREAM("Caught a Dynamixel exception while getting  " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position\n" << e.msg());
+            }
+            if (status.valid()) {
+                _joint_angles[i] = _dynamixel_servos[i]->parse_present_position_angle(status);
                 if (_dynamixel_corrections.size() != 0) {
-                    _joint_angles[i] -= _dynamixel_corrections[_dynamixel_ids[i]];
-                }
-                _joint_angles[i] = (_joint_angles[i] - 2048.0) * M_PI / 2048.0;
-
-                // current speed
-                _dynamixel_controller.send(dynamixel::ax12::GetSpeed(_dynamixel_ids[i]));
-                _dynamixel_controller.recv(_read_timeout, status);
-                if (status.get_params().size() == 0) {
-                    ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_ids[i]] << "'s velocity");
-                    continue;
-                }
-                _joint_velocities[i] = status.decode16();
-                // <1024 ccw, >=1024 cw, 0.11rpm is the unit
-                // we convert it to rad/s
-                if (_joint_velocities[i] < 1024) {
-                    _joint_velocities[i] *= 0.01151917305;
-                }
-                else {
-                    _joint_velocities[i] = (_joint_velocities[i] - 1024) * -0.01151917305;
+                    _joint_angles[i] -= _dynamixel_corrections[_dynamixel_servos[i]->id()];
                 }
             }
-        }
-        catch (Error& e) {
-            ROS_ERROR_STREAM("Caught a Dynamixel exception while getting the actuator's state:\n"
-                << e.msg());
+            else {
+                ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position");
+            }
+
+            // TO-DO: Make it work in V2 libdynamixel
+            // dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status_speed;
+            // // current speed
+            // _dynamixel_controller.send(_dynamixel_servos[i]->get_present_speed());
+            // _dynamixel_controller.recv(status_speed);
+            // if (status_speed.valid()) {
+            //     _joint_velocities[i] = _dynamixel_servos[i]->parse_present_speed(status_speed);
+            //     // <1024 ccw, >=1024 cw, 0.11rpm is the unit
+            //     // we convert it to rad/s
+            //     if (_joint_velocities[i] < 1024) {
+            //         _joint_velocities[i] *= 0.01151917305;
+            //     }
+            //     else {
+            //         _joint_velocities[i] = (_joint_velocities[i] - 1024) * -0.01151917305;
+            //     }
+            // }
+            // else {
+            //     ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s velocity");
+            // }
         }
     }
 
@@ -160,24 +163,30 @@ namespace dynamixel {
     **/
     void DynamixelHardwareInterface::write_joints()
     {
-        std::vector<int> command_int;
-        std::vector<byte_t> dyn_ids;
 
-        for (unsigned int i = 0; i < _dynamixel_ids.size(); i++) {
+        for (unsigned int i = 0; i < _dynamixel_servos.size(); i++) {
+            std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
+            if (dynamixel_iterator == _dynamixel_map.end())
+                continue;
             // Sending commands only when needed
             if (std::abs(_joint_commands[i] - _prev_commands[i]) < std::numeric_limits<double>::epsilon())
                 continue;
-            command_int.push_back((int)(_joint_commands[i] * 2048 / M_PI) + 2048 + ((_dynamixel_corrections.size() != 0) ? _dynamixel_corrections[_dynamixel_ids[i]] : 0));
             _prev_commands[i] = _joint_commands[i];
-            dyn_ids.push_back(_dynamixel_ids[i]);
+            try {
+                dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
+                _dynamixel_controller.send(_dynamixel_servos[i]->reg_goal_position_angle(_joint_commands[i] + ((_dynamixel_corrections.size() != 0) ? _dynamixel_corrections[_dynamixel_servos[i]->id()] : 0)));
+                _dynamixel_controller.recv(status);
+            }
+            catch (dynamixel::errors::Error& e) {
+                ROS_ERROR_STREAM("Caught a Dynamixel exception while sending new commands:\n"
+                    << e.msg());
+            }
         }
 
         try {
-            dynamixel::Status status;
-            _dynamixel_controller.send(dynamixel::ax12::SetPositions(dyn_ids, command_int));
-            _dynamixel_controller.recv(_read_timeout, status);
+            _dynamixel_controller.send(dynamixel::instructions::Action<dynamixel::protocols::Protocol1>(dynamixel::protocols::Protocol1::broadcast_id));
         }
-        catch (Error& e) {
+        catch (dynamixel::errors::Error& e) {
             ROS_ERROR_STREAM("Caught a Dynamixel exception while sending new commands:\n"
                 << e.msg());
         }

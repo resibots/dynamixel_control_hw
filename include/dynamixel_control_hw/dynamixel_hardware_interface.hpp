@@ -10,7 +10,7 @@
 #include <hardware_interface/robot_hw.h>
 
 // Library for access to the dynamixels
-#include "dynamixel/dynamixel.hpp"
+#include <dynamixel/dynamixel.hpp>
 
 namespace dynamixel {
     /** Hardware interface for a set of dynamixel actuators.
@@ -36,8 +36,8 @@ namespace dynamixel {
                 used in the controller list and in URDF
         **/
         DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-            const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map,
-            std::map<byte_t, int> dynamixel_corrections);
+            const float& dynamixel_timeout, std::map<long long int, std::string> dynamixel_map,
+            std::map<long long int, double> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
         /// Find all connected devices and register those refered in dynamixel_map in the
@@ -72,14 +72,14 @@ namespace dynamixel {
         const int _baudrate;
         const float _read_timeout; // in seconds
         // Dynamixel's low level controller
-        Usb2Dynamixel _dynamixel_controller;
+        dynamixel::controllers::Usb2Dynamixel _dynamixel_controller;
 
-        // List of actuator's IDs (collected at init. from the actuators)
-        std::vector<byte_t> _dynamixel_ids;
+        // List of actuators (collected at init. from the actuators)
+        std::vector<std::shared_ptr<dynamixel::servos::BaseServo<dynamixel::protocols::Protocol1>>> _dynamixel_servos;
         // Map from dynamixel ID to actuator's name
-        std::map<byte_t, std::string> _dynamixel_map;
+        std::map<long long int, std::string> _dynamixel_map;
         // Map for hardware corrections
-        std::map<byte_t, int> _dynamixel_corrections;
+        std::map<long long int, double> _dynamixel_corrections;
     };
 }
 
