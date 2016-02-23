@@ -7,9 +7,9 @@
 
 namespace dynamixel {
     DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface,
-        const int& baudrate, const float& dynamixel_timeout, std::map<long long int, std::string> dynamixel_map,
+        const int& baudrate, const float& dynamixel_timeout, std::map<long long int, std::string> dynamixel_map, std::map<long long int, long long int> dynamixel_max_speed,
         std::map<long long int, double> dynamixel_corrections)
-        : _dynamixel_map(dynamixel_map), _dynamixel_corrections(dynamixel_corrections), _usb_serial_interface(usb_serial_interface), _baudrate(get_baudrate(baudrate)), _read_timeout(dynamixel_timeout)
+        : _dynamixel_map(dynamixel_map), _dynamixel_max_speed(dynamixel_max_speed), _dynamixel_corrections(dynamixel_corrections), _usb_serial_interface(usb_serial_interface), _baudrate(get_baudrate(baudrate)), _read_timeout(dynamixel_timeout)
     {
     }
 
@@ -77,6 +77,12 @@ namespace dynamixel {
                     dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
                     _dynamixel_controller.send(_dynamixel_servos[i]->set_torque_enable(1));
                     _dynamixel_controller.recv(status);
+
+                    if (_dynamixel_max_speed.size() != 0) {
+                        dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
+                        _dynamixel_controller.send(_dynamixel_servos[i]->set_moving_speed(_dynamixel_max_speed[_dynamixel_servos[i]->id()]));
+                        _dynamixel_controller.recv(status);
+                    }
                 }
             }
 

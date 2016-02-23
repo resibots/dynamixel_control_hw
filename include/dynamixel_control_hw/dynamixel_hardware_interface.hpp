@@ -37,7 +37,7 @@ namespace dynamixel {
         **/
         DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
             const float& dynamixel_timeout, std::map<long long int, std::string> dynamixel_map,
-            std::map<long long int, double> dynamixel_corrections);
+            std::map<long long int, long long int> dynamixel_max_speed, std::map<long long int, double> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
         /// Find all connected devices and register those refered in dynamixel_map in the
@@ -78,6 +78,8 @@ namespace dynamixel {
         std::vector<std::shared_ptr<dynamixel::servos::BaseServo<dynamixel::protocols::Protocol1>>> _dynamixel_servos;
         // Map from dynamixel ID to actuator's name
         std::map<long long int, std::string> _dynamixel_map;
+        // Map for max speed
+        std::map<long long int, long long int> _dynamixel_max_speed;
         // Map for hardware corrections
         std::map<long long int, double> _dynamixel_corrections;
     };
