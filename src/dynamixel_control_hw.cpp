@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     got_all_params &= nhParams.getParam("serial_interface", usb_serial_interface);
     int baudrate; // in bauds
     got_all_params &= nhParams.getParam("baudrate", baudrate);
-    float dynamixel_timeout; // in seconds
+    double dynamixel_timeout; // in seconds
     got_all_params &= nhParams.getParam("dynamixel_timeout", dynamixel_timeout);
 
     // Retrieve the map from joint name to hardware-related ID
