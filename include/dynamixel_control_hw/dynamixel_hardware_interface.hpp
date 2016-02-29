@@ -12,8 +12,7 @@
 // Library for access to the dynamixels
 #include "dynamixel/dynamixel.hpp"
 
-namespace dynamixel
-{
+namespace dynamixel {
     /** Hardware interface for a set of dynamixel actuators.
 
         This class fits in the ros_control framework for robot control.
@@ -24,8 +23,7 @@ namespace dynamixel
             same goes for the position commands are.
         Warning: this code is currently limited to joint-mode dynamixel actuators
     **/
-    class DynamixelHardwareInterface : public hardware_interface::RobotHW
-    {
+    class DynamixelHardwareInterface : public hardware_interface::RobotHW {
     public:
         /** Set the essential parameters for communication with the hardware.
 
@@ -38,7 +36,8 @@ namespace dynamixel
                 used in the controller list and in URDF
         **/
         DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-            const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map);
+            const float& dynamixel_timeout, std::map<byte_t, std::string> dynamixel_map,
+            std::map<byte_t, int> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
         /// Find all connected devices and register those refered in dynamixel_map in the
@@ -47,6 +46,7 @@ namespace dynamixel
 
         void read_joints();
         void write_joints();
+
     private:
         // not implemented
         DynamixelHardwareInterface(DynamixelHardwareInterface const&);
@@ -61,6 +61,7 @@ namespace dynamixel
         // Memory space shared with the controller
         // It reads here the latest robot's state and put here the next desired values
         std::vector<std::string> _joint_names;
+        std::vector<double> _prev_commands;
         std::vector<double> _joint_commands; // target joint angle
         std::vector<double> _joint_angles; // actual joint angle
         std::vector<double> _joint_velocities; // actual joint velocity
@@ -77,8 +78,9 @@ namespace dynamixel
         std::vector<byte_t> _dynamixel_ids;
         // Map from dynamixel ID to actuator's name
         std::map<byte_t, std::string> _dynamixel_map;
-
+        // Map for hardware corrections
+        std::map<byte_t, int> _dynamixel_corrections;
     };
 }
 
-# endif
+#endif

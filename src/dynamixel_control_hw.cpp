@@ -33,7 +33,7 @@
 *********************************************************************/
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
-
+#include <sstream>
 
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
@@ -46,8 +46,8 @@ int main(int argc, char** argv)
     // Get parameters for the hardware
     // -------------------------------
 
-    std::string sub_namespace = "dynamixel_control_hw";
-    ros::NodeHandle nhParams(nh, sub_namespace);
+    ros::NodeHandle nhParams("~");
+    std::string sub_namespace = nhParams.getNamespace();
     bool got_all_params = true;
 
     std::string usb_serial_interface;
@@ -63,16 +63,25 @@ int main(int argc, char** argv)
     std::map<std::string, int> map_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("hardware_mapping", map_param);
     std::map<std::string, int>::iterator map_param_i;
-    for (map_param_i=map_param.begin(); map_param_i!=map_param.end(); map_param_i++)
-    {
+    for (map_param_i = map_param.begin(); map_param_i != map_param.end(); map_param_i++) {
         dynamixel_map[map_param_i->second] = map_param_i->first;
     }
 
-    if (!got_all_params)
-    {
+    // Retrieve the map with angle corrections (ID: correction in ticks)
+    std::map<dynamixel::byte_t, int> dynamixel_corrections;
+    std::map<std::string, int> map_corrections; // temporary map, from parameter server
+    nhParams.getParam("hardware_corrections", map_corrections);
+    std::map<std::string, int>::iterator map_cor_i;
+    for (map_cor_i = map_corrections.begin(); map_cor_i != map_corrections.end(); map_cor_i++) {
+        int k;
+        std::istringstream(map_cor_i->first) >> k;
+        dynamixel_corrections[k] = map_cor_i->second;
+    }
+
+    if (!got_all_params) {
         std::string error_message = "One or more of the following parameters were not set:\n"
-            "\t/"+sub_namespace+"/serial_interface /"+sub_namespace+"/baudrate"
-            "/"+sub_namespace+"/dynamixel_timeout /"+sub_namespace+"/hardware_mapping";
+                                    "\t/" + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
+                                                                                                    "/" + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }
@@ -80,18 +89,19 @@ int main(int argc, char** argv)
     // Run the hardware interface node
     // -------------------------------
 
-    // We run the ROS loop in a separate thread as external calls such
-    // as service callbacks to load controllers can block the (main) control loop
+    // We run the ROS loop in a separate thread as external calls, such
+    // as service callbacks loading controllers, can block the (main) control loop
     ros::AsyncSpinner spinner(2);
     spinner.start();
 
     // Create the hardware interface specific to your robot
     boost::shared_ptr<dynamixel::DynamixelHardwareInterface>
-        dynamixel_hw_interface (new dynamixel::DynamixelHardwareInterface(
+        dynamixel_hw_interface = boost::make_shared<dynamixel::DynamixelHardwareInterface>(
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
-            dynamixel_map));
+            dynamixel_map,
+            dynamixel_corrections);
     dynamixel_hw_interface->init();
 
     // Start the control loop

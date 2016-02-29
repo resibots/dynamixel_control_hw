@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- URDF robot description -->
+  <param name="robot_description" command="cat $(find dynamixel_control_hw)/urdf/sample.urdf" />
+  <!-- Publish robot's state in the tf tree -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_state_pub" />
+
+  <!-- Parameters for the hardware interface and controllers -->
+  <rosparam file="$(find dynamixel_control_hw)/config/sample.yaml"/>
+
+  <!-- To move the dummy robot with a gui, bypassing the controller manager -->
+  <!-- <param name="use_gui" value="true"/>
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="dummy_robot" /> -->
+
+  <!-- launch our hardware interface -->
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw" name="dynamixel_control_hw" output="screen"/>
+
+  <!-- Start a controller for our dummy robot -->
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="/dynamixel_controllers/first_position_controller /dynamixel_controllers/joint_state_controller /dynamixel_controllers/second_position_controller" />
+</launch>

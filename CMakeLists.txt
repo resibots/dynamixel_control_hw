@@ -9,12 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   controller_manager
 )
 
-find_package(Boost 1.55)
-
-add_service_files(
-  FILES
-)
-
 catkin_package(
  CATKIN_DEPENDS roscpp std_msgs message_runtime
 )
@@ -29,9 +23,8 @@ link_directories("${libdynamixel_dir}/lib")
 include_directories(
   ${catkin_INCLUDE_DIRS}
   "${libdynamixel_dir}/include"
-  ${Boost_INCLUDE_DIR}
   include
 )
 
 add_executable(dynamixel_control_hw src/dynamixel_control_hw.cpp src/dynamixel_loop.cpp src/dynamixel_hardware_interface.cpp)
-target_link_libraries(dynamixel_control_hw ${catkin_LIBRARIES} ${Boost_LIBRARIES} dynamixel)
+target_link_libraries(dynamixel_control_hw ${catkin_LIBRARIES} dynamixel)
