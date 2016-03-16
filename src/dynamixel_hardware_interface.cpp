@@ -103,6 +103,10 @@ namespace dynamixel {
                             << e.msg());
                     }
                 }
+                else // If the current actuator is not in the map of names, remove it
+                {
+                    _dynamixel_servos.erase(_dynamixel_servos.begin()[i]);
+                }
             }
 
             // register the hardware interfaces
@@ -117,11 +121,7 @@ namespace dynamixel {
         read_joints();
 
         for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
-            std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
-            if (dynamixel_iterator != _dynamixel_map.end()) // check that the actuator's name is in the map
-            {
-                _joint_commands[i] = _joint_angles[i];
-            }
+            _joint_commands[i] = _joint_angles[i];
         }
     }
 
@@ -135,9 +135,6 @@ namespace dynamixel {
     void DynamixelHardwareInterface::read_joints()
     {
         for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
-            std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
-            if (dynamixel_iterator == _dynamixel_map.end())
-                continue;
             dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status;
             try {
                 // current position
@@ -191,9 +188,6 @@ namespace dynamixel {
     {
 
         for (unsigned int i = 0; i < _dynamixel_servos.size(); i++) {
-            std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
-            if (dynamixel_iterator == _dynamixel_map.end())
-                continue;
             // Sending commands only when needed
             if (std::abs(_joint_commands[i] - _prev_commands[i]) < std::numeric_limits<double>::epsilon())
                 continue;
