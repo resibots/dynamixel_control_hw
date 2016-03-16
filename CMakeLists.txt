@@ -16,8 +16,10 @@ catkin_package(
 )
 
 if ("$ENV{RESIBOTS_DIR}" STREQUAL "")
+  message("Using default location for libdynamixel : ~")
   set(libdynamixel_dir "~")
 else()
+  message("Using user-defined location for libdynamixel : $ENV{RESIBOTS_DIR}")
   set(libdynamixel_dir "$ENV{RESIBOTS_DIR}")
 endif()
 
