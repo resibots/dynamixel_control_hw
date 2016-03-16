@@ -26,6 +26,8 @@ You are assumed to work in a POSIX environment.
 
 `dynmaixel_control_hw` depends on the [libdynamixel](https://github.com/resibots/libdynamixel) library. Once it is installed, you'll need to put the path of the installed library in the `RESIBOTS_DIR` environment variable.
 
+Install the ros package ros_control. In apt-get, it is called `ros-YourDistro-ros-control` (where *YourDistro* must be changed by the ROS distribution's name, like indigo or jade). If you plan to the sample launch files or to use one of the default controllers, please also install `ros-YourDistro-ros-control` with apt-get.
+
 Clone the `dynmaixel_control_hw` repository in your catkin workspace's source directory and run a `catkin_make`.
 
 ## Alternative software
