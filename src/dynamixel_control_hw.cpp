@@ -67,7 +67,7 @@ int main(int argc, char** argv)
         dynamixel_map[(long long int)map_param_i->second] = map_param_i->first;
     }
 
-    // Retrieve max speed parameters
+    // Retrieve the map for max speed (ID: max speed)
     std::map<long long int, long long int> dynamixel_max_speed_map;
     std::map<std::string, int> max_speed_param; // temporary map, from parameter server
     nhParams.getParam("max_speed", max_speed_param);
@@ -90,9 +90,11 @@ int main(int argc, char** argv)
     }
 
     if (!got_all_params) {
-        std::string error_message = "One or more of the following parameters were not set:\n"
-                                    "\t/" + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
-                                                                                                    "/" + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping";
+        std::string error_message = "One or more of the following parameters were"
+                                    " not set:\n\t/"
+            + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
+                                                                      "/"
+            + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }

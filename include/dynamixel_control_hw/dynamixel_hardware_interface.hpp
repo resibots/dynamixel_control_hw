@@ -17,9 +17,9 @@ namespace dynamixel {
 
         This class fits in the ros_control framework for robot control.
 
-        Warning, FIXME: due to the low-level nature of the dynamixel library in use, the
-            position and velocities are returned as integers, as explained in the
-            Dynamixel's documentation.
+        Warning, FIXME: due to the low-level nature of the dynamixel library in use,
+            the position and velocities are returned as integers, as explained in
+            the Dynamixel's documentation.
             same goes for the position commands are.
         Warning: this code is currently limited to joint-mode dynamixel actuators
     **/
@@ -32,11 +32,15 @@ namespace dynamixel {
             @param baudrate: baud-rate for the serial communication with actuators (in bauds)
             @param dynamixel_timeout: timeout in seconds to wait for a message
                 to arrive on seria bus
-            @param dynamixel_map: map from actuator's ID and its name, as to be
-                used in the controller list and in URDF
+            @param dynamixel_map: map actuator's ID to its name (the one used
+                in the controller list and in URDF)
+            @param dynamixel_max_speed map from actuator IDs to maximal allowed
+                velocity (the value is specific to the actuator's type)
+            @param dynamixel_corrections map from actuator IDs to the correction
+                to be applied to the angle
         **/
         DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-            const float& dynamixel_timeout, std::map<long long int, std::string> dynamixel_map,
+            const float& read_timeout, std::map<long long int, std::string> dynamixel_map,
             std::map<long long int, long long int> dynamixel_max_speed, std::map<long long int, double> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
