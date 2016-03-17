@@ -62,6 +62,12 @@ namespace dynamixel {
                 ++servo_it;
         }
 
+        // Check that no actuator was declared by user but not found
+        if (_dynamixel_map.size() > _dynamixel_servos.size()) {
+            ROS_FATAL_STREAM("Some servos were declared in the parameters but could "
+                             "not be found");
+        }
+
         _prev_commands.resize(_dynamixel_servos.size(), 0.0);
         _joint_commands.resize(_dynamixel_servos.size(), 0.0);
         _joint_angles.resize(_dynamixel_servos.size(), 0.0);
