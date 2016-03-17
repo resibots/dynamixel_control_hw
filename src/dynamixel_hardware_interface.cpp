@@ -54,12 +54,12 @@ namespace dynamixel {
 
         // remove servos that are not in the _dynamixel_map (i.e. that are not used)
         std::vector<dynamixel::DynamixelHardwareInterface::dynamixel_servo>::iterator servo_it;
-        for (servo_it = _dynamixel_servos.begin(); servo_it != _dynamixel_servos.end(); ++servo_it) {
+        for (servo_it = _dynamixel_servos.begin(); servo_it != _dynamixel_servos.end();) {
             std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find((*servo_it)->id());
             if (dynamixel_iterator == _dynamixel_map.end()) // the actuator's name is not in the map
-            {
-                _dynamixel_servos.erase(servo_it);
-            }
+                servo_it = _dynamixel_servos.erase(servo_it);
+            else
+                ++servo_it;
         }
 
         _prev_commands.resize(_dynamixel_servos.size(), 0.0);
