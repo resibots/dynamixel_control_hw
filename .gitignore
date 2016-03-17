@@ -20,6 +20,9 @@ srv_gen/
 # qcreator stuff
 CMakeLists.txt.user
 
+# Clang-format style files
+.clang-format
+
 srv/_*.py
 *.pcd
 *.pyc
