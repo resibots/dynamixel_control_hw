@@ -138,6 +138,7 @@ namespace dynamixel {
             throw e;
         }
 
+        // At startup robot should keep the pose it has
         read_joints();
 
         for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
@@ -166,7 +167,12 @@ namespace dynamixel {
                                                                                 << e.msg());
             }
             if (status.valid()) {
-                _joint_angles[i] = _dynamixel_servos[i]->parse_present_position_angle(status);
+                try {
+                    _joint_angles[i] = _dynamixel_servos[i]->parse_present_position_angle(status);
+                }
+                catch (dynamixel::errors::Error& e) {
+                    ROS_ERROR_STREAM("Unpack exception while getting  " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position\n" << e.msg());
+                }
 
                 std::map<long long int, double>::iterator dynamixel_corrections_iterator = _dynamixel_corrections.find(_dynamixel_servos[i]->id());
                 if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
