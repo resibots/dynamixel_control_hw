@@ -79,7 +79,8 @@ namespace dynamixel {
         dynamixel::controllers::Usb2Dynamixel _dynamixel_controller;
 
         // List of actuators (collected at init. from the actuators)
-        std::vector<std::shared_ptr<dynamixel::servos::BaseServo<dynamixel::protocols::Protocol1>>> _dynamixel_servos;
+        using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<dynamixel::protocols::Protocol1>>;
+        std::vector<dynamixel_servo> _dynamixel_servos;
         // Map from dynamixel ID to actuator's name
         std::map<long long int, std::string> _dynamixel_map;
         // Map for max speed
