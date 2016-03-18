@@ -63,9 +63,13 @@ namespace dynamixel {
         }
 
         // Check that no actuator was declared by user but not found
-        if (_dynamixel_map.size() > _dynamixel_servos.size()) {
-            ROS_FATAL_STREAM("Some servos were declared in the parameters but could "
-                             "not be found");
+        int unnused_servos = _dynamixel_map.size() - _dynamixel_servos.size();
+        if (unnused_servos > 0) {
+            ROS_WARN_STREAM(
+                unnused_servos
+                << " servo"
+                << (unnused_servos > 1 ? "s were" : " was")
+                << " declared to the hardware interface but could not be found");
         }
 
         _prev_commands.resize(_dynamixel_servos.size(), 0.0);
