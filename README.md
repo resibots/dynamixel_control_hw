@@ -1,6 +1,6 @@
 # Hardware interface for Dynamixels and ROS control
 
-[ROS control](http://wiki.ros.org/ros_control) is a framework to design software control loops in [ROS](http://www.ros.org/) (Robot Operating System) where the controller code is decoupled from the actual hardware.
+[ROS control][] is a framework to design software control loops in [ROS][] (Robot Operating System) where the controller code is decoupled from the actual hardware.
 
 This piece of software provides a hardware interface for ROS control. it's aim is to allow generic software controllers to control a set of Dynamixel actuators.
 
@@ -23,7 +23,7 @@ We are currently working on the following features:
 - it would be great to offer a service to reset one actuator after an overload error
 
 ## Installation and usage
-`dynamixel_control_hw` depends on the [libdynamixel](https://github.com/resibots/libdynamixel) library. Please install it.
+`dynamixel_control_hw` depends on the [libdynamixel][] library. Please install it, it's light and quick.
 
 Then, you'll need to store the installation path of libdynamixel in the `RESIBOTS_DIR` environment variable.
 
@@ -48,7 +48,9 @@ If you know of an other software offering similar functionalities to this one, f
 This software is developed as part of the ResiBots project. We do our best to keep it free of bug and to implement relevant features. Should you face an issue or have a suggestion, please open an issue.
 
 ## Projects using this software
-- [ResiBots](http://www.resibots.eu)
+- [ResiBots][]
 
-
+[ResiBots]: http://www.resibots.eu
 [libdynamixel]: http://github.com/resibots/libdynamixel
+[ROS]: http://www.ros.org/
+[ROS control]: http://wiki.ros.org/ros_control
