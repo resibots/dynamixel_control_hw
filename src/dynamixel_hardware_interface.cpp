@@ -42,7 +42,8 @@ namespace dynamixel {
     {
         // get the list of available actuators
         try {
-            _dynamixel_controller.set_recv_timeout(_read_timeout);
+            // small recv timeout for auto_detect
+            _dynamixel_controller.set_recv_timeout(0.05);
             _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
             _dynamixel_servos = dynamixel::auto_detect<dynamixel::protocols::Protocol1>(_dynamixel_controller);
         }
@@ -51,6 +52,9 @@ namespace dynamixel {
                 << e.msg());
             throw e;
         }
+
+        // restore recv timeout
+        _dynamixel_controller.set_recv_timeout(_read_timeout);
 
         // remove servos that are not in the _dynamixel_map (i.e. that are not used)
         std::vector<dynamixel::DynamixelHardwareInterface::dynamixel_servo>::iterator servo_it;
