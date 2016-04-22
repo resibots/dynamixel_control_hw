@@ -24,5 +24,4 @@ dynamixel_control_hw:
     first: 1
     second: 26
   hardware_corrections:
-    "1": 0
-    "26": 0
+    "26": 45

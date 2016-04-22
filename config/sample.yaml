@@ -21,3 +21,6 @@ dynamixel_control_hw:
   hardware_mapping:
     first: 1
     second: 26
+  # offset to be added, in ticks, to the position of an actuator
+  hardware_corrections:
+    "26": 45
