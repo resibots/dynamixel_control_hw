@@ -94,7 +94,8 @@ int main(int argc, char** argv)
                                     " not set:\n\t/"
             + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
                                                                       "/"
-            + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping";
+            + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping"
+            + "/" + sub_namespace + "/max_speed" + "/" + sub_namespace + "/hardware_corrections";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }
