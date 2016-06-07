@@ -9,12 +9,14 @@ namespace dynamixel {
     DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface,
         const int& baudrate,
         const float& read_timeout,
+        const float& scan_timeout,
         std::map<long long int, std::string> dynamixel_map,
         std::map<long long int, long long int> dynamixel_max_speed,
         std::map<long long int, double> dynamixel_corrections)
         : _usb_serial_interface(usb_serial_interface),
           _baudrate(get_baudrate(baudrate)),
           _read_timeout(read_timeout),
+          _scan_timeout(scan_timeout),
           _dynamixel_map(dynamixel_map),
           _dynamixel_max_speed(dynamixel_max_speed),
           _dynamixel_corrections(dynamixel_corrections)
@@ -43,7 +45,7 @@ namespace dynamixel {
         // get the list of available actuators
         try {
             // small recv timeout for auto_detect
-            _dynamixel_controller.set_recv_timeout(0.05);
+            _dynamixel_controller.set_recv_timeout(_scan_timeout);
             _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
             _dynamixel_servos = dynamixel::auto_detect<dynamixel::protocols::Protocol1>(_dynamixel_controller);
         }

@@ -40,7 +40,7 @@ namespace dynamixel {
                 to be applied to the angle
         **/
         DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-            const float& read_timeout, std::map<long long int, std::string> dynamixel_map,
+            const float& read_timeout, const float& scan_timeout, std::map<long long int, std::string> dynamixel_map,
             std::map<long long int, long long int> dynamixel_max_speed, std::map<long long int, double> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
@@ -74,7 +74,7 @@ namespace dynamixel {
         // USB to serial connexion settings
         const std::string& _usb_serial_interface;
         const int _baudrate;
-        const float _read_timeout; // in seconds
+        const float _read_timeout, _scan_timeout; // in seconds
         // Dynamixel's low level controller
         dynamixel::controllers::Usb2Dynamixel _dynamixel_controller;
 

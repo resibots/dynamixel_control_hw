@@ -19,6 +19,7 @@ dynamixel_control_hw:
   serial_interface: /dev/ttyUSB0
   baudrate: 1000000 # in bauds
   dynamixel_timeout: 0.05 # in seconds
+  dynamixel_scanning: 0.05 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
   hardware_mapping:
     first: 1

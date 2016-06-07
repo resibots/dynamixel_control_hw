@@ -56,6 +56,12 @@ int main(int argc, char** argv)
     got_all_params &= nhParams.getParam("baudrate", baudrate);
     double dynamixel_timeout; // in seconds
     got_all_params &= nhParams.getParam("dynamixel_timeout", dynamixel_timeout);
+    double dynamixel_scanning; // in seconds
+    bool dyn_scan = nhParams.getParam("dynamixel_scanning", dynamixel_scanning);
+    if (!dyn_scan) {
+        ROS_WARN_STREAM("Dynamixel scanning timeout parameter was not found. Setting to default: 0.05s.");
+        dynamixel_scanning = 0.05;
+    }
 
     // Retrieve the map from joint name to hardware-related ID
     // It has to be inverted, putting the ID as a key, for later use
@@ -114,6 +120,7 @@ int main(int argc, char** argv)
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
+            dynamixel_scanning,
             dynamixel_map,
             dynamixel_max_speed_map,
             dynamixel_corrections);
