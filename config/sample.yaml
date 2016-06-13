@@ -12,10 +12,16 @@ dynamixel_controllers:
     joint: second
 
 dynamixel_control_hw:
+  loop_frequency: 10
+  cycle_time_error_threshold: 0.2
   serial_interface: /dev/ttyUSB0
   baudrate: 1000000 # in bauds
-  dynamixel_timeout: 0.2 # in seconds
+  dynamixel_timeout: 0.05 # in seconds
+  dynamixel_scanning: 0.05 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
   hardware_mapping:
     first: 1
     second: 26
+  # offset to be added, in ticks, to the position of an actuator
+  hardware_corrections:
+    "26": 45

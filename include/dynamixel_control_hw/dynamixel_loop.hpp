@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
- /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
-
+/* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
 #ifndef DYNAMIXEL_LOOP
 #define DYNAMIXEL_LOOP
@@ -53,13 +52,11 @@
 // The hardware interface to dynamixels
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
-namespace dynamixel
-{
+namespace dynamixel {
     // Used to convert seconds elapsed to nanoseconds
     static const double BILLION = 1000000000.0;
 
-    class DynamixelLoop
-    {
+    class DynamixelLoop {
     public:
         DynamixelLoop(ros::NodeHandle& nh, boost::shared_ptr<dynamixel::DynamixelHardwareInterface> hardware_interface);
 
@@ -71,6 +68,7 @@ namespace dynamixel
                 linearly increasing.
         **/
         void update(const ros::TimerEvent& e);
+
     private:
         // Startup and shutdown of the internal node inside a roscpp program
         ros::NodeHandle _nh;
@@ -99,4 +97,4 @@ namespace dynamixel
     };
 }
 
-# endif
+#endif
