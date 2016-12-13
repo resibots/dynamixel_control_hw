@@ -59,7 +59,8 @@ int main(int argc, char** argv)
     double dynamixel_scanning; // in seconds
     bool dyn_scan = nhParams.getParam("dynamixel_scanning", dynamixel_scanning);
     if (!dyn_scan) {
-        ROS_WARN_STREAM("Dynamixel scanning timeout parameter was not found. Setting to default: 0.05s.");
+        ROS_WARN_STREAM("Dynamixel scanning timeout parameter was not found. "
+            << "Setting to default: 0.05s.");
         dynamixel_scanning = 0.05;
     }
 
@@ -96,12 +97,14 @@ int main(int argc, char** argv)
     }
 
     if (!got_all_params) {
-        std::string error_message = "One or more of the following parameters were"
-                                    " not set:\n\t/"
-            + sub_namespace + "/serial_interface /" + sub_namespace + "/baudrate"
-                                                                      "/"
-            + sub_namespace + "/dynamixel_timeout /" + sub_namespace + "/hardware_mapping"
-            + "/" + sub_namespace + "/max_speed" + "/" + sub_namespace + "/hardware_corrections";
+        std::string error_message = "One or more of the following parameters "
+                                    "were not set:\n\t/"
+            + sub_namespace + "/serial_interface"
+            + " /" + sub_namespace + "/baudrate"
+            + " /" + sub_namespace + "/dynamixel_timeout"
+            + " /" + sub_namespace + "/hardware_mapping"
+            + " /" + sub_namespace + "/max_speed"
+            + " /" + sub_namespace + "/hardware_corrections";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }

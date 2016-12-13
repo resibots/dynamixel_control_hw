@@ -29,7 +29,8 @@ namespace dynamixel {
 
             @param usb_serial_interface: name of the USB to serial interface;
                 for example "/dev/ttyUSB0"
-            @param baudrate: baud-rate for the serial communication with actuators (in bauds)
+            @param baudrate: baud-rate for the serial communication with actuators
+                (in bauds)
             @param dynamixel_timeout: timeout in seconds to wait for a message
                 to arrive on seria bus
             @param dynamixel_map: map actuator's ID to its name (the one used
@@ -39,13 +40,17 @@ namespace dynamixel {
             @param dynamixel_corrections map from actuator IDs to the correction
                 to be applied to the angle
         **/
-        DynamixelHardwareInterface(const std::string& usb_serial_interface, const int& baudrate,
-            const float& read_timeout, const float& scan_timeout, std::map<long long int, std::string> dynamixel_map,
-            std::map<long long int, long long int> dynamixel_max_speed, std::map<long long int, double> dynamixel_corrections);
+        DynamixelHardwareInterface(const std::string& usb_serial_interface,
+            const int& baudrate,
+            const float& read_timeout,
+            const float& scan_timeout,
+            std::map<long long int, std::string> dynamixel_map,
+            std::map<long long int, long long int> dynamixel_max_speed,
+            std::map<long long int, double> dynamixel_corrections);
         ~DynamixelHardwareInterface();
 
-        /// Find all connected devices and register those refered in dynamixel_map in the
-        /// hardware interface.
+        /// Find all connected devices and register those refered in dynamixel_map
+        /// in the hardware interface.
         void init();
 
         void read_joints();

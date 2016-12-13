@@ -6,7 +6,8 @@
 #include <math.h>
 
 namespace dynamixel {
-    DynamixelHardwareInterface::DynamixelHardwareInterface(const std::string& usb_serial_interface,
+    DynamixelHardwareInterface::DynamixelHardwareInterface(
+        const std::string& usb_serial_interface,
         const int& baudrate,
         const float& read_timeout,
         const float& scan_timeout,
@@ -34,7 +35,8 @@ namespace dynamixel {
             }
         }
         catch (dynamixel::errors::Error& e) {
-            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to power them off:\n"
+            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
+                << "power them off:\n"
                 << e.msg());
             throw e;
         }
@@ -50,7 +52,8 @@ namespace dynamixel {
             _dynamixel_servos = dynamixel::auto_detect<dynamixel::protocols::Protocol1>(_dynamixel_controller);
         }
         catch (dynamixel::errors::Error& e) {
-            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to initialise them:\n"
+            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
+                << "initialise them:\n"
                 << e.msg());
             throw e;
         }
@@ -62,7 +65,8 @@ namespace dynamixel {
         std::vector<dynamixel::DynamixelHardwareInterface::dynamixel_servo>::iterator servo_it;
         for (servo_it = _dynamixel_servos.begin(); servo_it != _dynamixel_servos.end();) {
             std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find((*servo_it)->id());
-            if (dynamixel_iterator == _dynamixel_map.end()) // the actuator's name is not in the map
+            // the actuator's name is not in the map
+            if (dynamixel_iterator == _dynamixel_map.end())
                 servo_it = _dynamixel_servos.erase(servo_it);
             else
                 ++servo_it;
@@ -90,8 +94,8 @@ namespace dynamixel {
         try {
             for (unsigned i = 0; i < _dynamixel_servos.size(); i++) {
                 std::map<long long int, std::string>::iterator dynamixel_iterator = _dynamixel_map.find(_dynamixel_servos[i]->id());
-                if (dynamixel_iterator != _dynamixel_map.end()) // check that the actuator's name is in the map
-                {
+                // check that the actuator's name is in the map
+                if (dynamixel_iterator != _dynamixel_map.end()) {
                     // tell ros_control the in-memory address where to read the
                     // information on joint angle, velocity and effort
                     hardware_interface::JointStateHandle state_handle(
@@ -121,17 +125,21 @@ namespace dynamixel {
                             ROS_DEBUG_STREAM("Setting velocity limit of joint "
                                 << _dynamixel_servos[i]->id() << " to "
                                 << dynamixel_max_speed_iterator->second);
-                            _dynamixel_controller.send(_dynamixel_servos[i]->set_moving_speed(dynamixel_max_speed_iterator->second));
+                            _dynamixel_controller.send(
+                                _dynamixel_servos[i]->set_moving_speed(dynamixel_max_speed_iterator->second));
                             _dynamixel_controller.recv(status);
                         }
                     }
                     catch (dynamixel::errors::Error& e) {
-                        ROS_ERROR_STREAM("Caught a Dynamixel exception while initializing:\n"
+                        ROS_ERROR_STREAM("Caught a Dynamixel exception while "
+                            << "initializing:\n"
                             << e.msg());
                     }
                 }
                 else {
-                    ROS_WARN_STREAM("Servo " << i << " was not initialised (not found in the parameters)");
+                    ROS_WARN_STREAM("Servo "
+                        << i
+                        << " was not initialised (not found in the parameters)");
                 }
             }
 
@@ -140,7 +148,8 @@ namespace dynamixel {
             registerInterface(&_jnt_pos_interface);
         }
         catch (const ros::Exception& e) {
-            ROS_ERROR_STREAM("Could not initialize hardware interface:\n\tTrace: " << e.what());
+            ROS_ERROR_STREAM("Could not initialize hardware interface:\n\tTrace: "
+                << e.what());
             throw e;
         }
 
@@ -169,15 +178,20 @@ namespace dynamixel {
                 _dynamixel_controller.recv(status);
             }
             catch (dynamixel::errors::Error& e) {
-                ROS_ERROR_STREAM("Caught a Dynamixel exception while getting  " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position\n"
-                                                                                << e.msg());
+                ROS_ERROR_STREAM("Caught a Dynamixel exception while getting  "
+                    << _dynamixel_map[_dynamixel_servos[i]->id()]
+                    << "'s position\n"
+                    << e.msg());
             }
             if (status.valid()) {
                 try {
                     _joint_angles[i] = _dynamixel_servos[i]->parse_present_position_angle(status);
                 }
                 catch (dynamixel::errors::Error& e) {
-                    ROS_ERROR_STREAM("Unpack exception while getting  " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position\n" << e.msg());
+                    ROS_ERROR_STREAM("Unpack exception while getting  "
+                        << _dynamixel_map[_dynamixel_servos[i]->id()]
+                        << "'s position\n"
+                        << e.msg());
                 }
 
                 // Apply angle correction to joint, if any
@@ -187,10 +201,12 @@ namespace dynamixel {
                 }
             }
             else {
-                ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position");
+                ROS_WARN_STREAM("Did not receive any data when reading "
+                    << _dynamixel_map[_dynamixel_servos[i]->id()]
+                    << "'s position");
             }
 
-            // TO-DO: Make it work in V2 libdynamixel
+            // TODO: Make it work in V2 libdynamixel
             // dynamixel::StatusPacket<dynamixel::protocols::Protocol1> status_speed;
             // // current speed
             // _dynamixel_controller.send(_dynamixel_servos[i]->get_present_speed());
@@ -235,12 +251,14 @@ namespace dynamixel {
                     goal_pos += dynamixel_corrections_iterator->second;
                 }
 
-                ROS_DEBUG_STREAM("Setting position of joint " << _dynamixel_servos[i]->id() << " to " << goal_pos);
+                ROS_DEBUG_STREAM("Setting position of joint "
+                    << _dynamixel_servos[i]->id() << " to " << goal_pos);
                 _dynamixel_controller.send(_dynamixel_servos[i]->reg_goal_position_angle(goal_pos));
                 _dynamixel_controller.recv(status);
             }
             catch (dynamixel::errors::Error& e) {
-                ROS_ERROR_STREAM("Caught a Dynamixel exception while sending new commands:\n"
+                ROS_ERROR_STREAM("Caught a Dynamixel exception while sending "
+                    << "new commands:\n"
                     << e.msg());
             }
         }
@@ -253,4 +271,4 @@ namespace dynamixel {
                 << e.msg());
         }
     }
-}
+} // namespace dynamixel
