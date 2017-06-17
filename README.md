@@ -17,9 +17,8 @@ We are using it for our robots and developing it for this purpose. Version 0.0.1
 ## Limitations
 We are currently working on the following features:
 
-- doesn't manage wheel mode
 - joint limits not implemented yet
-- position control only
+- position control only (doesn't manage wheel mode)
 - it would be great to offer a service to reset one actuator after an overload error
 
 ## Installation and usage
@@ -37,9 +36,9 @@ If you want to use the sample launch files or to use one of the default controll
 - `ros-YourDistro-ros-controllers` and
 - `ros-YourDistro-joint-state-publisher`.
 
-The Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only position controllers and a virtual controller that publishes the states of each actuator.
+Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only position controllers and a virtual controller that publishes the states of each actuator.
 
-*Before starting* it, check `config/sample.yaml` for the `hardware_mapping` section, the `serial_interface` and `baudrate`. Once you are sure that it's correct, you can launch the sample. By looking at the available topics, you should find two for the commands of each joint and one for the joint state.
+*Before starting* it, check `config/sample.yaml` for the `hardware_mapping` section, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can launch the sample. By looking at the available topics, you should find two for the commands of each joint and one for the joint state.
 
 ## Alternative software
 If you know of an other software offering similar functionalities to this one, feel free to open an issue so that we can add it here.
