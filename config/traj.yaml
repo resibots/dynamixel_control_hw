@@ -6,8 +6,8 @@ dynamixel_controllers:
   first_traj_controller:
     type: position_controllers/JointTrajectoryController
     joints:
-      - first
-      - second
+      - arm_joint_1
+      - arm_joint_2
 
   # second_position_controller:
   #   type: position_controllers/JointPositionController
@@ -22,7 +22,9 @@ dynamixel_control_hw:
   dynamixel_scanning: 0.05 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
   hardware_mapping:
-    first: 1
-    second: 26
+    arm_joint_1: 2
+    arm_joint_2: 3
+  # offset to be added, in radians, to the position of an actuator
   hardware_corrections:
-    "26": 45
+    "2": 3.14159265359
+    "3": 3.14159265359

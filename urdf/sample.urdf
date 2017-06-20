@@ -1,25 +1,42 @@
 <robot name="dummy_robot">
   <link name="base_link">
     <visual>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
       <geometry>
-        <cylinder length="0.6" radius="0.2"/>
+        <cylinder length="0.06" radius="0.04"/>
       </geometry>
     </visual>
   </link>
-  <link name="end_link"/>
-  <link name="alt_link"/>
+  <link name="middle_link">
+    <visual>
+      <origin xyz="0 0 0.13" rpy="0 0 0 "/>
+      <geometry>
+        <cylinder length="0.26" radius="0.04"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="end_link">
+    <visual>
+      <origin xyz="0 0 0.075" rpy="0 0 0 "/>
+      <geometry>
+        <cylinder length="0.15" radius="0.04"/>
+      </geometry>
+    </visual>
+  </link>
 
-  <joint name="first" type="continuous">
+  <joint name="arm_joint_1" type="revolute">
     <parent link="base_link"/>
-    <child link="end_link"/>
-    <origin xyz="0.5 0.3 0" rpy="0 0 0"/>
-    <axis xyz="-0.707 0.707 0"/>
+    <child link="middle_link"/>
+    <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" velocity="50" effort="100"/>
   </joint>
 
-  <joint name="second" type="continuous">
-    <parent link="base_link"/>
-    <child link="alt_link"/>
-    <origin xyz="0 0.3 0" rpy="0 0 0"/>
+  <joint name="arm_joint_2" type="revolute">
+    <parent link="middle_link"/>
+    <child link="end_link"/>
+    <origin xyz="0 0 0.26" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" velocity="50" effort="100"/>
   </joint>
 </robot>
