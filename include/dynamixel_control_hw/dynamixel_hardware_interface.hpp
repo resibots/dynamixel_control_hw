@@ -20,7 +20,7 @@ namespace dynamixel {
         Warning, FIXME: due to the low-level nature of the dynamixel library in use,
             the position and velocities are returned as integers, as explained in
             the Dynamixel's documentation.
-            same goes for the position commands are.
+            Same goes for the position commands.
         Warning: this code is currently limited to joint-mode dynamixel actuators
     **/
     class DynamixelHardwareInterface : public hardware_interface::RobotHW {
@@ -69,7 +69,6 @@ namespace dynamixel {
 
         // Memory space shared with the controller
         // It reads here the latest robot's state and put here the next desired values
-        std::vector<std::string> _joint_names;
         std::vector<double> _prev_commands;
         std::vector<double> _joint_commands; // target joint angle
         std::vector<double> _joint_angles; // actual joint angle
@@ -93,6 +92,6 @@ namespace dynamixel {
         // Map for hardware corrections
         std::map<long long int, double> _dynamixel_corrections;
     };
-}
+} // namespace dynamixel
 
 #endif

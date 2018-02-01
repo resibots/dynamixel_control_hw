@@ -195,7 +195,8 @@ namespace dynamixel {
                 }
 
                 // Apply angle correction to joint, if any
-                std::map<long long int, double>::iterator dynamixel_corrections_iterator = _dynamixel_corrections.find(_dynamixel_servos[i]->id());
+                std::map<long long int, double>::iterator dynamixel_corrections_iterator
+                    = _dynamixel_corrections.find(_dynamixel_servos[i]->id());
                 if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                     _joint_angles[i] -= dynamixel_corrections_iterator->second;
                 }
