@@ -38,5 +38,5 @@ include_directories(
   include
 )
 
-add_executable(dynamixel_control_hw src/dynamixel_control_hw.cpp src/dynamixel_loop.cpp src/dynamixel_hardware_interface.cpp)
-target_link_libraries(dynamixel_control_hw ${catkin_LIBRARIES})
+add_executable(dynamixel_control_hw src/dynamixel_control_hw.cpp)
+target_link_libraries(dynamixel_control_hw ${catkin_LIBRARIES} ${Boost_LIBRARIES})

@@ -42,6 +42,8 @@
 
 // Boost shared pointer
 #include <boost/shared_ptr.hpp>
+// for runtime_error
+#include <stdexcept>
 
 // ROS
 #include <ros/ros.h>
@@ -56,9 +58,38 @@ namespace dynamixel {
     // Used to convert seconds elapsed to nanoseconds
     static const double BILLION = 1000000000.0;
 
+    template <class Protocol>
     class DynamixelLoop {
+        using hw_int = typename dynamixel::DynamixelHardwareInterface<Protocol>;
+
     public:
-        DynamixelLoop(ros::NodeHandle& nh, boost::shared_ptr<dynamixel::DynamixelHardwareInterface> hardware_interface);
+        DynamixelLoop(
+            ros::NodeHandle& nh,
+            boost::shared_ptr<hw_int> hardware_interface)
+            : _nh(nh),
+              _hardware_interface(hardware_interface)
+        {
+            // Create the controller manager
+            _controller_manager.reset(new controller_manager::ControllerManager(_hardware_interface.get(), _nh));
+
+            // Load rosparams
+            int error = 0;
+            ros::NodeHandle np("~");
+            error += !np.getParam("loop_frequency", _loop_hz);
+            error += !np.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
+            if (error > 0) {
+                char error_message[] = "could not retrieve one of the required parameters\n\tdynamixel_hw/loop_hz or dynamixel_hw/cycle_time_error_threshold";
+                ROS_ERROR_STREAM(error_message);
+                throw std::runtime_error(error_message);
+            }
+
+            // Get current time for use with first update
+            clock_gettime(CLOCK_MONOTONIC, &_last_time);
+
+            // Start timer that will periodically call DynamixelLoop::update
+            ros::Duration _desired_update_freq = ros::Duration(1 / _loop_hz);
+            _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
+        }
 
         /** Timed method that reads current hardware's state, runs the controller
             code once and sends the new commands to the hardware.
@@ -67,7 +98,34 @@ namespace dynamixel {
                 does NOT guarantee that the time source is strictly
                 linearly increasing.
         **/
-        void update(const ros::TimerEvent& e);
+        void update(const ros::TimerEvent& e)
+        {
+            // Get change in time
+            clock_gettime(CLOCK_MONOTONIC, &_current_time);
+            _elapsed_time = ros::Duration(
+                _current_time.tv_sec - _last_time.tv_sec + (_current_time.tv_nsec - _last_time.tv_nsec) / BILLION);
+            _last_time = _current_time;
+
+            // Check cycle time for excess delay
+            const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
+            if (cycle_time_error > _cycle_time_error_threshold) {
+                ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
+                    << cycle_time_error - _cycle_time_error_threshold << ", cycle time: " << _elapsed_time
+                    << ", threshold: " << _cycle_time_error_threshold);
+            }
+
+            // Input
+            // get the hardware's state
+            _hardware_interface->read_joints();
+
+            // Control
+            // let the controller compute the new command (via the controller manager)
+            _controller_manager->update(ros::Time::now(), _elapsed_time);
+
+            // Output
+            // send the new command to hardware
+            _hardware_interface->write_joints();
+        }
 
     private:
         // Startup and shutdown of the internal node inside a roscpp program
@@ -93,8 +151,8 @@ namespace dynamixel {
         boost::shared_ptr<controller_manager::ControllerManager> _controller_manager;
 
         /// Abstract Hardware Interface for your robot
-        boost::shared_ptr<dynamixel::DynamixelHardwareInterface> _hardware_interface;
+        boost::shared_ptr<hw_int> _hardware_interface;
     };
-}
+} // namespace dynamixel
 
 #endif

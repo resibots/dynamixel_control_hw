@@ -43,6 +43,9 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "dynamixel_control_hw");
     ros::NodeHandle nh;
 
+    ROS_INFO_STREAM("Dynamixel communication protocol : version 1");
+    using Protocol = dynamixel::protocols::Protocol1;
+
     // Get parameters for the hardware
     // -------------------------------
 
@@ -118,8 +121,8 @@ int main(int argc, char** argv)
     spinner.start();
 
     // Create the hardware interface specific to your robot
-    boost::shared_ptr<dynamixel::DynamixelHardwareInterface>
-        dynamixel_hw_interface = boost::make_shared<dynamixel::DynamixelHardwareInterface>(
+    boost::shared_ptr<dynamixel::DynamixelHardwareInterface<Protocol>>
+        dynamixel_hw_interface = boost::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>(
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
@@ -130,7 +133,7 @@ int main(int argc, char** argv)
     dynamixel_hw_interface->init();
 
     // Start the control loop
-    dynamixel::DynamixelLoop control_loop(nh, dynamixel_hw_interface);
+    dynamixel::DynamixelLoop<Protocol> control_loop(nh, dynamixel_hw_interface);
 
     // Wait until shutdown signal recieved
     ros::waitForShutdown();
