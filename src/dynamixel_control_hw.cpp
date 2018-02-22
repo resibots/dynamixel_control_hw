@@ -43,8 +43,13 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "dynamixel_control_hw");
     ros::NodeHandle nh;
 
+#ifdef PROTOCOL1
     ROS_INFO_STREAM("Dynamixel communication protocol : version 1");
     using Protocol = dynamixel::protocols::Protocol1;
+#else
+    ROS_INFO_STREAM("Dynamixel communication protocol : version 2");
+    using Protocol = dynamixel::protocols::Protocol2;
+#endif
 
     // Get parameters for the hardware
     // -------------------------------

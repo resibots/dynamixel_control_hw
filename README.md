@@ -10,6 +10,7 @@ We are using it for our robots and developing it for this purpose. Version 0.0.1
 
 - simple, ROS-style control interface for your dynamixel-based robot
 - not specific to a given number or set of actuators
+- works with both version of Dynamixel protocol (1 and 2)
 - uses radians uniformly over all Dynamixel models (no need to worry about ticks-to-angle conversion)
 - you can set an offset for each actuator's position
 - set names for your dynamixels in a configuration file

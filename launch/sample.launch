@@ -15,7 +15,8 @@
   <node pkg="joint_state_publisher" type="joint_state_publisher" name="dummy_robot" /> -->
 
   <!-- launch our hardware interface -->
-  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw" name="dynamixel_control_hw" output="screen"/>
+  <arg name="protocol_version" default="v1" doc="Choses the dynamixel protocol variant to be used (v1 or v2)"/>
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw_$(arg protocol_version)" name="dynamixel_control_hw" output="screen"/>
 
   <!-- Start a controller for our dummy robot -->
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
