@@ -3,7 +3,7 @@ dynamixel_controllers:
     type: joint_state_controller/JointStateController
     publish_rate: 50
 
-  first_traj_controller:
+  traj_controller:
     type: position_controllers/JointTrajectoryController
     joints:
       - arm_joint_1

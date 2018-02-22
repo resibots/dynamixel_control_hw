@@ -20,5 +20,5 @@
   <!-- Start a controller for our dummy robot -->
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args="/dynamixel_controllers/joint_state_controller
-      /dynamixel_controllers/first_traj_controller" />
+      /dynamixel_controllers/traj_controller" />
 </launch>
