@@ -19,5 +19,6 @@
 
   <!-- Start a controller for our dummy robot -->
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" args="/dynamixel_controllers/first_position_controller /dynamixel_controllers/joint_state_controller /dynamixel_controllers/second_position_controller" />
+    output="screen" args="/dynamixel_controllers/first_position_controller /dynamixel_controllers/second_position_controller
+    /dynamixel_controllers/joint_state_controller" />
 </launch>
