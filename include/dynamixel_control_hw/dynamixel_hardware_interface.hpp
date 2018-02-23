@@ -50,7 +50,7 @@ namespace dynamixel {
             const float& read_timeout,
             const float& scan_timeout,
             std::map<long long int, std::string> dynamixel_map,
-            std::map<long long int, long long int> dynamixel_max_speed,
+            std::map<long long int, double> dynamixel_max_speed,
             std::map<long long int, double> dynamixel_corrections)
             : _usb_serial_interface(usb_serial_interface),
               _baudrate(get_baudrate(baudrate)),
@@ -162,14 +162,15 @@ namespace dynamixel {
                             _dynamixel_controller.send(_servos[i]->set_torque_enable(1));
                             _dynamixel_controller.recv(status);
 
-                            std::map<long long int, long long int>::iterator dynamixel_max_speed_iterator
+                            // set max speed
+                            std::map<long long int, double>::iterator dynamixel_max_speed_iterator
                                 = _dynamixel_max_speed.find(_servos[i]->id());
                             if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
                                 dynamixel::StatusPacket<Protocol> status;
                                 ROS_DEBUG_STREAM("Setting velocity limit of joint "
                                     << _servos[i]->id() << " to "
                                     << dynamixel_max_speed_iterator->second);
-                                _dynamixel_controller.send(_servos[i]->set_moving_speed(dynamixel_max_speed_iterator->second));
+                                _dynamixel_controller.send(_servos[i]->set_moving_speed_angle(dynamixel_max_speed_iterator->second));
                                 _dynamixel_controller.recv(status);
                             }
                         }
@@ -352,7 +353,7 @@ namespace dynamixel {
         // Map from dynamixel ID to actuator's name
         std::map<long long int, std::string> _dynamixel_map;
         // Map for max speed
-        std::map<long long int, long long int> _dynamixel_max_speed;
+        std::map<long long int, double> _dynamixel_max_speed;
         // Map for hardware corrections
         std::map<long long int, double> _dynamixel_corrections;
     };

@@ -22,9 +22,13 @@ dynamixel_control_hw:
   dynamixel_scanning: 0.05 # in seconds
   # correspondance between hardware IDs of the actuators and their names in ROS
   hardware_mapping:
-    arm_joint_1: 3
+    arm_joint_1: 2
     arm_joint_2: 1
   # offset to be added, in radians, to the position of an actuator
   hardware_corrections:
     "1": 3.14159265359
-    "3": 3.14159265359
+    "2": 3.14159265359
+  # max joint speed, in rad/s
+  max_speed:
+    "1": 0.1
+    "2": 0.1

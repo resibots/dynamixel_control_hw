@@ -83,14 +83,14 @@ int main(int argc, char** argv)
     }
 
     // Retrieve the map for max speed (ID: max speed)
-    std::map<long long int, long long int> dynamixel_max_speed_map;
-    std::map<std::string, int> max_speed_param; // temporary map, from parameter server
+    std::map<long long int, double> dynamixel_max_speed_map;
+    std::map<std::string, double> max_speed_param; // temporary map, from parameter server
     nhParams.getParam("max_speed", max_speed_param);
-    std::map<std::string, int>::iterator max_speed_param_i;
+    std::map<std::string, double>::iterator max_speed_param_i;
     for (max_speed_param_i = max_speed_param.begin(); max_speed_param_i != max_speed_param.end(); max_speed_param_i++) {
         long long int k;
         std::istringstream(max_speed_param_i->first) >> k;
-        dynamixel_max_speed_map[k] = (long long int)max_speed_param_i->second;
+        dynamixel_max_speed_map[k] = max_speed_param_i->second;
     }
 
     // Retrieve the map with angle corrections (ID: correction in radians)
