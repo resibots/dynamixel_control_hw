@@ -233,7 +233,6 @@ namespace dynamixel {
                     ROS_WARN_STREAM("Did not receive any data when reading " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s position");
                 }
 
-                // TO-DO: Make it work in V2 libdynamixel
                 dynamixel::StatusPacket<Protocol> status_speed;
                 try {
                     // current speed
@@ -246,19 +245,11 @@ namespace dynamixel {
                 }
                 if (status_speed.valid()) {
                     try {
-                        _joint_velocities[i] = _dynamixel_servos[i]->parse_present_speed(status_speed);
+                        _joint_velocities[i] = _dynamixel_servos[i]->parse_joint_speed(status_speed);
                     }
                     catch (dynamixel::errors::Error& e) {
                         ROS_ERROR_STREAM("Unpack exception while getting  " << _dynamixel_map[_dynamixel_servos[i]->id()] << "'s velocity\n"
                                                                             << e.msg());
-                    }
-                    // <1024 ccw, >=1024 cw, 0.11rpm is the unit
-                    // we convert it to rad/s
-                    if (_joint_velocities[i] < 1024) {
-                        _joint_velocities[i] *= 0.01151917305;
-                    }
-                    else {
-                        _joint_velocities[i] = (_joint_velocities[i] - 1024) * -0.01151917305;
                     }
                 }
                 else {
