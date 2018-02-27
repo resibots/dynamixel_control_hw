@@ -106,13 +106,13 @@ int main(int argc, char** argv)
 
     if (!got_all_params) {
         std::string error_message = "One or more of the following parameters "
-                                    "were not set:\n\t/"
-            + sub_namespace + "/serial_interface"
-            + " /" + sub_namespace + "/baudrate"
-            + " /" + sub_namespace + "/dynamixel_timeout"
-            + " /" + sub_namespace + "/hardware_mapping"
-            + " /" + sub_namespace + "/max_speed"
-            + " /" + sub_namespace + "/hardware_corrections";
+                                    "were not set:\n"
+            + sub_namespace + "/serial_interface\n"
+            + sub_namespace + "/baudrate\n"
+            + sub_namespace + "/dynamixel_timeout\n"
+            + sub_namespace + "/hardware_mapping\n"
+            + sub_namespace + "/max_speed\n"
+            + sub_namespace + "/hardware_corrections";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }
