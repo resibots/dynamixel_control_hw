@@ -37,8 +37,7 @@
 #ifndef DYNAMIXEL_LOOP
 #define DYNAMIXEL_LOOP
 
-// Standard C++
-#include <time.h>
+#include <chrono>
 
 // for shared pointer
 #include <memory>
@@ -55,8 +54,8 @@
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
 namespace dynamixel {
-    // Used to convert seconds elapsed to nanoseconds
-    static const double BILLION = 1000000000.0;
+    // To make uses of stead_clock and duration_cast shorter
+    using namespace std::chrono;
 
     template <class Protocol>
     class DynamixelLoop {
@@ -84,7 +83,7 @@ namespace dynamixel {
             }
 
             // Get current time for use with first update
-            clock_gettime(CLOCK_MONOTONIC, &_last_time);
+            _last_time = steady_clock::now();
 
             // Start timer that will periodically call DynamixelLoop::update
             ros::Duration _desired_update_freq = ros::Duration(1 / _loop_hz);
@@ -101,17 +100,20 @@ namespace dynamixel {
         void update(const ros::TimerEvent& e)
         {
             // Get change in time
-            clock_gettime(CLOCK_MONOTONIC, &_current_time);
-            _elapsed_time = ros::Duration(
-                _current_time.tv_sec - _last_time.tv_sec + (_current_time.tv_nsec - _last_time.tv_nsec) / BILLION);
+            _current_time = steady_clock::now();
+            duration<double> time_span
+                = duration_cast<duration<double>>(_current_time - _last_time);
+            _elapsed_time = ros::Duration(time_span.count());
             _last_time = _current_time;
 
             // Check cycle time for excess delay
             const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
             if (cycle_time_error > _cycle_time_error_threshold) {
                 ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
-                    << cycle_time_error - _cycle_time_error_threshold << ", cycle time: " << _elapsed_time
-                    << ", threshold: " << _cycle_time_error_threshold);
+                    << cycle_time_error - _cycle_time_error_threshold << "s, "
+                    << "cycle time: " << _elapsed_time << "s, "
+                    << "threshold: " << _cycle_time_error_threshold)
+                    << "s";
             }
 
             // Input
@@ -139,8 +141,8 @@ namespace dynamixel {
         ros::Timer _non_realtime_loop;
         ros::Duration _elapsed_time;
         double _loop_hz;
-        struct timespec _last_time;
-        struct timespec _current_time;
+        steady_clock::time_point _last_time;
+        steady_clock::time_point _current_time;
 
         /** ROS Controller Manager and Runner
 
