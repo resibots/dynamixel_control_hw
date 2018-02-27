@@ -34,6 +34,7 @@
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 #include <sstream>
+#include <unordered_map>
 
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
@@ -74,7 +75,7 @@ int main(int argc, char** argv)
 
     // Retrieve the map from joint name to hardware-related ID
     // It has to be inverted, putting the ID as a key, for later use
-    std::map<long long int, std::string> dynamixel_map;
+    std::unordered_map<long long int, std::string> dynamixel_map;
     std::map<std::string, int> map_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("hardware_mapping", map_param);
     std::map<std::string, int>::iterator map_param_i;
@@ -83,7 +84,7 @@ int main(int argc, char** argv)
     }
 
     // Retrieve the map for max speed (ID: max speed)
-    std::map<long long int, double> dynamixel_max_speed_map;
+    std::unordered_map<long long int, double> dynamixel_max_speed_map;
     std::map<std::string, double> max_speed_param; // temporary map, from parameter server
     nhParams.getParam("max_speed", max_speed_param);
     std::map<std::string, double>::iterator max_speed_param_i;
@@ -94,7 +95,7 @@ int main(int argc, char** argv)
     }
 
     // Retrieve the map with angle corrections (ID: correction in radians)
-    std::map<long long int, double> dynamixel_corrections;
+    std::unordered_map<long long int, double> dynamixel_corrections;
     std::map<std::string, double> map_corrections; // temporary map, from parameter server
     nhParams.getParam("hardware_corrections", map_corrections);
     std::map<std::string, double>::iterator map_cor_i;

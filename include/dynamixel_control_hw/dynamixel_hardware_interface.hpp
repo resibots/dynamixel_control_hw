@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <stdexcept>
+#include <unordered_map>
 #include <math.h>
 
 // ROS
@@ -49,9 +50,9 @@ namespace dynamixel {
             const int& baudrate,
             const float& read_timeout,
             const float& scan_timeout,
-            std::map<long long int, std::string> dynamixel_map,
-            std::map<long long int, double> dynamixel_max_speed,
-            std::map<long long int, double> dynamixel_corrections)
+            std::unordered_map<long long int, std::string> dynamixel_map,
+            std::unordered_map<long long int, double> dynamixel_max_speed,
+            std::unordered_map<long long int, double> dynamixel_corrections)
             : _usb_serial_interface(usb_serial_interface),
               _baudrate(get_baudrate(baudrate)),
               _read_timeout(read_timeout),
@@ -105,7 +106,7 @@ namespace dynamixel {
             using servo = typename dynamixel::DynamixelHardwareInterface<Protocol>::dynamixel_servo;
             typename std::vector<servo>::iterator servo_it;
             for (servo_it = _servos.begin(); servo_it != _servos.end();) {
-                std::map<long long int, std::string>::iterator dynamixel_iterator
+                std::unordered_map<long long int, std::string>::iterator dynamixel_iterator
                     = _dynamixel_map.find((*servo_it)->id());
                 // the actuator's name is not in the map
                 if (dynamixel_iterator == _dynamixel_map.end())
@@ -135,7 +136,7 @@ namespace dynamixel {
             // also enable the torque output on the actuators (sort of power up)
             try {
                 for (unsigned i = 0; i < _servos.size(); i++) {
-                    std::map<long long int, std::string>::iterator dynamixel_iterator
+                    std::unordered_map<long long int, std::string>::iterator dynamixel_iterator
                         = _dynamixel_map.find(_servos[i]->id());
                     // check that the actuator's name is in the map
                     if (dynamixel_iterator != _dynamixel_map.end()) {
@@ -163,7 +164,7 @@ namespace dynamixel {
                             _dynamixel_controller.recv(status);
 
                             // set max speed
-                            std::map<long long int, double>::iterator dynamixel_max_speed_iterator
+                            std::unordered_map<long long int, double>::iterator dynamixel_max_speed_iterator
                                 = _dynamixel_max_speed.find(_servos[i]->id());
                             if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
                                 dynamixel::StatusPacket<Protocol> status;
@@ -236,7 +237,7 @@ namespace dynamixel {
                     }
 
                     // Apply angle correction to joint, if any
-                    std::map<long long int, double>::iterator dynamixel_corrections_iterator
+                    std::unordered_map<long long int, double>::iterator dynamixel_corrections_iterator
                         = _dynamixel_corrections.find(_servos[i]->id());
                     if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                         _joint_angles[i] -= dynamixel_corrections_iterator->second;
@@ -293,7 +294,7 @@ namespace dynamixel {
 
                     double goal_pos = _joint_commands[i];
 
-                    std::map<long long int, double>::iterator dynamixel_corrections_iterator
+                    std::unordered_map<long long int, double>::iterator dynamixel_corrections_iterator
                         = _dynamixel_corrections.find(_servos[i]->id());
                     if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                         goal_pos += dynamixel_corrections_iterator->second;
@@ -351,11 +352,11 @@ namespace dynamixel {
         using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
         std::vector<dynamixel_servo> _servos;
         // Map from dynamixel ID to actuator's name
-        std::map<long long int, std::string> _dynamixel_map;
+        std::unordered_map<long long int, std::string> _dynamixel_map;
         // Map for max speed
-        std::map<long long int, double> _dynamixel_max_speed;
+        std::unordered_map<long long int, double> _dynamixel_max_speed;
         // Map for hardware corrections
-        std::map<long long int, double> _dynamixel_corrections;
+        std::unordered_map<long long int, double> _dynamixel_corrections;
     };
 } // namespace dynamixel
 
