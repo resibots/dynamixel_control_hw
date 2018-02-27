@@ -35,13 +35,12 @@ endif()
 include_directories(
   ${catkin_INCLUDE_DIRS}
   "${libdynamixel_dir}/include"
-  ${BOOST_INCLUDE_DIRS}
   include
 )
 
 add_executable(dynamixel_control_hw_v1 src/dynamixel_control_hw.cpp)
 target_compile_definitions(dynamixel_control_hw_v1 PRIVATE PROTOCOL1)
-target_link_libraries(dynamixel_control_hw_v1 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(dynamixel_control_hw_v1 ${catkin_LIBRARIES})
 
 add_executable(dynamixel_control_hw_v2 src/dynamixel_control_hw.cpp)
-target_link_libraries(dynamixel_control_hw_v2 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(dynamixel_control_hw_v2 ${catkin_LIBRARIES})

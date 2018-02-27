@@ -40,8 +40,8 @@
 // Standard C++
 #include <time.h>
 
-// Boost shared pointer
-#include <boost/shared_ptr.hpp>
+// for shared pointer
+#include <memory>
 // for runtime_error
 #include <stdexcept>
 
@@ -65,7 +65,7 @@ namespace dynamixel {
     public:
         DynamixelLoop(
             ros::NodeHandle& nh,
-            boost::shared_ptr<hw_int> hardware_interface)
+            std::shared_ptr<hw_int> hardware_interface)
             : _nh(nh),
               _hardware_interface(hardware_interface)
         {
@@ -148,10 +148,10 @@ namespace dynamixel {
         stopping ros_control-based controllers. It also serializes execution of all
         running controllers in \ref update.
         **/
-        boost::shared_ptr<controller_manager::ControllerManager> _controller_manager;
+        std::shared_ptr<controller_manager::ControllerManager> _controller_manager;
 
         /// Abstract Hardware Interface for your robot
-        boost::shared_ptr<hw_int> _hardware_interface;
+        std::shared_ptr<hw_int> _hardware_interface;
     };
 } // namespace dynamixel
 

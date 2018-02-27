@@ -126,8 +126,8 @@ int main(int argc, char** argv)
     spinner.start();
 
     // Create the hardware interface specific to your robot
-    boost::shared_ptr<dynamixel::DynamixelHardwareInterface<Protocol>>
-        dynamixel_hw_interface = boost::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>(
+    std::shared_ptr<dynamixel::DynamixelHardwareInterface<Protocol>>
+        dynamixel_hw_interface = std::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>(
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
