@@ -112,8 +112,7 @@ namespace dynamixel {
                 ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
                     << cycle_time_error - _cycle_time_error_threshold << "s, "
                     << "cycle time: " << _elapsed_time << "s, "
-                    << "threshold: " << _cycle_time_error_threshold)
-                    << "s";
+                    << "threshold: " << _cycle_time_error_threshold << "s");
             }
 
             // Input
