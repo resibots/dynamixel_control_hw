@@ -22,10 +22,6 @@ namespace dynamixel {
 
         This class fits in the ros_control framework for robot control.
 
-        Warning, FIXME: due to the low-level nature of the dynamixel library in use,
-            the position and velocities are returned as integers, as explained in
-            the Dynamixel's documentation.
-            Same goes for the position commands.
         Warning: this code is currently limited to joint-mode dynamixel actuators
     **/
     template <class Protocol>
