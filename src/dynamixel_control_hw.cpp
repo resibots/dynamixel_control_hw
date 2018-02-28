@@ -75,32 +75,32 @@ int main(int argc, char** argv)
 
     // Retrieve the map from joint name to hardware-related ID
     // It has to be inverted, putting the ID as a key, for later use
-    std::unordered_map<long long int, std::string> dynamixel_map;
+    std::unordered_map<Protocol::id_t, std::string> dynamixel_map;
     std::map<std::string, int> map_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("hardware_mapping", map_param);
     std::map<std::string, int>::iterator map_param_i;
     for (map_param_i = map_param.begin(); map_param_i != map_param.end(); map_param_i++) {
-        dynamixel_map[(long long int)map_param_i->second] = map_param_i->first;
+        dynamixel_map[(Protocol::id_t)map_param_i->second] = map_param_i->first;
     }
 
     // Retrieve the map for max speed (ID: max speed)
-    std::unordered_map<long long int, double> dynamixel_max_speed_map;
+    std::unordered_map<Protocol::id_t, double> dynamixel_max_speed_map;
     std::map<std::string, double> max_speed_param; // temporary map, from parameter server
     nhParams.getParam("max_speed", max_speed_param);
     std::map<std::string, double>::iterator max_speed_param_i;
     for (max_speed_param_i = max_speed_param.begin(); max_speed_param_i != max_speed_param.end(); max_speed_param_i++) {
-        long long int k;
+        Protocol::id_t k;
         std::istringstream(max_speed_param_i->first) >> k;
         dynamixel_max_speed_map[k] = max_speed_param_i->second;
     }
 
     // Retrieve the map with angle corrections (ID: correction in radians)
-    std::unordered_map<long long int, double> dynamixel_corrections;
+    std::unordered_map<Protocol::id_t, double> dynamixel_corrections;
     std::map<std::string, double> map_corrections; // temporary map, from parameter server
     nhParams.getParam("hardware_corrections", map_corrections);
     std::map<std::string, double>::iterator map_cor_i;
     for (map_cor_i = map_corrections.begin(); map_cor_i != map_corrections.end(); map_cor_i++) {
-        long long int k;
+        Protocol::id_t k;
         std::istringstream(map_cor_i->first) >> k;
         dynamixel_corrections[k] = map_cor_i->second;
     }

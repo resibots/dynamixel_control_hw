@@ -27,6 +27,9 @@ namespace dynamixel {
     template <class Protocol>
     class DynamixelHardwareInterface : public hardware_interface::RobotHW {
     public:
+        // Actuator's id type
+        using id_t = typename Protocol::id_t;
+
         /** Set the essential parameters for communication with the hardware.
 
             @param usb_serial_interface: name of the USB to serial interface;
@@ -46,9 +49,9 @@ namespace dynamixel {
             const int& baudrate,
             const float& read_timeout,
             const float& scan_timeout,
-            std::unordered_map<long long int, std::string> dynamixel_map,
-            std::unordered_map<long long int, double> dynamixel_max_speed,
-            std::unordered_map<long long int, double> dynamixel_corrections)
+            std::unordered_map<id_t, std::string> dynamixel_map,
+            std::unordered_map<id_t, double> dynamixel_max_speed,
+            std::unordered_map<id_t, double> dynamixel_corrections)
             : _usb_serial_interface(usb_serial_interface),
               _baudrate(get_baudrate(baudrate)),
               _read_timeout(read_timeout),
@@ -111,11 +114,11 @@ namespace dynamixel {
         using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
         std::vector<dynamixel_servo> _servos;
         // Map from dynamixel ID to actuator's name
-        std::unordered_map<long long int, std::string> _dynamixel_map;
+        std::unordered_map<id_t, std::string> _dynamixel_map;
         // Map for max speed
-        std::unordered_map<long long int, double> _dynamixel_max_speed;
+        std::unordered_map<id_t, double> _dynamixel_max_speed;
         // Map for hardware corrections
-        std::unordered_map<long long int, double> _dynamixel_corrections;
+        std::unordered_map<id_t, double> _dynamixel_corrections;
     };
 
     template <class Protocol>
@@ -158,10 +161,10 @@ namespace dynamixel {
         _dynamixel_controller.set_recv_timeout(_read_timeout);
 
         // remove servos that are not in the _dynamixel_map (i.e. that are not used)
-        using servo = typename dynamixel::DynamixelHardwareInterface<Protocol>::dynamixel_servo;
+        using servo = dynamixel::DynamixelHardwareInterface<Protocol>::dynamixel_servo;
         typename std::vector<servo>::iterator servo_it;
         for (servo_it = _servos.begin(); servo_it != _servos.end();) {
-            std::unordered_map<long long int, std::string>::iterator dynamixel_iterator
+            typename std::unordered_map<id_t, std::string>::iterator dynamixel_iterator
                 = _dynamixel_map.find((*servo_it)->id());
             // the actuator's name is not in the map
             if (dynamixel_iterator == _dynamixel_map.end())
@@ -191,7 +194,7 @@ namespace dynamixel {
         // also enable the torque output on the actuators (sort of power up)
         try {
             for (unsigned i = 0; i < _servos.size(); i++) {
-                std::unordered_map<long long int, std::string>::iterator dynamixel_iterator
+                typename std::unordered_map<id_t, std::string>::iterator dynamixel_iterator
                     = _dynamixel_map.find(_servos[i]->id());
                 // check that the actuator's name is in the map
                 if (dynamixel_iterator != _dynamixel_map.end()) {
@@ -219,7 +222,7 @@ namespace dynamixel {
                         _dynamixel_controller.recv(status);
 
                         // set max speed
-                        std::unordered_map<long long int, double>::iterator dynamixel_max_speed_iterator
+                        typename std::unordered_map<id_t, double>::iterator dynamixel_max_speed_iterator
                             = _dynamixel_max_speed.find(_servos[i]->id());
                         if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
                             dynamixel::StatusPacket<Protocol> status;
@@ -286,7 +289,7 @@ namespace dynamixel {
                 }
 
                 // Apply angle correction to joint, if any
-                std::unordered_map<long long int, double>::iterator dynamixel_corrections_iterator
+                typename std::unordered_map<id_t, double>::iterator dynamixel_corrections_iterator
                     = _dynamixel_corrections.find(_servos[i]->id());
                 if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                     _joint_angles[i] -= dynamixel_corrections_iterator->second;
@@ -339,7 +342,7 @@ namespace dynamixel {
 
                 double goal_pos = _joint_commands[i];
 
-                std::unordered_map<long long int, double>::iterator dynamixel_corrections_iterator
+                typename std::unordered_map<id_t, double>::iterator dynamixel_corrections_iterator
                     = _dynamixel_corrections.find(_servos[i]->id());
                 if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                     goal_pos += dynamixel_corrections_iterator->second;
