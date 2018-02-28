@@ -141,12 +141,19 @@ namespace dynamixel {
     template <class Protocol>
     void DynamixelHardwareInterface<Protocol>::init()
     {
+        // vector of actuators we are looking for
+        std::vector<typename Protocol::id_t> ids(_dynamixel_map.size());
+        using dm_iter_t = std::unordered_map<id_t, std::string>::iterator;
+        for (dm_iter_t dm_iter = _dynamixel_map.begin(); dm_iter != _dynamixel_map.end(); ++dm_iter) {
+            ids.push_back(dm_iter->first);
+        }
+
         // get the list of available actuators
         try {
             // small recv timeout for auto_detect
             _dynamixel_controller.set_recv_timeout(_scan_timeout);
             _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
-            _servos = dynamixel::auto_detect<Protocol>(_dynamixel_controller);
+            _servos = dynamixel::auto_detect<Protocol>(_dynamixel_controller, ids);
         }
         catch (dynamixel::errors::Error& e) {
             ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
