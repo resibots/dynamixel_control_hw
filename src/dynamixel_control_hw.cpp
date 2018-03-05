@@ -38,6 +38,9 @@
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 
+// for dynamixel::OperatingMode
+#include <dynamixel/servos/base_servo.hpp>
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "dynamixel_control_hw");
@@ -82,6 +85,30 @@ int main(int argc, char** argv)
         dynamixel_map[(Protocol::id_t)map_param_i->second] = map_param_i->first;
     }
 
+    // Retrieve the map for command interface (ID: velocity/position)
+    std::unordered_map<long long int, dynamixel::OperatingMode> dynamixel_c_mode_map;
+    std::map<std::string, std::string> c_mode_param; // temporary map, from parameter server
+    got_all_params &= nhParams.getParam("command_interface", c_mode_param);
+    std::map<std::string, std::string>::iterator c_mode_param_i;
+    for (c_mode_param_i = c_mode_param.begin(); c_mode_param_i != c_mode_param.end(); c_mode_param_i++) {
+        long long int k;
+        std::istringstream(c_mode_param_i->first) >> k;
+
+        dynamixel::OperatingMode mode;
+        if (c_mode_param_i->second == "velocity")
+            mode = dynamixel::OperatingMode::wheel;
+        else if (c_mode_param_i->second == "position")
+            mode = dynamixel::OperatingMode::joint;
+        else {
+            ROS_FATAL_STREAM("The command mode " << c_mode_param_i->second
+                                                 << " is not available (actuator "
+                                                 << k << ")");
+            return 1;
+        }
+
+        dynamixel_c_mode_map[k] = mode;
+    }
+
     // Retrieve the map for max speed (ID: max speed)
     std::unordered_map<Protocol::id_t, double> dynamixel_max_speed_map;
     std::map<std::string, double> max_speed_param; // temporary map, from parameter server
@@ -109,8 +136,7 @@ int main(int argc, char** argv)
             + sub_namespace + "/baudrate\n"
             + sub_namespace + "/dynamixel_timeout\n"
             + sub_namespace + "/hardware_mapping\n"
-            + sub_namespace + "/max_speed\n"
-            + sub_namespace + "/hardware_corrections";
+            + sub_namespace + "/command_interface";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }
@@ -131,6 +157,7 @@ int main(int argc, char** argv)
             dynamixel_timeout,
             dynamixel_scanning,
             dynamixel_map,
+            dynamixel_c_mode_map,
             dynamixel_max_speed_map,
             dynamixel_corrections);
     dynamixel_hw_interface->init();
