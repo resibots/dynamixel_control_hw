@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     }
 
     // Retrieve the map for command interface (ID: velocity/position)
-    std::unordered_map<long long int, dynamixel::OperatingMode> dynamixel_c_mode_map;
+    std::unordered_map<Protocol::id_t, dynamixel::OperatingMode> dynamixel_c_mode_map;
     std::map<std::string, std::string> c_mode_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("command_interface", c_mode_param);
     std::map<std::string, std::string>::iterator c_mode_param_i;
@@ -157,8 +157,8 @@ int main(int argc, char** argv)
             dynamixel_timeout,
             dynamixel_scanning,
             dynamixel_map,
-            dynamixel_c_mode_map,
             dynamixel_max_speed_map,
+            dynamixel_c_mode_map,
             dynamixel_corrections);
     dynamixel_hw_interface->init();
 
