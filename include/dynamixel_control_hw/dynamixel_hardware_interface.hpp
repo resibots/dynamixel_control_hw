@@ -90,8 +90,13 @@ namespace dynamixel {
         void write_joints();
 
     private:
+        using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
+
         DynamixelHardwareInterface(DynamixelHardwareInterface<Protocol> const&) = delete;
         DynamixelHardwareInterface& operator=(DynamixelHardwareInterface<Protocol> const&) = delete;
+
+        void _find_servos();
+        void _enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode);
 
         // ROS's hardware interface instances
         hardware_interface::JointStateInterface _jnt_state_interface;
@@ -114,7 +119,6 @@ namespace dynamixel {
         dynamixel::controllers::Usb2Dynamixel _dynamixel_controller;
 
         // List of actuators (collected at init. from the actuators)
-        using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
         std::vector<dynamixel_servo> _servos;
         // Map from dynamixel ID to actuator's name
         std::unordered_map<id_t, std::string> _dynamixel_map;
@@ -148,52 +152,7 @@ namespace dynamixel {
     template <class Protocol>
     void DynamixelHardwareInterface<Protocol>::init()
     {
-        // vector of actuators we are looking for
-        std::vector<typename Protocol::id_t> ids(_dynamixel_map.size());
-        using dm_iter_t = typename std::unordered_map<id_t, std::string>::iterator;
-        for (dm_iter_t dm_iter = _dynamixel_map.begin(); dm_iter != _dynamixel_map.end(); ++dm_iter) {
-            ids.push_back(dm_iter->first);
-        }
-
-        // get the list of available actuators
-        try {
-            // small recv timeout for auto_detect
-            _dynamixel_controller.set_recv_timeout(_scan_timeout);
-            _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
-            _servos = dynamixel::auto_detect<Protocol>(_dynamixel_controller, ids);
-        }
-        catch (dynamixel::errors::Error& e) {
-            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
-                << "initialise them:\n"
-                << e.msg());
-            throw e;
-        }
-
-        // restore recv timeout
-        _dynamixel_controller.set_recv_timeout(_read_timeout);
-
-        // remove servos that are not in the _dynamixel_map (i.e. that are not used)
-        using servo = dynamixel::DynamixelHardwareInterface<Protocol>::dynamixel_servo;
-        typename std::vector<servo>::iterator servo_it;
-        for (servo_it = _servos.begin(); servo_it != _servos.end();) {
-            typename std::unordered_map<id_t, std::string>::iterator dynamixel_iterator
-                = _dynamixel_map.find((*servo_it)->id());
-            // the actuator's name is not in the map
-            if (dynamixel_iterator == _dynamixel_map.end())
-                servo_it = _servos.erase(servo_it);
-            else
-                ++servo_it;
-        }
-
-        // Check that no actuator was declared by user but not found
-        int unnused_servos = _dynamixel_map.size() - _servos.size();
-        if (unnused_servos > 0) {
-            ROS_WARN_STREAM(
-                unnused_servos
-                << " servo"
-                << (unnused_servos > 1 ? "s were" : " was")
-                << " declared to the hardware interface but could not be found");
-        }
+        _find_servos();
 
         _prev_commands.resize(_servos.size(), 0.0);
         _joint_commands.resize(_servos.size(), 0.0);
@@ -225,7 +184,7 @@ namespace dynamixel {
                     // command interface (position/velocity)
                     OperatingMode hardware_mode
                         = operating_mode<Protocol>(_dynamixel_controller, id);
-                    std::unordered_map<id_t, OperatingMode>::iterator c_mode_map_i
+                    typename std::unordered_map<id_t, OperatingMode>::iterator c_mode_map_i
                         = _c_mode_map.find(id);
                     if (c_mode_map_i != _c_mode_map.end()) {
                         if (c_mode_map_i->second != hardware_mode) {
@@ -260,39 +219,9 @@ namespace dynamixel {
                         ROS_ERROR_STREAM("Servo " << id << " was not initialised "
                                                   << "(operating mode not supported)");
 
-                    try {
-                        // enable the actuator
-                        dynamixel::StatusPacket<Protocol> status;
-                        ROS_DEBUG_STREAM("Enabling joint " << id);
-                        _dynamixel_controller.send(_servos[i]->set_torque_enable(1));
-                        _dynamixel_controller.recv(status);
-
-                        // set max speed for actuators in position mode
-                        typename std::unordered_map<id_t, double>::iterator dynamixel_max_speed_iterator
-                            = _dynamixel_max_speed.find(id);
-                        if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
-                            if (OperatingMode::joint == hardware_mode) {
-                                dynamixel::StatusPacket<Protocol> status;
-                                ROS_DEBUG_STREAM("Setting velocity limit of servo "
-                                    << _dynamixel_map[_servos[i]->id()] << " to "
-                                    << dynamixel_max_speed_iterator->second << " rad/s.");
-                                _dynamixel_controller.send(
-                                    _servos[i]->set_moving_speed_angle(
-                                        dynamixel_max_speed_iterator->second));
-                                _dynamixel_controller.recv(status);
-                            }
-                            else {
-                                ROS_WARN_STREAM("A \"max speed\" was defined for servo "
-                                    << id << " but it is currently only supported for "
-                                    << "servos in position mode. Ignoring the speed limit.");
-                            }
-                        }
-                    }
-                    catch (dynamixel::errors::Error& e) {
-                        ROS_ERROR_STREAM("Caught a Dynamixel exception while "
-                            << "initializing:\n"
-                            << e.msg());
-                    }
+                    // enable torque output on the servo and set its configuration
+                    // including max speed
+                    _enable_and_configure_servo(_servos[i], hardware_mode);
                 }
                 else {
                     ROS_WARN_STREAM("Servo " << id << " was not initialised "
@@ -438,7 +367,100 @@ namespace dynamixel {
                 << "new commands:\n"
                 << e.msg());
         }
-    } // namespace dynamixel
+    }
+
+    /** Serach for the requested servos
+
+        Servos that were not requested are ignored and the software complain if
+        any required one misses.
+    **/
+    template <class Protocol>
+    void DynamixelHardwareInterface<Protocol>::_find_servos()
+    {
+        // extract servo IDs from _dynamixel_map
+        std::vector<typename Protocol::id_t> ids(_dynamixel_map.size());
+        using dm_iter_t = typename std::unordered_map<id_t, std::string>::iterator;
+        for (dm_iter_t dm_iter = _dynamixel_map.begin(); dm_iter != _dynamixel_map.end(); ++dm_iter) {
+            ids.push_back(dm_iter->first);
+        }
+
+        // get the list of available actuators using the vector of IDs
+        try {
+            // small recv timeout for auto_detect
+            _dynamixel_controller.set_recv_timeout(_scan_timeout);
+            _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
+            _servos = dynamixel::auto_detect<Protocol>(_dynamixel_controller, ids);
+        }
+        catch (dynamixel::errors::Error& e) {
+            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
+                << "initialise them:\n"
+                << e.msg());
+            throw e;
+        }
+
+        // restore recv timeout
+        _dynamixel_controller.set_recv_timeout(_read_timeout);
+
+        // remove servos that are not in the _dynamixel_map (i.e. that are not used)
+        using servo = dynamixel::DynamixelHardwareInterface<Protocol>::dynamixel_servo;
+        typename std::vector<servo>::iterator servo_it;
+        for (servo_it = _servos.begin(); servo_it != _servos.end();) {
+            typename std::unordered_map<id_t, std::string>::iterator dynamixel_iterator
+                = _dynamixel_map.find((*servo_it)->id());
+            // the actuator's name is not in the map
+            if (dynamixel_iterator == _dynamixel_map.end())
+                servo_it = _servos.erase(servo_it);
+            else
+                ++servo_it;
+        }
+
+        // Check that no actuator was declared by user but not found
+        int missing_servos = _dynamixel_map.size() - _servos.size();
+        if (missing_servos > 0) {
+            ROS_WARN_STREAM(
+                missing_servos
+                << " servo"
+                << (missing_servos > 1 ? "s were" : " was")
+                << " declared to the hardware interface but could not be found");
+        }
+    }
+    template <class Protocol>
+    void DynamixelHardwareInterface<Protocol>::_enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode)
+    {
+        try {
+            // enable the actuator
+            dynamixel::StatusPacket<Protocol> status;
+            ROS_DEBUG_STREAM("Enabling servo " << servo->id());
+            _dynamixel_controller.send(servo->set_torque_enable(1));
+            _dynamixel_controller.recv(status);
+
+            // set max speed for actuators in position mode
+            typename std::unordered_map<id_t, double>::iterator dynamixel_max_speed_iterator
+                = _dynamixel_max_speed.find(servo->id());
+            if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
+                if (OperatingMode::joint == mode) {
+                    dynamixel::StatusPacket<Protocol> status;
+                    ROS_DEBUG_STREAM("Setting velocity limit of servo "
+                        << _dynamixel_map[_servos[i]->id()] << " to "
+                        << dynamixel_max_speed_iterator->second << " rad/s.");
+                    _dynamixel_controller.send(
+                        servo->set_moving_speed_angle(
+                            dynamixel_max_speed_iterator->second));
+                    _dynamixel_controller.recv(status);
+                }
+                else {
+                    ROS_WARN_STREAM("A \"max speed\" was defined for servo "
+                        << servo->id() << " but it is currently only supported for "
+                        << "servos in position mode. Ignoring the speed limit.");
+                }
+            }
+        }
+        catch (dynamixel::errors::Error& e) {
+            ROS_ERROR_STREAM("Caught a Dynamixel exception while "
+                << "initializing:\n"
+                << e.msg());
+        }
+    }
 } // namespace dynamixel
 
 #endif
