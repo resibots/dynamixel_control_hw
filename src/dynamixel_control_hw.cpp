@@ -89,8 +89,7 @@ int main(int argc, char** argv)
     nhParams.getParam("max_speed", max_speed_param);
     std::map<std::string, double>::iterator max_speed_param_i;
     for (max_speed_param_i = max_speed_param.begin(); max_speed_param_i != max_speed_param.end(); max_speed_param_i++) {
-        Protocol::id_t k;
-        std::istringstream(max_speed_param_i->first) >> k;
+        Protocol::id_t k = std::stoll(max_speed_param_i->first);
         dynamixel_max_speed_map[k] = max_speed_param_i->second;
     }
 
@@ -100,8 +99,7 @@ int main(int argc, char** argv)
     nhParams.getParam("hardware_corrections", map_corrections);
     std::map<std::string, double>::iterator map_cor_i;
     for (map_cor_i = map_corrections.begin(); map_cor_i != map_corrections.end(); map_cor_i++) {
-        Protocol::id_t k;
-        std::istringstream(map_cor_i->first) >> k;
+        Protocol::id_t k = std::stoll(map_cor_i->first);
         dynamixel_corrections[k] = map_cor_i->second;
     }
 
