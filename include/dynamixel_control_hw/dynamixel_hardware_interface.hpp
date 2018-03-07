@@ -2,9 +2,9 @@
 #define dynamixel_hardware_interface
 
 #include <limits>
+#include <math.h>
 #include <stdexcept>
 #include <unordered_map>
-#include <math.h>
 
 // ROS
 #include <ros/ros.h>
@@ -37,7 +37,7 @@ namespace dynamixel {
             @param baudrate: baud-rate for the serial communication with actuators
                 (in bauds)
             @param dynamixel_timeout: timeout in seconds to wait for a message
-                to arrive on seria bus
+                to arrive on serial bus
             @param dynamixel_map: map actuator's ID to its name (the one used
                 in the controller list and in URDF)
             @param dynamixel_max_speed map from actuator IDs to maximal allowed
@@ -64,8 +64,9 @@ namespace dynamixel {
 
         ~DynamixelHardwareInterface();
 
-        /// Find all connected devices and register those refered in dynamixel_map
-        /// in the hardware interface.
+        /** Find all connected devices and register those referred in dynamixel_map
+            in the hardware interface.
+        **/
         void init();
 
         /** Copy joint's information to memory
@@ -85,11 +86,8 @@ namespace dynamixel {
         void write_joints();
 
     private:
-        // not implemented
-        DynamixelHardwareInterface(DynamixelHardwareInterface<Protocol> const&);
-
-        // not implemented
-        DynamixelHardwareInterface& operator=(DynamixelHardwareInterface<Protocol> const&);
+        DynamixelHardwareInterface(DynamixelHardwareInterface<Protocol> const&) = delete;
+        DynamixelHardwareInterface& operator=(DynamixelHardwareInterface<Protocol> const&) = delete;
 
         // ROS's hardware interface instances
         hardware_interface::JointStateInterface _jnt_state_interface;

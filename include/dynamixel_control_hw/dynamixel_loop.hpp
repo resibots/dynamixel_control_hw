@@ -54,7 +54,7 @@
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
 namespace dynamixel {
-    // To make uses of stead_clock and duration_cast shorter
+    // To make use of stead_clock and duration_cast shorter
     using namespace std::chrono;
 
     template <class Protocol>
@@ -97,7 +97,7 @@ namespace dynamixel {
                 does NOT guarantee that the time source is strictly
                 linearly increasing.
         **/
-        void update(const ros::TimerEvent& e)
+        void update(const ros::TimerEvent&)
         {
             // Get change in time
             _current_time = steady_clock::now();
@@ -145,9 +145,9 @@ namespace dynamixel {
 
         /** ROS Controller Manager and Runner
 
-        This class advertises a ROS interface for loading, unloading, starting, and
-        stopping ros_control-based controllers. It also serializes execution of all
-        running controllers in \ref update.
+            This class advertises a ROS interface for loading, unloading, starting, and
+            stopping ros_control-based controllers. It also serializes execution of all
+            running controllers in \ref update.
         **/
         std::shared_ptr<controller_manager::ControllerManager> _controller_manager;
 

@@ -36,8 +36,8 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
+#include <dynamixel_control_hw/dynamixel_loop.hpp>
 
 int main(int argc, char** argv)
 {
