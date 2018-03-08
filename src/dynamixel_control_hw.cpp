@@ -33,7 +33,6 @@
 *********************************************************************/
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
-#include <sstream>
 #include <unordered_map>
 
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
