@@ -232,8 +232,8 @@ namespace dynamixel {
                         if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
                             dynamixel::StatusPacket<Protocol> status;
                             ROS_DEBUG_STREAM("Setting velocity limit of joint "
-                                << _servos[i]->id() << " to "
-                                << dynamixel_max_speed_iterator->second);
+                                << _dynamixel_map[_servos[i]->id()] << " to "
+                                << dynamixel_max_speed_iterator->second << " rad/s.");
                             _dynamixel_controller.send(_servos[i]->set_moving_speed_angle(dynamixel_max_speed_iterator->second));
                             _dynamixel_controller.recv(status);
                         }
@@ -354,7 +354,8 @@ namespace dynamixel {
                 }
 
                 ROS_DEBUG_STREAM("Setting position of joint "
-                    << _servos[i]->id() << " to " << goal_pos);
+                    << _dynamixel_map[_servos[i]->id()] << " to " << goal_pos
+                    << " rad.");
                 _dynamixel_controller.send(_servos[i]->reg_goal_position_angle(goal_pos));
                 _dynamixel_controller.recv(status);
             }
