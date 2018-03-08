@@ -34,14 +34,23 @@
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 #include <sstream>
+#include <unordered_map>
 
-#include <dynamixel_control_hw/dynamixel_loop.hpp>
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
+#include <dynamixel_control_hw/dynamixel_loop.hpp>
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "dynamixel_control_hw");
     ros::NodeHandle nh;
+
+#ifdef PROTOCOL1
+    ROS_INFO_STREAM("Dynamixel communication protocol : version 1");
+    using Protocol = dynamixel::protocols::Protocol1;
+#else
+    ROS_INFO_STREAM("Dynamixel communication protocol : version 2");
+    using Protocol = dynamixel::protocols::Protocol2;
+#endif
 
     // Get parameters for the hardware
     // -------------------------------
@@ -66,45 +75,45 @@ int main(int argc, char** argv)
 
     // Retrieve the map from joint name to hardware-related ID
     // It has to be inverted, putting the ID as a key, for later use
-    std::map<long long int, std::string> dynamixel_map;
+    std::unordered_map<Protocol::id_t, std::string> dynamixel_map;
     std::map<std::string, int> map_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("hardware_mapping", map_param);
     std::map<std::string, int>::iterator map_param_i;
     for (map_param_i = map_param.begin(); map_param_i != map_param.end(); map_param_i++) {
-        dynamixel_map[(long long int)map_param_i->second] = map_param_i->first;
+        dynamixel_map[(Protocol::id_t)map_param_i->second] = map_param_i->first;
     }
 
     // Retrieve the map for max speed (ID: max speed)
-    std::map<long long int, long long int> dynamixel_max_speed_map;
-    std::map<std::string, int> max_speed_param; // temporary map, from parameter server
+    std::unordered_map<Protocol::id_t, double> dynamixel_max_speed_map;
+    std::map<std::string, double> max_speed_param; // temporary map, from parameter server
     nhParams.getParam("max_speed", max_speed_param);
-    std::map<std::string, int>::iterator max_speed_param_i;
+    std::map<std::string, double>::iterator max_speed_param_i;
     for (max_speed_param_i = max_speed_param.begin(); max_speed_param_i != max_speed_param.end(); max_speed_param_i++) {
-        long long int k;
+        Protocol::id_t k;
         std::istringstream(max_speed_param_i->first) >> k;
-        dynamixel_max_speed_map[k] = (long long int)max_speed_param_i->second;
+        dynamixel_max_speed_map[k] = max_speed_param_i->second;
     }
 
     // Retrieve the map with angle corrections (ID: correction in radians)
-    std::map<long long int, double> dynamixel_corrections;
+    std::unordered_map<Protocol::id_t, double> dynamixel_corrections;
     std::map<std::string, double> map_corrections; // temporary map, from parameter server
     nhParams.getParam("hardware_corrections", map_corrections);
     std::map<std::string, double>::iterator map_cor_i;
     for (map_cor_i = map_corrections.begin(); map_cor_i != map_corrections.end(); map_cor_i++) {
-        long long int k;
+        Protocol::id_t k;
         std::istringstream(map_cor_i->first) >> k;
         dynamixel_corrections[k] = map_cor_i->second;
     }
 
     if (!got_all_params) {
         std::string error_message = "One or more of the following parameters "
-                                    "were not set:\n\t/"
-            + sub_namespace + "/serial_interface"
-            + " /" + sub_namespace + "/baudrate"
-            + " /" + sub_namespace + "/dynamixel_timeout"
-            + " /" + sub_namespace + "/hardware_mapping"
-            + " /" + sub_namespace + "/max_speed"
-            + " /" + sub_namespace + "/hardware_corrections";
+                                    "were not set:\n"
+            + sub_namespace + "/serial_interface\n"
+            + sub_namespace + "/baudrate\n"
+            + sub_namespace + "/dynamixel_timeout\n"
+            + sub_namespace + "/hardware_mapping\n"
+            + sub_namespace + "/max_speed\n"
+            + sub_namespace + "/hardware_corrections";
         ROS_FATAL_STREAM(error_message);
         return 1;
     }
@@ -118,8 +127,8 @@ int main(int argc, char** argv)
     spinner.start();
 
     // Create the hardware interface specific to your robot
-    boost::shared_ptr<dynamixel::DynamixelHardwareInterface>
-        dynamixel_hw_interface = boost::make_shared<dynamixel::DynamixelHardwareInterface>(
+    std::shared_ptr<dynamixel::DynamixelHardwareInterface<Protocol>>
+        dynamixel_hw_interface = std::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>(
             usb_serial_interface,
             baudrate,
             dynamixel_timeout,
@@ -130,7 +139,7 @@ int main(int argc, char** argv)
     dynamixel_hw_interface->init();
 
     // Start the control loop
-    dynamixel::DynamixelLoop control_loop(nh, dynamixel_hw_interface);
+    dynamixel::DynamixelLoop<Protocol> control_loop(nh, dynamixel_hw_interface);
 
     // Wait until shutdown signal recieved
     ros::waitForShutdown();
