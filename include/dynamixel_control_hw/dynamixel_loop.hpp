@@ -54,7 +54,7 @@
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
 namespace dynamixel {
-    // To make use of stead_clock and duration_cast shorter
+    // To make use of steady_clock and duration_cast shorter
     using namespace std::chrono;
 
     template <class Protocol>
