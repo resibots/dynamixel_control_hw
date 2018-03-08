@@ -143,7 +143,7 @@ namespace dynamixel {
     {
         // vector of actuators we are looking for
         std::vector<typename Protocol::id_t> ids(_dynamixel_map.size());
-        using dm_iter_t = std::unordered_map<id_t, std::string>::iterator;
+        using dm_iter_t = typename std::unordered_map<id_t, std::string>::iterator;
         for (dm_iter_t dm_iter = _dynamixel_map.begin(); dm_iter != _dynamixel_map.end(); ++dm_iter) {
             ids.push_back(dm_iter->first);
         }
