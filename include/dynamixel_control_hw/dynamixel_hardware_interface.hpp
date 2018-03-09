@@ -205,7 +205,8 @@ namespace dynamixel {
                     }
 
                     // tell ros_control the in-memory address to change to set new
-                    // position or velocity goal for the actuator
+                    // position or velocity goal for the actuator (depending on
+                    // hardware_mode)
                     hardware_interface::JointHandle cmd_handle(
                         _jnt_state_interface.getHandle(dynamixel_iterator->second),
                         &_joint_commands[i]);
@@ -424,6 +425,15 @@ namespace dynamixel {
                 << " declared to the hardware interface but could not be found");
         }
     }
+
+    /** Enable torque output for a joint and send it the relevant settings.
+
+        For now, these settings are only the speed limit.
+
+        @param servo the actuator concerned
+        @param mode operating mode of the actuator (e.g. position or velocity,
+            in dynamixel speech, joint, wheel, etc.)
+    **/
     template <class Protocol>
     void DynamixelHardwareInterface<Protocol>::_enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode)
     {
