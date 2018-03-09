@@ -451,7 +451,7 @@ namespace dynamixel {
                 if (OperatingMode::joint == mode) {
                     dynamixel::StatusPacket<Protocol> status;
                     ROS_DEBUG_STREAM("Setting velocity limit of servo "
-                        << _dynamixel_map[_servos[i]->id()] << " to "
+                        << _dynamixel_map[servo->id()] << " to "
                         << dynamixel_max_speed_iterator->second << " rad/s.");
                     _dynamixel_controller.send(
                         servo->set_moving_speed_angle(
