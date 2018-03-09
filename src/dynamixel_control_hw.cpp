@@ -157,8 +157,8 @@ int main(int argc, char** argv)
             dynamixel_timeout,
             dynamixel_scanning,
             dynamixel_map,
-            dynamixel_max_speed_map,
             dynamixel_c_mode_map,
+            dynamixel_max_speed_map,
             dynamixel_corrections);
     dynamixel_hw_interface->init();
 
