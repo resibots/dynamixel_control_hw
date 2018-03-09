@@ -52,8 +52,8 @@ namespace dynamixel {
             const float& read_timeout,
             const float& scan_timeout,
             std::unordered_map<id_t, std::string> dynamixel_map,
-            std::unordered_map<id_t, double> dynamixel_max_speed,
             std::unordered_map<id_t, OperatingMode> dynamixel_c_mode_map,
+            std::unordered_map<id_t, double> dynamixel_max_speed,
             std::unordered_map<id_t, double> dynamixel_corrections)
             : _usb_serial_interface(usb_serial_interface),
               _baudrate(get_baudrate(baudrate)),
