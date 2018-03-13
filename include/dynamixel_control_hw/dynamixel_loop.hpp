@@ -125,7 +125,7 @@ namespace dynamixel {
 
             // Output
             // send the new command to hardware
-            _hardware_interface->write_joints();
+            _hardware_interface->write_joints(_elapsed_time);
         }
 
     private:

@@ -87,7 +87,7 @@ namespace dynamixel {
             takes the target position from memory (given by a controller) and sends
             them to the dynamixels.
         **/
-        void write_joints();
+        void write_joints(ros::Duration& elapsed_time);
 
     private:
         using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
@@ -97,6 +97,7 @@ namespace dynamixel {
 
         void _find_servos();
         void _enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode);
+        void _enforce_limits(ros::Duration& elapsed_time);
 
         // ROS's hardware interface instances
         hardware_interface::JointStateInterface _jnt_state_interface;
@@ -333,8 +334,10 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::write_joints()
+    void DynamixelHardwareInterface<Protocol>::write_joints(ros::Duration& elapsed_time)
     {
+        // ensure that the joints limits are respected
+        _enforce_limits(elapsed_time);
 
         for (unsigned int i = 0; i < _servos.size(); i++) {
             // Sending commands only when needed
@@ -484,6 +487,12 @@ namespace dynamixel {
                 << "initializing:\n"
                 << e.msg());
         }
+    }
+
+    template <class Protocol>
+    void DynamixelHardwareInterface<Protocol>::_enforce_limits(ros::Duration& elapsed_time)
+    {
+        // enforce joint limits
     }
 } // namespace dynamixel
 
