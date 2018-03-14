@@ -149,6 +149,7 @@ int main(int argc, char** argv)
     }
     catch (XmlRpc::XmlRpcException& e) {
         ROS_FATAL_STREAM("Exception raised when parsing the configuration: " << e.getMessage());
+        return 1;
     }
 
     if (!got_all_params) {
