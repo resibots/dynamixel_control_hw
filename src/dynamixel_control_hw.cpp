@@ -89,10 +89,15 @@ int main(int argc, char** argv)
     std::unordered_map<Protocol::id_t, dynamixel::OperatingMode> dynamixel_c_mode_map;
     std::map<std::string, std::string> c_mode_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("command_interface", c_mode_param);
+    std::string default_c_mode = "";
     std::map<std::string, std::string>::iterator c_mode_param_i;
     for (c_mode_param_i = c_mode_param.begin(); c_mode_param_i != c_mode_param.end(); c_mode_param_i++) {
-        long long int k;
-        std::istringstream(c_mode_param_i->first) >> k;
+        if (c_mode_param_i->first == "default") {
+            default_c_mode = c_mode_param_i->second;
+            continue;
+        }
+
+        Protocol::id_t k = std::stoll(c_mode_param_i->first);
 
         dynamixel::OperatingMode mode;
         if (c_mode_param_i->second == "velocity")
@@ -107,6 +112,27 @@ int main(int argc, char** argv)
         }
 
         dynamixel_c_mode_map[k] = mode;
+    }
+
+    // if default command mode is available
+    if (default_c_mode != "") {
+        dynamixel::OperatingMode default_mode;
+        if (default_c_mode == "velocity")
+            default_mode = dynamixel::OperatingMode::wheel;
+        else if (default_c_mode == "position")
+            default_mode = dynamixel::OperatingMode::joint;
+        else {
+            ROS_FATAL_STREAM("The default command mode " << default_c_mode
+                                                         << " is not available");
+            return 1;
+        }
+
+        // set all undefined servos to default command mode
+        for (auto it = dynamixel_map.begin(); it != dynamixel_map.end(); it++) {
+            if (dynamixel_c_mode_map.find(it->first) == dynamixel_c_mode_map.end()) {
+                dynamixel_c_mode_map[it->first] = default_mode;
+            }
+        }
     }
 
     // Retrieve the map for max speed (ID: max speed)
