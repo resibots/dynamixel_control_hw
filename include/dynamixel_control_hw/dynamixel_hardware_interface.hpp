@@ -188,20 +188,19 @@ namespace dynamixel {
                         = _c_mode_map.find(id);
                     if (c_mode_map_i != _c_mode_map.end()) {
                         if (c_mode_map_i->second != hardware_mode) {
-                            ROS_ERROR_STREAM("the command interface declared "
+                            ROS_FATAL_STREAM("the command interface declared "
                                 << mode2str(c_mode_map_i->second)
                                 << " for joint " << dynamixel_iterator->second
                                 << " but is set to " << mode2str(hardware_mode)
-                                << " in hardware. Using the one from hardware.");
-                            _c_mode_map[id] = hardware_mode;
+                                << " in hardware. Aborting.");
+                            exit(1);
                         }
                     }
                     else {
-                        ROS_WARN_STREAM("the command interface was not defined "
+                        ROS_FATAL_STREAM("the command interface was not defined "
                             << "for joint " << dynamixel_iterator->second
-                            << " fallback to the hardware's mode: "
-                            << mode2str(hardware_mode));
-                        _c_mode_map[id] = hardware_mode;
+                            << ". Aborting.");
+                        exit(1);
                     }
 
                     // tell ros_control the in-memory address to change to set new
