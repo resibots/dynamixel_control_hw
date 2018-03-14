@@ -2,6 +2,7 @@
 
 In reverse chronological order:
 
+- breaking change: the configuration parameter syntax has changed; see sample configuration files
 - velocity control mode integrated
 - replace c-style code with std::chrono for time-related code
 - replace std::map with std::unordered_map when possible (hypothetical performance gain)

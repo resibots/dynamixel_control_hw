@@ -16,22 +16,21 @@ dynamixel_control_hw:
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
   baudrate: 1000000 # in bauds
-  dynamixel_timeout: 0.05 # in seconds
-  dynamixel_scanning: 0.05 # in seconds
-  # correspondance between hardware IDs of the actuators and their names in ROS
-  hardware_mapping:
-    first: 1
-    second: 26
-  # offset to be added, in ticks, to the position of an actuator
-  hardware_corrections:
-    "26": 45
-  # max joint speed, in rad/s
-  # it shoud NOT be used for actuators in velocity mode
-  max_speed:
-    "1": 0.1
-    "26": 0.1
-  # command mode for the joint, either position or velocity
-  command_interface:
-    "1": velocity
-    "26": position
+  read_timeout: 0.05 # in seconds
+  scan_timeout: 0.05 # in seconds
+  # Cofniguration of the servos
+  servos:
+    first:
+      # hardware ID of the actuator
+      id: 1
+      # offset to be added, in radians, to the position of an actuator
+      offset: 4.5
+      command_interface: velocity
+    second:
+      id: 26
+      # max joint speed, in rad/s
+      # it shoud NOT be used for actuators in velocity mode
+      max-speed: 4
+  # default mode
+  default_command_interface: position
 
