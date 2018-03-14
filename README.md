@@ -2,7 +2,7 @@
 
 [ROS control][] is a framework to design software control loops in [ROS][] (Robot Operating System) where the controller code is decoupled from the actual hardware.
 
-This piece of software provides a hardware interface for ROS control. it's aim is to allow generic software controllers to control a set of Dynamixel actuators.
+This piece of software provides a hardware interface for ROS control. Its aim is to allow generic software controllers to control a set of Dynamixel actuators.
 
 We are using it for our robots and developing it for this purpose. Version 0.0.1 is clearly no final code but it works for the basic usage.
 
@@ -10,6 +10,7 @@ We are using it for our robots and developing it for this purpose. Version 0.0.1
 
 - simple, ROS-style control interface for your dynamixel-based robot
 - not specific to a given number or set of actuators
+- position and velocity control
 - works with both version of Dynamixel protocol (1 and 2)
 - uses radians uniformly over all Dynamixel models (no need to worry about ticks-to-angle conversion)
 - you can set an offset for each actuator's position
@@ -19,7 +20,7 @@ We are using it for our robots and developing it for this purpose. Version 0.0.1
 We are currently working on the following features:
 
 - joint limits not implemented yet
-- position control only (doesn't manage wheel mode)
+- add support for the more exotic control modes (including current and multi-turn)
 - it would be great to offer a service to reset one actuator after an overload error
 
 ## Installation and usage
@@ -37,7 +38,7 @@ If you want to use the sample launch files or to use one of the default controll
 - `ros-YourDistro-ros-controllers` and
 - `ros-YourDistro-joint-state-publisher`.
 
-Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only position controllers and a virtual controller that publishes the states of each actuator.
+Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of each actuator.
 
 *Before starting* it, check `config/sample.yaml` for the `hardware_mapping` section, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can launch the sample. By looking at the available topics, you should find two for the commands of each joint and one for the joint state.
 
