@@ -13,6 +13,9 @@ srv_gen/
 *.dox
 *.wikidoc
 
+# vscode stuff
+.vscode
+
 # eclipse stuff
 .project
 .cproject
