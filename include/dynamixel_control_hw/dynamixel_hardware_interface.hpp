@@ -238,6 +238,9 @@ namespace dynamixel {
                 else {
                     ROS_WARN_STREAM("Servo " << id << " was not initialised "
                                              << "(not found in the parameters)");
+                    // remove this servo
+                    _servos.erase(_servos.begin() + i);
+                    --i;
                 }
             }
 
