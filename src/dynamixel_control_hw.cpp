@@ -148,7 +148,9 @@ int main(int argc, char** argv)
         }
     }
     catch (XmlRpc::XmlRpcException& e) {
-        ROS_FATAL_STREAM("Exception raised when parsing the configuration: " << e.getMessage());
+        ROS_FATAL_STREAM("Exception raised by XmlRpc while reading the "
+            << "configuration: " << e.getMessage() << ".\n"
+            << "Please check the configuration, particularly parameter types.");
         return 1;
     }
 
