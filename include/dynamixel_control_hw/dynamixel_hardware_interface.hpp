@@ -215,15 +215,25 @@ namespace dynamixel {
                     else if (OperatingMode::wheel == hardware_mode) {
                         _jnt_vel_interface.registerHandle(cmd_handle);
                     }
-                    else if (OperatingMode::unknown != hardware_mode)
+                    else if (OperatingMode::unknown != hardware_mode) {
                         ROS_ERROR_STREAM("Servo " << id << " was not initialised "
                                                   << "(operating mode "
                                                   << mode2str(hardware_mode)
                                                   << " is not supported)");
+                        _c_mode_map[id] = OperatingMode::unknown;
+                    }
 
-                    // enable torque output on the servo and set its configuration
-                    // including max speed
-                    _enable_and_configure_servo(_servos[i], hardware_mode);
+                    // Enable servos that were properly configured
+                    if (OperatingMode::unknown != _c_mode_map[id]) {
+                        // enable torque output on the servo and set its configuration
+                        // including max speed
+                        _enable_and_configure_servo(_servos[i], hardware_mode);
+                    }
+                    else {
+                        // remove this servo
+                        _servos.erase(_servos.begin() + i);
+                        --i;
+                    }
                 }
                 else {
                     ROS_WARN_STREAM("Servo " << id << " was not initialised "
