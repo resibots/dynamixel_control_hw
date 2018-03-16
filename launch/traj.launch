@@ -16,7 +16,7 @@
 
   <!-- launch our hardware interface -->
   <arg name="protocol_version" default="v1" doc="Choses the dynamixel protocol variant to be used (v1 or v2)"/>
-  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw_$(arg protocol_version)" name="dynamixel_control_hw" output="screen"/>
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_hw_$(arg protocol_version)" name="dynamixel_control_hw" output="screen" required="true"/>
 
   <!-- Start a controller for our dummy robot -->
   <node name="controller" pkg="controller_manager" type="spawner" respawn="false"
