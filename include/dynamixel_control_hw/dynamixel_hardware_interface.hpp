@@ -142,10 +142,9 @@ namespace dynamixel {
             }
         }
         catch (dynamixel::errors::Error& e) {
-            ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
+            ROS_ERROR_STREAM("Caught a Dynamixel exception while trying to "
                 << "power them off:\n"
                 << e.msg());
-            throw e;
         }
     }
 
@@ -250,8 +249,9 @@ namespace dynamixel {
             registerInterface(&_jnt_vel_interface);
         }
         catch (const ros::Exception& e) {
-            ROS_ERROR_STREAM("Could not initialize hardware interface:\n"
-                << "\tTrace: " << e.what());
+            // TODO: disable actuators that were enabled ?
+            ROS_FATAL_STREAM("Error during initialisation. BEWARE: some "
+                << "actuators might have already been started.");
             throw e;
         }
 
@@ -432,7 +432,7 @@ namespace dynamixel {
         // Check that no actuator was declared by user but not found
         int missing_servos = _dynamixel_map.size() - _servos.size();
         if (missing_servos > 0) {
-            ROS_WARN_STREAM(
+            ROS_ERROR_STREAM(
                 missing_servos
                 << " servo"
                 << (missing_servos > 1 ? "s were" : " was")

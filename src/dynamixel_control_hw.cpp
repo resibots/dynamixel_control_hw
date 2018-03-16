@@ -62,7 +62,6 @@ int main(int argc, char** argv)
 
     // Get parameters for the hardware
     // -------------------------------
-
     ros::NodeHandle nhParams("~");
     std::string sub_namespace = nhParams.getNamespace();
     bool got_all_params = true;
@@ -97,61 +96,63 @@ int main(int argc, char** argv)
     std::unordered_map<Protocol::id_t, std::string> servos_map;
     XmlRpc::XmlRpcValue servos_param; // temporary map, from parameter server
     got_all_params &= nhParams.getParam("servos", servos_param);
-    ROS_ASSERT(servos_param.getType() == XmlRpc::XmlRpcValue::TypeStruct);
-    try {
-        for (XmlRpc::XmlRpcValue::ValueStruct::const_iterator it = servos_param.begin(); it != servos_param.end(); ++it) {
-            ROS_DEBUG_STREAM("Found servo: " << (std::string)(it->first));
+    if (got_all_params &= nhParams.getParam("servos", servos_param)) {
+        ROS_ASSERT(servos_param.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        try {
+            for (XmlRpc::XmlRpcValue::ValueStruct::const_iterator it = servos_param.begin(); it != servos_param.end(); ++it) {
+                ROS_DEBUG_STREAM("servo: " << (std::string)(it->first));
 
-            Protocol::id_t id;
-            if (it->second.hasMember("id")) {
-                id = static_cast<int>(servos_param[it->first]["id"]);
-                ROS_DEBUG_STREAM("\tid: " << servos_param[it->first]["id"]);
-                dynamixel_map[id] = it->first;
-            }
-            else {
-                ROS_ERROR_STREAM("Actuator " << it->first
-                                             << " has no associated servo ID.");
-            }
+                Protocol::id_t id;
+                if (it->second.hasMember("id")) {
+                    id = static_cast<int>(servos_param[it->first]["id"]);
+                    ROS_DEBUG_STREAM("\tid: " << servos_param[it->first]["id"]);
+                    dynamixel_map[id] = it->first;
+                }
+                else {
+                    ROS_ERROR_STREAM("Actuator " << it->first
+                                                 << " has no associated servo ID.");
+                }
 
-            if (it->second.hasMember("offset")) {
-                ROS_DEBUG_STREAM("\toffset: "
-                    << servos_param[it->first]["offset"]);
-                dynamixel_corrections[id]
-                    = static_cast<double>(servos_param[it->first]["offset"]);
-            }
-            if (it->second.hasMember("max_speed")) {
-                ROS_DEBUG_STREAM("\tmax_speed: "
-                    << servos_param[it->first]["max_speed"]);
-                dynamixel_max_speed[id]
-                    = static_cast<double>(servos_param[it->first]["max_speed"]);
-            }
+                if (it->second.hasMember("offset")) {
+                    ROS_DEBUG_STREAM("\toffset: "
+                        << servos_param[it->first]["offset"]);
+                    dynamixel_corrections[id]
+                        = static_cast<double>(servos_param[it->first]["offset"]);
+                }
+                if (it->second.hasMember("max_speed")) {
+                    ROS_DEBUG_STREAM("\tmax_speed: "
+                        << servos_param[it->first]["max_speed"]);
+                    dynamixel_max_speed[id]
+                        = static_cast<double>(servos_param[it->first]["max_speed"]);
+                }
 
-            if (it->second.hasMember("command_interface")) {
-                std::string mode_string
-                    = static_cast<std::string>(servos_param[it->first]["command_interface"]);
-                ROS_DEBUG_STREAM("\tcommand_interface: " << mode_string);
+                if (it->second.hasMember("command_interface")) {
+                    std::string mode_string
+                        = static_cast<std::string>(servos_param[it->first]["command_interface"]);
+                    ROS_DEBUG_STREAM("\tcommand_interface: " << mode_string);
 
-                dynamixel_c_mode_map[id] = get_mode(mode_string, it->first);
-            }
-            else if (has_default_command_interface) {
-                ROS_DEBUG_STREAM("\tcommand_interface: "
-                    << default_command_interface << " (default)");
-                dynamixel_c_mode_map[id]
-                    = get_mode(default_command_interface, it->first);
-            }
-            else {
-                ROS_ERROR_STREAM("A command interface (speed or position) "
-                    << "should be declared for the actuator " << it->first
-                    << " or a default one should be defined with the parameter "
-                    << "'default_command_interface'.");
+                    dynamixel_c_mode_map[id] = get_mode(mode_string, it->first);
+                }
+                else if (has_default_command_interface) {
+                    ROS_DEBUG_STREAM("\tcommand_interface: "
+                        << default_command_interface << " (default)");
+                    dynamixel_c_mode_map[id]
+                        = get_mode(default_command_interface, it->first);
+                }
+                else {
+                    ROS_ERROR_STREAM("A command interface (speed or position) "
+                        << "should be declared for the actuator " << it->first
+                        << " or a default one should be defined with the parameter "
+                        << "'default_command_interface'.");
+                }
             }
         }
-    }
-    catch (XmlRpc::XmlRpcException& e) {
-        ROS_FATAL_STREAM("Exception raised by XmlRpc while reading the "
-            << "configuration: " << e.getMessage() << ".\n"
-            << "Please check the configuration, particularly parameter types.");
-        return 1;
+        catch (XmlRpc::XmlRpcException& e) {
+            ROS_FATAL_STREAM("Exception raised by XmlRpc while reading the "
+                << "configuration: " << e.getMessage() << ".\n"
+                << "Please check the configuration, particularly parameter types.");
+            return 1;
+        }
     }
 
     if (!got_all_params) {
@@ -174,24 +175,36 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(2);
     spinner.start();
 
-    // Create the hardware interface specific to your robot
-    std::shared_ptr<dynamixel::DynamixelHardwareInterface<Protocol>>
-        dynamixel_hw_interface = std::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>(
-            usb_serial_interface,
-            baudrate,
-            read_timeout,
-            scan_timeout,
-            dynamixel_map,
-            dynamixel_c_mode_map,
-            dynamixel_max_speed,
-            dynamixel_corrections);
-    dynamixel_hw_interface->init();
+    try {
+        // Create the hardware interface specific to your robot
+        std::shared_ptr<dynamixel::DynamixelHardwareInterface<Protocol>>
+            dynamixel_hw_interface = std::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>(
+                usb_serial_interface,
+                baudrate,
+                read_timeout,
+                scan_timeout,
+                dynamixel_map,
+                dynamixel_c_mode_map,
+                dynamixel_max_speed,
+                dynamixel_corrections);
+        dynamixel_hw_interface->init();
 
-    // Start the control loop
-    dynamixel::DynamixelLoop<Protocol> control_loop(nh, dynamixel_hw_interface);
+        // Start the control loop
+        dynamixel::DynamixelLoop<Protocol> control_loop(nh, dynamixel_hw_interface);
 
-    // Wait until shutdown signal recieved
-    ros::waitForShutdown();
+        // Wait until shutdown signal recieved
+        ros::waitForShutdown();
+    }
+    catch (const ros::Exception& e) {
+        ROS_FATAL_STREAM("Error in the hardware interface:\n"
+            << "\tTrace: " << e.what());
+        return 1;
+    }
+    catch (const dynamixel::errors::Error& e) {
+        ROS_FATAL_STREAM("Error in the hardware interface:\n"
+            << "\tTrace: " << e.msg());
+        return 1;
+    }
 
     return 0;
 }
