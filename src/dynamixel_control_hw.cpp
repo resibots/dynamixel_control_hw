@@ -62,6 +62,7 @@ int main(int argc, char** argv)
 
     // Get parameters for the hardware
     // -------------------------------
+
     ros::NodeHandle nhParams("~");
     std::string sub_namespace = nhParams.getNamespace();
     bool got_all_params = true;
