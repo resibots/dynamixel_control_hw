@@ -86,7 +86,7 @@ namespace dynamixel {
             _last_time = steady_clock::now();
 
             // Start timer that will periodically call DynamixelLoop::update
-            ros::Duration _desired_update_freq = ros::Duration(1 / _loop_hz);
+            _desired_update_freq = ros::Duration(1 / _loop_hz);
             _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
         }
 
