@@ -198,12 +198,12 @@ int main(int argc, char** argv)
     }
     catch (const ros::Exception& e) {
         ROS_FATAL_STREAM("Error in the hardware interface:\n"
-            << "\tTrace: " << e.what());
+            << "\t" << e.what());
         return 1;
     }
     catch (const dynamixel::errors::Error& e) {
         ROS_FATAL_STREAM("Error in the hardware interface:\n"
-            << "\tTrace: " << e.msg());
+            << "\t" << e.msg());
         return 1;
     }
 
