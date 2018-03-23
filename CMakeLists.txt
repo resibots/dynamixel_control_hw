@@ -7,14 +7,18 @@ set(LIBDYNAMIXEL "")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  urdf
   std_msgs
   message_generation
   hardware_interface
   controller_manager
 )
 
-catkin_package(
- CATKIN_DEPENDS roscpp std_msgs message_runtime
+catkin_package(CATKIN_DEPENDS
+  roscpp
+  urdf
+  std_msgs
+  message_runtime
 )
 
 if ("$ENV{RESIBOTS_DIR}" STREQUAL "" AND "${LIBDYNAMIXEL}" STREQUAL "")

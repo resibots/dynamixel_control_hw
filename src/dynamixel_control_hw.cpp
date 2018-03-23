@@ -33,19 +33,29 @@
 *********************************************************************/
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
+
 #include <unordered_map>
 
+// Local includes
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 #include <dynamixel_control_hw/dynamixel_loop.hpp>
 
-// for dynamixel::OperatingMode
-#include <dynamixel/servos/base_servo.hpp>
-
-// to parse parameters
+// ROS: joint limits
+#include <joint_limits_interface/joint_limits.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
+#include <joint_limits_interface/joint_limits_rosparam.h>
+// ROS: parsing the URDF
+#include <urdf/model.h>
+// ROS-related: to parse parameters
 #include <XmlRpcValue.h>
 #include <XmlRpcException.h>
 
+// Libdynamixel: for dynamixel::OperatingMode
+#include <dynamixel/servos/base_servo.hpp>
+
+// Functions defined below
 dynamixel::OperatingMode get_mode(const std::string& mode_string, std::string name);
+void load_urdf(ros::NodeHandle& nh, std::string param_name, std::shared_ptr<urdf::Model> urdf_model);
 
 int main(int argc, char** argv)
 {
@@ -167,6 +177,15 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    // Get joint limits from the URDF or the parameter server
+    // ------------------------------------------------------
+
+    auto urdf_model = std::make_shared<urdf::Model>();
+    std::string urdf_param_name("/robot_description");
+    if (nhParams.hasParam("urdf_param_name"))
+        nhParams.getParam("urdf_param_name", urdf_param_name);
+    load_urdf(nh, urdf_param_name, urdf_model);
+
     // Run the hardware interface node
     // -------------------------------
 
@@ -187,7 +206,9 @@ int main(int argc, char** argv)
                 dynamixel_map,
                 dynamixel_c_mode_map,
                 dynamixel_max_speed,
-                dynamixel_corrections);
+                dynamixel_corrections,
+                nhParams,
+                urdf_model);
         dynamixel_hw_interface->init();
 
         // Start the control loop
@@ -231,4 +252,31 @@ dynamixel::OperatingMode get_mode(const std::string& mode_string, std::string na
     }
 
     return mode;
+}
+
+/** Search for the robot's URDF model on the parameter server and parse it
+
+    @param nh NodeHandle used to query for the URDF
+    @param param_name name of the ROS parameter holding the robot model
+    @param urdf_model pointer to be populated by this function
+**/
+void load_urdf(ros::NodeHandle& nh, std::string param_name, std::shared_ptr<urdf::Model> urdf_model)
+{
+    std::string urdf_string;
+    if (urdf_model == nullptr)
+        urdf_model = std::make_shared<urdf::Model>();
+
+    // search and wait for the urdf param on param server
+    while (urdf_string.empty() && ros::ok()) {
+        ROS_INFO_STREAM("Waiting for model URDF on the ROS param server "
+            << "at location: " << param_name);
+        nh.getParam(param_name, urdf_string);
+
+        usleep(100000);
+    }
+
+    if (!urdf_model->initString(urdf_string))
+        ROS_ERROR_STREAM("Unable to load the URDF model.");
+    else
+        ROS_DEBUG_STREAM("Received the URDF from param server.");
 }

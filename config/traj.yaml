@@ -12,10 +12,6 @@ dynamixel_controllers:
     type: velocity_controllers/JointVelocityController
     joint: arm_joint_2
 
-  # second_position_controller:
-  #   type: position_controllers/JointPositionController
-  #   joint: second
-
 dynamixel_control_hw:
   serial_interface: /dev/ttyUSB0
   loop_frequency: 50

@@ -29,7 +29,14 @@
     <child link="middle_link"/>
     <origin xyz="0 0 0.06" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-1.5708" upper="1.5708" velocity="50" effort="100"/>
+
+    <!-- Joint limits -->
+    <limit lower="-3.1415" upper="3.1415" velocity="10" effort="100"/>
+    <!-- Soft limits -->
+    <safety_controller k_position="3"
+                    k_velocity="1000"
+                    soft_lower_limit="-3.1415"
+                    soft_upper_limit="3.1415" />
   </joint>
 
   <joint name="arm_joint_2" type="revolute">
@@ -37,6 +44,13 @@
     <child link="end_link"/>
     <origin xyz="0 0 0.26" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-3.1415" upper="3.1415" velocity="50" effort="100"/>
+
+    <!-- Joint limits -->
+    <limit lower="-3.1415" upper="3.1415" velocity="5" effort="100"/>
+    <!-- Soft limits -->
+    <safety_controller k_position="3"
+                    k_velocity="1000"
+                    soft_lower_limit="-2.1415"
+                    soft_upper_limit="2.1415" />
   </joint>
 </robot>

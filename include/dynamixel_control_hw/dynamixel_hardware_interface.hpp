@@ -8,11 +8,16 @@
 
 // ROS
 #include <ros/ros.h>
+#include <urdf/model.h>
 
 // ROS control
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <joint_limits_interface/joint_limits.h>
+#include <joint_limits_interface/joint_limits_interface.h>
+#include <joint_limits_interface/joint_limits_rosparam.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
 
 // Library for access to the dynamixels
 #include <dynamixel/dynamixel.hpp>
@@ -54,7 +59,9 @@ namespace dynamixel {
             std::unordered_map<id_t, std::string> dynamixel_map,
             std::unordered_map<id_t, OperatingMode> dynamixel_c_mode_map,
             std::unordered_map<id_t, double> dynamixel_max_speed,
-            std::unordered_map<id_t, double> dynamixel_corrections)
+            std::unordered_map<id_t, double> dynamixel_corrections,
+            ros::NodeHandle& nh,
+            std::shared_ptr<urdf::Model> urdf_model = nullptr)
             : _usb_serial_interface(usb_serial_interface),
               _baudrate(get_baudrate(baudrate)),
               _read_timeout(read_timeout),
@@ -62,7 +69,9 @@ namespace dynamixel {
               _dynamixel_map(dynamixel_map),
               _c_mode_map(dynamixel_c_mode_map),
               _dynamixel_max_speed(dynamixel_max_speed),
-              _dynamixel_corrections(dynamixel_corrections)
+              _dynamixel_corrections(dynamixel_corrections),
+              _nh(nh),
+              _urdf_model(urdf_model)
         {
         }
 
@@ -97,12 +106,20 @@ namespace dynamixel {
 
         void _find_servos();
         void _enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode);
-        void _enforce_limits(ros::Duration& elapsed_time);
+        void _register_joint_limits(const hardware_interface::JointHandle& cmd_handle,
+            id_t id);
+        void _enforce_limits(ros::Duration& loop_period);
 
         // ROS's hardware interface instances
         hardware_interface::JointStateInterface _jnt_state_interface;
         hardware_interface::PositionJointInterface _jnt_pos_interface;
         hardware_interface::VelocityJointInterface _jnt_vel_interface;
+
+        // Joint limits (hard and soft)
+        joint_limits_interface::PositionJointSoftLimitsInterface _jnt_pos_lim_interface;
+        joint_limits_interface::VelocityJointSoftLimitsInterface _jnt_vel_lim_interface;
+        joint_limits_interface::PositionJointSaturationInterface _jnt_pos_sat_interface;
+        joint_limits_interface::VelocityJointSaturationInterface _jnt_vel_sat_interface;
 
         // Memory space shared with the controller
         // It reads here the latest robot's state and put here the next desired values
@@ -129,6 +146,12 @@ namespace dynamixel {
         std::unordered_map<id_t, double> _dynamixel_max_speed;
         // Map for hardware corrections
         std::unordered_map<id_t, double> _dynamixel_corrections;
+
+        // To get joint limits from the parameter server
+        ros::NodeHandle _nh;
+
+        // URDF model of the robot, for joint limits
+        std::shared_ptr<urdf::Model> _urdf_model;
     };
 
     template <class Protocol>
@@ -225,6 +248,8 @@ namespace dynamixel {
 
                     // Enable servos that were properly configured
                     if (OperatingMode::unknown != _c_mode_map[id]) {
+                        // Set joint limits (saturation or soft for the joint)
+                        _register_joint_limits(cmd_handle, id);
                         // enable torque output on the servo and set its configuration
                         // including max speed
                         _enable_and_configure_servo(_servos[i], hardware_mode);
@@ -334,10 +359,10 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::write_joints(ros::Duration& elapsed_time)
+    void DynamixelHardwareInterface<Protocol>::write_joints(ros::Duration& loop_period)
     {
         // ensure that the joints limits are respected
-        _enforce_limits(elapsed_time);
+        _enforce_limits(loop_period);
 
         for (unsigned int i = 0; i < _servos.size(); i++) {
             // Sending commands only when needed
@@ -490,9 +515,123 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::_enforce_limits(ros::Duration& elapsed_time)
+    void DynamixelHardwareInterface<Protocol>::_register_joint_limits(
+        const hardware_interface::JointHandle& cmd_handle,
+        id_t id)
+    {
+        // Limits datastructures
+        joint_limits_interface::JointLimits joint_limits; // Position
+        joint_limits_interface::SoftJointLimits soft_limits; // Soft Position
+        bool has_joint_limits = false;
+        bool has_soft_limits = false;
+
+        // Get limits from URDF
+        if (_urdf_model == NULL) {
+            ROS_WARN_STREAM("No URDF model loaded, unable to get joint limits");
+        }
+        else {
+            // Get limits from URDF
+            urdf::JointConstSharedPtr urdf_joint
+                = _urdf_model->getJoint(cmd_handle.getName());
+
+            // Get main joint limits
+            if (urdf_joint == nullptr) {
+                ROS_ERROR_STREAM("URDF joint not found " << cmd_handle.getName());
+                return;
+            }
+
+            // Get limits from URDF
+            if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
+                has_joint_limits = true;
+                ROS_DEBUG_STREAM("Joint " << cmd_handle.getName()
+                                          << " has URDF position limits ["
+                                          << joint_limits.min_position << ", "
+                                          << joint_limits.max_position << "]");
+                if (joint_limits.has_velocity_limits)
+                    ROS_DEBUG_STREAM("Joint " << cmd_handle.getName()
+                                              << " has URDF velocity limit ["
+                                              << joint_limits.max_velocity << "]");
+            }
+            else {
+                if (urdf_joint->type != urdf::Joint::CONTINUOUS)
+                    ROS_WARN_STREAM("Joint " << cmd_handle.getName()
+                                             << " does not have a URDF "
+                                                "position limit");
+            }
+
+            // Get soft limits from URDF
+            if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
+                has_soft_limits = true;
+                ROS_DEBUG_STREAM("Joint " << cmd_handle.getName()
+                                          << " has soft joint limits.");
+            }
+            else {
+                ROS_DEBUG_STREAM("Joint " << cmd_handle.getName()
+                                          << " does not have soft joint "
+                                             "limits");
+            }
+        }
+
+        // Get limits from ROS param
+        if (joint_limits_interface::getJointLimits(cmd_handle.getName(), _nh, joint_limits)) {
+            has_joint_limits = true;
+            ROS_DEBUG_STREAM("Joint " << cmd_handle.getName()
+                                      << " has rosparam position limits ["
+                                      << joint_limits.min_position << ", "
+                                      << joint_limits.max_position << "]");
+            if (joint_limits.has_velocity_limits)
+                ROS_DEBUG_STREAM("Joint " << cmd_handle.getName()
+                                          << " has rosparam velocity limit ["
+                                          << joint_limits.max_velocity << "]");
+        } // the else debug message provided internally by joint_limits_interface
+
+        // Slighly reduce the joint limits to prevent floating point errors
+        if (joint_limits.has_position_limits) {
+            joint_limits.min_position += std::numeric_limits<double>::epsilon();
+            joint_limits.max_position -= std::numeric_limits<double>::epsilon();
+        }
+
+        if (has_soft_limits) // Use soft limits
+        {
+            ROS_DEBUG_STREAM("Using soft saturation limits");
+
+            if (OperatingMode::joint == _c_mode_map[id]) {
+                const joint_limits_interface::PositionJointSoftLimitsHandle
+                    soft_handle_position(
+                        cmd_handle, joint_limits, soft_limits);
+                _jnt_pos_lim_interface.registerHandle(soft_handle_position);
+            }
+            else if (OperatingMode::wheel == _c_mode_map[id]) {
+                const joint_limits_interface::VelocityJointSoftLimitsHandle
+                    soft_handle_velocity(
+                        cmd_handle, joint_limits, soft_limits);
+                _jnt_vel_lim_interface.registerHandle(soft_handle_velocity);
+            }
+        }
+        else if (has_joint_limits) // Use saturation limits
+        {
+            ROS_DEBUG_STREAM("Using saturation limits (not soft limits)");
+            if (OperatingMode::joint == _c_mode_map[id]) {
+                const joint_limits_interface::PositionJointSaturationHandle
+                    sat_handle_position(cmd_handle, joint_limits);
+                _jnt_pos_sat_interface.registerHandle(sat_handle_position);
+            }
+            else if (OperatingMode::wheel == _c_mode_map[id]) {
+                const joint_limits_interface::VelocityJointSaturationHandle
+                    sat_handle_velocity(cmd_handle, joint_limits);
+                _jnt_vel_sat_interface.registerHandle(sat_handle_velocity);
+            }
+        }
+    } // namespace dynamixel
+
+    template <class Protocol>
+    void DynamixelHardwareInterface<Protocol>::_enforce_limits(ros::Duration& loop_period)
     {
         // enforce joint limits
+        _jnt_pos_lim_interface.enforceLimits(loop_period);
+        _jnt_vel_lim_interface.enforceLimits(loop_period);
+        _jnt_pos_sat_interface.enforceLimits(loop_period);
+        _jnt_vel_sat_interface.enforceLimits(loop_period);
     }
 } // namespace dynamixel
 

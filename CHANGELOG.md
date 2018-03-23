@@ -2,6 +2,7 @@
 
 In reverse chronological order:
 
+- implement joint limits (parameterised through URDF or param server)
 - breaking change: the configuration parameter syntax has changed; see sample configuration files
 - velocity control mode integrated
 - replace c-style code with std::chrono for time-related code
