@@ -14,6 +14,7 @@ dynamixel_controllers:
 
 dynamixel_control_hw:
   serial_interface: /dev/ttyUSB0
+dynamixel_control:
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
   baudrate: 1000000 # in bauds
