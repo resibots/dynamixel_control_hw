@@ -43,6 +43,7 @@
 #include <memory>
 // for runtime_error
 #include <stdexcept>
+#include <fstream>
 
 // ROS
 #include <ros/ros.h>
@@ -66,7 +67,9 @@ namespace dynamixel {
             ros::NodeHandle& nh,
             std::shared_ptr<hw_int> hardware_interface)
             : _nh(nh),
-              _hardware_interface(hardware_interface)
+              _hardware_interface(hardware_interface),
+              _reads(100000),
+              _writes(100000)
         {
             // Create the controller manager
             _controller_manager.reset(new controller_manager::ControllerManager(_hardware_interface.get(), _nh));
@@ -88,6 +91,36 @@ namespace dynamixel {
             // Start timer that will periodically call DynamixelLoop::update
             _desired_update_freq = ros::Duration(1 / _loop_hz);
             _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
+        }
+
+        template <typename A>
+        std::string vec2str(std::vector<A> vec, std::string name)
+        {
+            std::string filename("/home/dgoepp/ros_workspaces/dynamixel_ws/control_times_" + name + ".csv");
+            std::ofstream oss(filename, std::ios::out | std::ios::trunc);
+            if (!oss)
+                std::cout << "Could not open file " << name;
+
+            if (!vec.empty()) {
+                // Convert all but the last element to avoid a trailing ","
+                std::copy(vec.begin(), vec.end() - 1,
+                    std::ostream_iterator<A>(oss, "\n"));
+
+                // Now add the last element with no delimiter
+                oss << vec.back();
+            }
+            oss.close();
+
+            // return oss.str();
+            return std::string();
+        }
+
+        ~DynamixelLoop()
+        {
+            std::cout << "Times for the read: " << vec2str(_reads, "reads") << std::endl;
+            std::cout << "Times for the controller: " << vec2str(_controller, "controller") << std::endl;
+            std::cout << "Times for the write: " << vec2str(_writes, "writes") << std::endl;
+            std::cout << "Done with dynamixel loop" << std::endl;
         }
 
         /** Timed method that reads current hardware's state, runs the controller
@@ -115,17 +148,26 @@ namespace dynamixel {
                     << "threshold: " << _cycle_time_error_threshold << "s");
             }
 
+            auto start = steady_clock::now();
             // Input
             // get the hardware's state
             _hardware_interface->read(ros::Time::now(), _elapsed_time);
+            _reads.push_back(
+                duration_cast<duration<double>>(steady_clock::now() - start).count());
 
             // Control
             // let the controller compute the new command (via the controller manager)
+            start = steady_clock::now();
             _controller_manager->update(ros::Time::now(), _elapsed_time);
+            _controller.push_back(
+                duration_cast<duration<double>>(steady_clock::now() - start).count());
 
+            start = steady_clock::now();
             // Output
             // send the new command to hardware
             _hardware_interface->write(ros::Time::now(), _elapsed_time);
+            _writes.push_back(
+                duration_cast<duration<double>>(steady_clock::now() - start).count());
         }
 
     private:
@@ -142,6 +184,8 @@ namespace dynamixel {
         double _loop_hz;
         steady_clock::time_point _last_time;
         steady_clock::time_point _current_time;
+
+        std::vector<double> _reads, _controller, _writes;
 
         /** ROS Controller Manager and Runner
 

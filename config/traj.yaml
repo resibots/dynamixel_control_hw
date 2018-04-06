@@ -13,10 +13,10 @@ dynamixel_controllers:
     type: velocity_controllers/JointVelocityController
     joint: arm_joint_2
 
-dynamixel_control:
-  serial_interface: /dev/ttyACM0
-  loop_frequency: 50
-  cycle_time_error_threshold: 0.1
+dynamixel_control_hw:
+  serial_interface: /dev/ttyUSB0
+  loop_frequency: 60
+  cycle_time_error_threshold: 0.001
   baudrate: 1000000 # in bauds
   read_timeout: 0.05 # in seconds
   scan_timeout: 0.05 # in seconds
@@ -29,7 +29,7 @@ dynamixel_control:
       offset: 3.14159265359 # in rad
       # max joint speed
       # it shoud NOT be used for actuators in velocity mode
-      max_speed: 0.1 # in rad/s
+      # max_speed: 1.3
     arm_joint_2:
       id: 2
       offset: 3.14159265359

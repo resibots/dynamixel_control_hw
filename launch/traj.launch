@@ -15,6 +15,10 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher"
         name="rob_state_pub" />
 
+  <!-- Configuration file to override logging settings (like level put to DEBUG) -->
+  <env name="ROSCONSOLE_CONFIG_FILE"
+   value="$(find dynamixel_control_hw)/config/custom_rosconsole.conf"/>
+
   <!-- To move the dummy robot with a gui, bypassing the controller manager -->
   <node if="$(arg fake_robot)" pkg="joint_state_publisher"
         type="joint_state_publisher" name="dummy_robot" />
