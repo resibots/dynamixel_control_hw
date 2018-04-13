@@ -1,0 +1,34 @@
+dynamixel_controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  velocity_controller:
+    type: omni_controllers/OmnigrasperSpeedSafeController
+    joints:
+      - arm_joint_1
+      - arm_joint_2
+      - arm_joint_3
+    hard_min_height: 0.2
+    soft_min_height: 0.51
+
+dynamixel_control:
+  serial_interface: /dev/ttyACM0
+  loop_frequency: 50
+  cycle_time_error_threshold: 0.1
+  baudrate: 1000000 # in bauds
+  read_timeout: 0.05 # in seconds
+  scan_timeout: 0.05 # in seconds
+  # Configuration of the servos
+  servos:
+    arm_joint_1:
+      id: 1
+      offset: 3.14159265359
+    arm_joint_2:
+      id: 2
+      offset: 3.14159265359
+    arm_joint_3:
+      id: 3
+      offset: 3.14159265359
+  # default mode
+  default_command_interface: velocity
