@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>dynamixel_control_hw</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
   <description>An interface to the Dynamixel actuators for ROS control</description>
 
   <maintainer email="dorian.goepp@inria.fr">Dorian Goepp</maintainer>

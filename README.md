@@ -4,7 +4,7 @@
 
 This piece of software provides a hardware interface for ROS control. Its aim is to allow generic software controllers to control a set of Dynamixel actuators.
 
-We are using it for our robots and developing it for this purpose. Version 0.0.1 is clearly no final code but it works for the basic usage.
+We are using it for our robots and developing it for this purpose. Version 0.1.0 is clearly no final code but it works for the regular needs.
 
 ## Features
 
@@ -26,7 +26,7 @@ We are currently working on the following features:
 ## Installation and usage
 `dynamixel_control_hw` depends on the [libdynamixel][] library. Please install it, it's light and quick.
 
-Then, you'll need to store the installation path of libdynamixel in the `RESIBOTS_DIR` environment variable.
+Then, you'll need to store the installation path of libdynamixel in the `LIBDYNAMIXEL` environment variable.
 
 Install the ros package ros_control. In apt-get, it is called `ros-YourDistro-ros-control` (where *YourDistro* must be changed by the ROS distribution's name, like indigo or jade).
 
@@ -50,6 +50,9 @@ This software is developed as part of the ResiBots project. We do our best to ke
 
 ## Projects using this software
 - [ResiBots][]
+
+## License
+Unless stated otherwise, the license for this repository is CeCILL-C (see LICENSE and LICENSE.fr).
 
 [ResiBots]: http://www.resibots.eu
 [libdynamixel]: http://github.com/resibots/libdynamixel
