@@ -506,6 +506,13 @@ namespace dynamixel {
                         << "servos in position mode. Ignoring the speed limit.");
                 }
             }
+            else if (OperatingMode::joint == mode) {
+                dynamixel::StatusPacket<Protocol> status;
+                ROS_DEBUG_STREAM("Resetting velocity limit of servo "
+                    << _dynamixel_map[servo->id()] << ".");
+                _dynamixel_controller.send(servo->set_moving_speed_angle(0));
+                _dynamixel_controller.recv(status);
+            }
         }
         catch (dynamixel::errors::Error& e) {
             ROS_ERROR_STREAM("Caught a Dynamixel exception while "
