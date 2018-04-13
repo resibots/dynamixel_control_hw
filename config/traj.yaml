@@ -26,10 +26,10 @@ dynamixel_control:
       # hardware ID of the actuator
       id: 1
       # offset to be added, in radians, to the position of an actuator
-      offset: 3.14159265359
-      # max joint speed, in rad/s
+      offset: 3.14159265359 # in rad
+      # max joint speed
       # it shoud NOT be used for actuators in velocity mode
-      max_speed: 0.1
+      max_speed: 0.1 # in rad/s
     arm_joint_2:
       id: 2
       offset: 3.14159265359
