@@ -9,6 +9,9 @@
 // ROS
 #include <ros/ros.h>
 #include <urdf/model.h>
+// ROS-related: to parse parameters
+#include <XmlRpcValue.h>
+#include <XmlRpcException.h>
 
 // ROS control
 #include <hardware_interface/joint_command_interface.h>
@@ -35,52 +38,16 @@ namespace dynamixel {
         // Actuator's id type
         using id_t = typename Protocol::id_t;
 
-        /** Set the essential parameters for communication with the hardware.
-
-            @param usb_serial_interface: name of the USB to serial interface;
-                for example "/dev/ttyUSB0"
-            @param baudrate: baud-rate for the serial communication with actuators
-                (in bauds)
-            @param dynamixel_timeout: timeout in seconds to wait for a message
-                to arrive on serial bus
-            @param dynamixel_map: map actuator's ID to its name (the one used
-                in the controller list and in URDF)
-            @param dynamixel_c_mode_map: map actuator's ID to the command
-                mode, as defined in libdynamixel dynamixel::OperatingMode
-            @param dynamixel_max_speed map from actuator IDs to maximal allowed
-                velocity (the value is specific to the actuator's type)
-            @param dynamixel_corrections map from actuator IDs to the correction
-                to be applied to the angle
-        **/
-        DynamixelHardwareInterface(const std::string& usb_serial_interface,
-            const int& baudrate,
-            const float& read_timeout,
-            const float& scan_timeout,
-            std::unordered_map<id_t, std::string> dynamixel_map,
-            std::unordered_map<id_t, OperatingMode> dynamixel_c_mode_map,
-            std::unordered_map<id_t, double> dynamixel_max_speed,
-            std::unordered_map<id_t, double> dynamixel_corrections,
-            ros::NodeHandle& nh,
-            std::shared_ptr<urdf::Model> urdf_model = nullptr)
-            : _usb_serial_interface(usb_serial_interface),
-              _baudrate(get_baudrate(baudrate)),
-              _read_timeout(read_timeout),
-              _scan_timeout(scan_timeout),
-              _dynamixel_map(dynamixel_map),
-              _c_mode_map(dynamixel_c_mode_map),
-              _dynamixel_max_speed(dynamixel_max_speed),
-              _dynamixel_corrections(dynamixel_corrections),
-              _nh(nh),
-              _urdf_model(urdf_model)
-        {
-        }
-
+        DynamixelHardwareInterface(){};
         ~DynamixelHardwareInterface();
 
-        /** Find all connected devices and register those referred in dynamixel_map
-            in the hardware interface.
+        /** Initialise the whole hardware interface.
+
+            Set the essential parameters for communication with the hardware
+            and find all connected devices and register those referred in
+            dynamixel_map in the hardware interface.
         **/
-        void init();
+        bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
 
         /** Copy joint's information to memory
 
@@ -104,10 +71,17 @@ namespace dynamixel {
         DynamixelHardwareInterface(DynamixelHardwareInterface<Protocol> const&) = delete;
         DynamixelHardwareInterface& operator=(DynamixelHardwareInterface<Protocol> const&) = delete;
 
-        void _find_servos();
+        // Methods used for initialisation
+        bool _get_ros_parameters(ros::NodeHandle& root_nh,
+            ros::NodeHandle& robot_hw_nh);
+        dynamixel::OperatingMode _str2mode(const std::string& mode_string,
+            std::string name);
+        bool _load_urdf(ros::NodeHandle& nh, std::string param_name);
+        bool _find_servos();
         void _enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode);
         void _register_joint_limits(const hardware_interface::JointHandle& cmd_handle,
             id_t id);
+
         void _enforce_limits(ros::Duration& loop_period);
 
         // ROS's hardware interface instances
@@ -130,9 +104,9 @@ namespace dynamixel {
         std::vector<double> _joint_efforts; // compulsory but not used
 
         // USB to serial connexion settings
-        const std::string& _usb_serial_interface;
-        const int _baudrate;
-        const float _read_timeout, _scan_timeout; // in seconds
+        std::string _usb_serial_interface;
+        int _baudrate;
+        float _read_timeout, _scan_timeout; // in seconds
         // Dynamixel's low level controller
         dynamixel::controllers::Usb2Dynamixel _dynamixel_controller;
 
@@ -140,11 +114,11 @@ namespace dynamixel {
         std::vector<dynamixel_servo> _servos;
         // Map from dynamixel ID to actuator's name
         std::unordered_map<id_t, std::string> _dynamixel_map;
-        // Map from dynamixel ID to actuator's command interface (velocity/position)
+        // Map from dynamixel ID to actuator's command interface (ID: velocity/position)
         std::unordered_map<id_t, OperatingMode> _c_mode_map;
-        // Map for max speed
+        // Map for max speed (ID: max speed)
         std::unordered_map<id_t, double> _dynamixel_max_speed;
-        // Map for hardware corrections
+        // Map for angle offsets (ID: correction in radians)
         std::unordered_map<id_t, double> _dynamixel_corrections;
 
         // To get joint limits from the parameter server
@@ -173,9 +147,11 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::init()
+    bool DynamixelHardwareInterface<Protocol>::init(
+        ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
     {
-        _find_servos();
+        if (!_get_ros_parameters(root_nh, robot_hw_nh) || !_find_servos())
+            return false;
 
         _prev_commands.resize(_servos.size(), 0.0);
         _joint_commands.resize(_servos.size(), 0.0);
@@ -278,7 +254,7 @@ namespace dynamixel {
             // TODO: disable actuators that were enabled ?
             ROS_FATAL_STREAM("Error during initialisation. BEWARE: some "
                 << "actuators might have already been started.");
-            throw e;
+            return false;
         }
 
         // At startup robot should keep the pose it has
@@ -291,6 +267,8 @@ namespace dynamixel {
             else if (OperatingMode::wheel == mode)
                 _joint_commands[i] = 0;
         }
+
+        return true;
     }
 
     template <class Protocol>
@@ -403,7 +381,7 @@ namespace dynamixel {
         }
 
         try {
-            _dynamixel_controller.send(dynamixel::instructions::Action<Protocol>(Protocol::broadcast_id));
+            _dynamixel_controller.send(dynamixel::itnstructions::Action<Protocol>(Protocol::broadcast_id));
         }
         catch (dynamixel::errors::Error& e) {
             ROS_ERROR_STREAM("Caught a Dynamixel exception while sending "
@@ -412,13 +390,181 @@ namespace dynamixel {
         }
     }
 
+    /** Retrieve all needed ROS parameters
+        @return true if and only if all went well
+    **/
+    template <class Protocol>
+    bool DynamixelHardwareInterface<Protocol>::_get_ros_parameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
+    {
+        bool got_all_params = true;
+
+        got_all_params &= robot_hw_nh.getParam("serial_interface", _usb_serial_interface); // path to the device
+        got_all_params &= robot_hw_nh.getParam("baudrate", _baudrate); // in bauds
+        got_all_params &= robot_hw_nh.getParam("read_timeout", _read_timeout); // in seconds
+        bool dyn_scan = robot_hw_nh.getParam("scan_timeout", _scan_timeout); // in seconds
+        if (!dyn_scan) {
+            ROS_WARN_STREAM("Dynamixel scanning timeout parameter was not found. "
+                << "Setting to default: 0.05s.");
+            _scan_timeout = 0.05;
+        }
+        std::string default_command_interface;
+        bool has_default_command_interface = robot_hw_nh.getParam(
+            "default_command_interface", default_command_interface);
+
+        // Retrieve the srevo parameter and fill maps above with its content.
+        XmlRpc::XmlRpcValue servos_param; // temporary map, from parameter server
+        got_all_params &= robot_hw_nh.getParam("servos", servos_param);
+        if (got_all_params &= robot_hw_nh.getParam("servos", servos_param)) {
+            ROS_ASSERT(servos_param.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+            try {
+                for (XmlRpc::XmlRpcValue::ValueStruct::const_iterator it = servos_param.begin(); it != servos_param.end(); ++it) {
+                    ROS_DEBUG_STREAM("servo: " << (std::string)(it->first));
+
+                    id_t id;
+                    if (it->second.hasMember("id")) {
+                        id = static_cast<int>(servos_param[it->first]["id"]);
+                        ROS_DEBUG_STREAM("\tid: " << id);
+                        _dynamixel_map[id] = it->first;
+                    }
+                    else {
+                        ROS_ERROR_STREAM("Actuator " << it->first
+                                                     << " has no associated servo ID.");
+                        continue;
+                    }
+
+                    if (it->second.hasMember("offset")) {
+                        _dynamixel_corrections[id]
+                            = static_cast<double>(servos_param[it->first]["offset"]);
+                        ROS_DEBUG_STREAM("\toffset: "
+                            << _dynamixel_corrections[id]);
+                    }
+                    if (it->second.hasMember("max_speed")) {
+                        _dynamixel_max_speed[id]
+                            = static_cast<double>(servos_param[it->first]["max_speed"]);
+                        ROS_DEBUG_STREAM("\tmax_speed: "
+                            << _dynamixel_max_speed[id]);
+                    }
+
+                    if (it->second.hasMember("command_interface")) {
+                        std::string mode_string
+                            = static_cast<std::string>(
+                                servos_param[it->first]["command_interface"]);
+                        ROS_DEBUG_STREAM("\tcommand_interface: " << mode_string);
+
+                        _c_mode_map[id] = _str2mode(mode_string, it->first);
+                    }
+                    else if (has_default_command_interface) {
+                        _c_mode_map[id]
+                            = _str2mode(default_command_interface, it->first);
+                        ROS_DEBUG_STREAM("\tcommand_interface: "
+                            << default_command_interface << " (default)");
+                    }
+                    else {
+                        ROS_ERROR_STREAM("A command interface (speed or position) "
+                            << "should be declared for the actuator " << it->first
+                            << " or a default one should be defined with the parameter "
+                            << "'default_command_interface'.");
+                    }
+                }
+            }
+            catch (XmlRpc::XmlRpcException& e) {
+                ROS_FATAL_STREAM("Exception raised by XmlRpc while reading the "
+                    << "configuration: " << e.getMessage() << ".\n"
+                    << "Please check the configuration, particularly parameter types.");
+                return false;
+            }
+        }
+
+        if (!got_all_params) {
+            std::string sub_namespace = robot_hw_nh.getNamespace();
+            std::string error_message = "One or more of the following parameters "
+                                        "were not set:\n"
+                + sub_namespace + "/serial_interface\n"
+                + sub_namespace + "/baudrate\n"
+                + sub_namespace + "/read_timeout\n"
+                + sub_namespace + "/servos";
+            ROS_FATAL_STREAM(error_message);
+            return false;
+        }
+
+        // Get joint limits from the URDF or the parameter server
+        // ------------------------------------------------------
+
+        std::string urdf_param_name("/robot_description");
+        // TODO: document this feature
+        if (robot_hw_nh.hasParam("urdf_param_name"))
+            robot_hw_nh.getParam("urdf_param_name", urdf_param_name);
+
+        if (!_load_urdf(root_nh, urdf_param_name)) {
+            ROS_ERROR_STREAM("Unable to load the URDF model.");
+            return false;
+        }
+        else {
+            ROS_DEBUG_STREAM("Received the URDF from param server.");
+            return true;
+        }
+    }
+
+    /** Convert a string to an operating mode for a Dynamixel servo
+
+        @param mode_string name of the operating mode (either velocity or position)
+        @param nam name of the joint
+        @return dynamixel::OperatingMode::unknown if mode_string is not recognized
+    **/
+    template <class Protocol>
+    dynamixel::OperatingMode DynamixelHardwareInterface<Protocol>::_str2mode(
+        const std::string& mode_string, std::string name)
+    {
+        dynamixel::OperatingMode mode;
+        if ("velocity" == mode_string)
+            mode = dynamixel::OperatingMode::wheel;
+        else if ("position" == mode_string)
+            mode = dynamixel::OperatingMode::joint;
+        else {
+            mode = dynamixel::OperatingMode::unknown;
+            ROS_ERROR_STREAM("The command mode " << mode_string
+                                                 << " is not available (actuator "
+                                                 << name << ")");
+        }
+
+        return mode;
+    }
+
+    /** Search for the robot's URDF model on the parameter server and parse it
+
+        @param nh NodeHandle used to query for the URDF
+        @param param_name name of the ROS parameter holding the robot model
+        @param urdf_model pointer to be populated by this function
+    **/
+    template <class Protocol>
+    bool DynamixelHardwareInterface<Protocol>::_load_urdf(ros::NodeHandle& nh,
+        std::string param_name)
+    {
+        std::string urdf_string;
+        if (_urdf_model == nullptr)
+            _urdf_model = std::make_shared<urdf::Model>();
+
+        // search and wait for the urdf param on param server
+        while (urdf_string.empty() && ros::ok()) {
+            ROS_INFO_STREAM("Waiting for model URDF on the ROS param server "
+                << "at location: " << param_name);
+            nh.getParam(param_name, urdf_string);
+
+            usleep(100000);
+        }
+
+        return _urdf_model->initString(urdf_string);
+    }
+
     /** Serach for the requested servos
 
         Servos that were not requested are ignored and the software complain if
         any required one misses.
+
+        @return true if and only if there was no error
     **/
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::_find_servos()
+    bool DynamixelHardwareInterface<Protocol>::_find_servos()
     {
         // extract servo IDs from _dynamixel_map
         std::vector<typename Protocol::id_t> ids(_dynamixel_map.size());
@@ -438,7 +584,7 @@ namespace dynamixel {
             ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
                 << "initialise them:\n"
                 << e.msg());
-            throw e;
+            return false;
         }
 
         // restore recv timeout
@@ -465,7 +611,10 @@ namespace dynamixel {
                 << " servo"
                 << (missing_servos > 1 ? "s were" : " was")
                 << " declared to the hardware interface but could not be found");
+            return false;
         }
+
+        return true;
     }
 
     /** Enable torque output for a joint and send it the relevant settings.
@@ -487,6 +636,7 @@ namespace dynamixel {
             _dynamixel_controller.recv(status);
 
             // set max speed for actuators in position mode
+            // TODO: take joint limits for max_speed and remove it from parameters
             typename std::unordered_map<id_t, double>::iterator dynamixel_max_speed_iterator
                 = _dynamixel_max_speed.find(servo->id());
             if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {

@@ -2,7 +2,7 @@
 
 In reverse chronological order:
 
-- TODO: take joint limits for max_speed
+- 
 - implement joint limits (parameterised through URDF or param server)
 - breaking change: the configuration parameter syntax has changed; see sample configuration files
 - velocity control mode integrated
