@@ -117,7 +117,7 @@ namespace dynamixel {
 
             // Input
             // get the hardware's state
-            _hardware_interface->read_joints();
+            _hardware_interface->read();
 
             // Control
             // let the controller compute the new command (via the controller manager)
@@ -125,7 +125,7 @@ namespace dynamixel {
 
             // Output
             // send the new command to hardware
-            _hardware_interface->write_joints(_elapsed_time);
+            _hardware_interface->write(_elapsed_time);
         }
 
     private:

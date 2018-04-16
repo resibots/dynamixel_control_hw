@@ -27,5 +27,6 @@
   <run_depend>controller_manager</run_depend>
 
   <export>
+    <hardware_interface plugin="${prefix}/dynamixel_plugins.xml"/>
   </export>
 </package>

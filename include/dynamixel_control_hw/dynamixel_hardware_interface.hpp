@@ -56,14 +56,14 @@ namespace dynamixel {
 
             Warning: do not get any information on torque
         **/
-        void read_joints();
+        void read();
 
         /** Send new joint's target position to dynamixels
 
             takes the target position from memory (given by a controller) and sends
             them to the dynamixels.
         **/
-        void write_joints(ros::Duration& elapsed_time);
+        void write(ros::Duration& elapsed_time);
 
     private:
         using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
@@ -258,7 +258,7 @@ namespace dynamixel {
         }
 
         // At startup robot should keep the pose it has
-        read_joints();
+        read();
 
         for (unsigned i = 0; i < _servos.size(); i++) {
             OperatingMode mode = _c_mode_map[_servos[i]->id()];
@@ -272,7 +272,7 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::read_joints()
+    void DynamixelHardwareInterface<Protocol>::read()
     {
         for (unsigned i = 0; i < _servos.size(); i++) {
             dynamixel::StatusPacket<Protocol> status;
@@ -337,7 +337,7 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::write_joints(ros::Duration& loop_period)
+    void DynamixelHardwareInterface<Protocol>::write(ros::Duration& loop_period)
     {
         // ensure that the joints limits are respected
         _enforce_limits(loop_period);
