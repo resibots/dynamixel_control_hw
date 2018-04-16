@@ -32,15 +32,31 @@ Install the ros package ros_control. In apt-get, it is called `ros-YourDistro-ro
 
 Clone the `dynamixel_control_hw` repository in your catkin workspace's source directory and run a `catkin_make`.
 
+### Parameters
+For examples cofiguration files, see the ones in `config/`. Here are the accepted parameters.
+
+- **serial_interface**: path to the USB to serial interface for example "/dev/ttyUSB0"
+- **baudrate**: baud-rate for the serial communication with actuators (in bauds)
+- **loop_frequency**: frequency at which the control loop will run (in Hz)
+- **cycle_time_error_threshold**: how much delay is tolerated on the control loop (in s)
+- **read_timeout**: timeout on the reception of replies from the servos (in s)
+- **read_timeout**: (for the scan only) timeout on the reception of replies from the servos (in s)
+- **servos**: object which keys are the name of the joints and which values contain:
+  - **id** (required): actuator's ID to its name (the one used in the controller list and in URDF)
+  - **offset**: correction to be applied to the angle of the joint (in rad)
+  - **command_interface**: the command mode (velocity or position)
+  - **max_speed**: maximal allowed velocity (rad/s), **for now, works only for joints in position control**
+- **default_command_interface**: if no **command_interface** is defined for a joint, this value is used instead
+
 ### Testing the hardware interface
 If you want to use the sample launch files or to use one of the default controllers, please install with apt-get:
 
 - `ros-YourDistro-ros-controllers` and
 - `ros-YourDistro-joint-state-publisher`.
 
-Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of each actuator.
+Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators.
 
-*Before starting* it, check `config/sample.yaml` for the `hardware_mapping` section, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can launch the sample. By looking at the available topics, you should find two for the commands of each joint and one for the joint state.
+*Before starting* it, check `config/sample.yaml` for the `id` parameters, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can `roslaunch dynamixel_control_hw sample.launch`. By looking at the available topics, you should find two, for the commands the joints, and one for the joint state.
 
 ## Alternative software
 If you know of an other software offering similar functionalities to this one, feel free to open an issue so that we can add it here.
