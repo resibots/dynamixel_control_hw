@@ -381,7 +381,7 @@ namespace dynamixel {
         }
 
         try {
-            _dynamixel_controller.send(dynamixel::itnstructions::Action<Protocol>(Protocol::broadcast_id));
+            _dynamixel_controller.send(dynamixel::instructions::Action<Protocol>(Protocol::broadcast_id));
         }
         catch (dynamixel::errors::Error& e) {
             ROS_ERROR_STREAM("Caught a Dynamixel exception while sending "
