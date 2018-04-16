@@ -7,14 +7,14 @@ dynamixel_controllers:
     type: position_controllers/JointTrajectoryController
     joints:
       - arm_joint_1
+      - arm_joint_3
 
   vel_controller:
     type: velocity_controllers/JointVelocityController
     joint: arm_joint_2
 
-dynamixel_control_hw:
-  serial_interface: /dev/ttyUSB0
 dynamixel_control:
+  serial_interface: /dev/ttyUSB0
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
   baudrate: 1000000 # in bauds
@@ -35,5 +35,9 @@ dynamixel_control:
       offset: 3.14159265359
       # command mode for the joint, either position or velocity
       command_interface: velocity
+    arm_joint_3:
+      id: 3
+      offset: 3.14159265359
+      command_interface: position
   # default mode
   default_command_interface: position
