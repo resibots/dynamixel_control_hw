@@ -103,7 +103,7 @@ namespace dynamixel {
         std::vector<double> _joint_velocities; // actual joint velocity
         std::vector<double> _joint_efforts; // compulsory but not used
 
-        // USB to serial connexion settings
+        // USB to serial connection settings
         std::string _usb_serial_interface;
         int _baudrate;
         float _read_timeout, _scan_timeout; // in seconds
