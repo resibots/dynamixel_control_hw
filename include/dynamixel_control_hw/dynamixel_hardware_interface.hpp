@@ -413,7 +413,6 @@ namespace dynamixel {
 
         // Retrieve the srevo parameter and fill maps above with its content.
         XmlRpc::XmlRpcValue servos_param; // temporary map, from parameter server
-        got_all_params &= robot_hw_nh.getParam("servos", servos_param);
         if (got_all_params &= robot_hw_nh.getParam("servos", servos_param)) {
             ROS_ASSERT(servos_param.getType() == XmlRpc::XmlRpcValue::TypeStruct);
             try {
