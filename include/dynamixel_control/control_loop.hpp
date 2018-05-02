@@ -34,8 +34,8 @@
 
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
-#ifndef DYNAMIXEL_LOOP
-#define DYNAMIXEL_LOOP
+#ifndef DYNAMIXEL_CONTROL_LOOP
+#define DYNAMIXEL_CONTROL_LOOP
 
 #include <chrono>
 
@@ -51,7 +51,7 @@
 #include <controller_manager/controller_manager.h>
 
 // The hardware interface to dynamixels
-#include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
+#include <dynamixel_control/hardware_interface.hpp>
 
 namespace dynamixel {
     // To make use of steady_clock and duration_cast shorter

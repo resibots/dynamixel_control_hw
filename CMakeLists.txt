@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(dynamixel_control_hw)
+project(dynamixel_control)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -43,12 +43,12 @@ include_directories(
   include
 )
 
-add_executable(dynamixel_control_hw_v1 src/dynamixel_control_hw.cpp)
-target_compile_definitions(dynamixel_control_hw_v1 PRIVATE PROTOCOL1)
-target_link_libraries(dynamixel_control_hw_v1 ${catkin_LIBRARIES})
+add_executable(dynamixel_control_p1 src/dynamixel_control.cpp)
+target_compile_definitions(dynamixel_control_p1 PRIVATE PROTOCOL1)
+target_link_libraries(dynamixel_control_p1 ${catkin_LIBRARIES})
 
-add_executable(dynamixel_control_hw_v2 src/dynamixel_control_hw.cpp)
-target_link_libraries(dynamixel_control_hw_v2 ${catkin_LIBRARIES})
+add_executable(dynamixel_control_p2 src/dynamixel_control.cpp)
+target_link_libraries(dynamixel_control_p2 ${catkin_LIBRARIES})
 
 add_library(dynamixel_hw
   src/hardware_interface.cpp

@@ -35,12 +35,12 @@
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
 // Local includes
-#include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
-#include <dynamixel_control_hw/dynamixel_loop.hpp>
+#include <dynamixel_control/hardware_interface.hpp>
+#include <dynamixel_control/control_loop.hpp>
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "dynamixel_control_hw");
+    ros::init(argc, argv, "dynamixel_control");
     ros::NodeHandle nh;
     ros::NodeHandle robot_hw_nh("~");
 

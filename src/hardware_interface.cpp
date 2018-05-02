@@ -1,5 +1,5 @@
 #include <pluginlib/class_list_macros.h>
-#include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
+#include <dynamixel_control/hardware_interface.hpp>
 
 namespace dynamixel {
     typedef dynamixel::DynamixelHardwareInterface<Protocol1> DynamixelHardwareInterfaceP1;

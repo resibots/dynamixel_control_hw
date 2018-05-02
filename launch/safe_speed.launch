@@ -6,11 +6,11 @@
               disabling hardware interface."/>
 
   <!-- Parameters for the hardware interface and controllers -->
-  <rosparam file="$(find dynamixel_control_hw)/config/safe_speed.yaml"/>
+  <rosparam file="$(find dynamixel_control)/config/safe_speed.yaml"/>
 
   <!-- URDF robot description -->
   <param name="robot_description"
-         command="cat $(find dynamixel_control_hw)/urdf/sample.urdf" />
+         command="cat $(find dynamixel_control)/urdf/sample.urdf" />
   <!-- Publish robot's state in the tf tree -->
   <node pkg="robot_state_publisher" type="robot_state_publisher"
         name="rob_state_pub" />
@@ -23,8 +23,8 @@
   <group unless="$(arg fake_robot)">
     <arg name="protocol_version" default="v1"
          doc="Choses the dynamixel protocol variant to be used (v1 or v2)"/>
-    <node pkg="dynamixel_control_hw"
-          type="dynamixel_control_hw_$(arg protocol_version)"
+    <node pkg="dynamixel_control"
+          type="dynamixel_control_$(arg protocol_version)"
           name="dynamixel_control" output="screen" clear_params="true"
           required="true"/>
 
