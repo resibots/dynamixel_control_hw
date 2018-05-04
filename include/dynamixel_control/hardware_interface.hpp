@@ -399,7 +399,9 @@ namespace dynamixel {
         bool got_all_params = true;
 
         got_all_params &= robot_hw_nh.getParam("serial_interface", _usb_serial_interface); // path to the device
-        got_all_params &= robot_hw_nh.getParam("baudrate", _baudrate); // in bauds
+        int baudrate;
+        got_all_params &= robot_hw_nh.getParam("baudrate", baudrate); // in bauds
+        _baudrate = get_baudrate(baudrate); // convert to OS-defined values
         got_all_params &= robot_hw_nh.getParam("read_timeout", _read_timeout); // in seconds
         bool dyn_scan = robot_hw_nh.getParam("scan_timeout", _scan_timeout); // in seconds
         if (!dyn_scan) {
