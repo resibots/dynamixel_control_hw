@@ -50,34 +50,41 @@
 // ROS control
 #include <controller_manager/controller_manager.h>
 
-// The hardware interface to dynamixels
-#include <dynamixel_control/hardware_interface.hpp>
+// The combined interface
+#include <combined_robot_hw/combined_robot_hw.h>
 
-namespace dynamixel {
+namespace combined_hw {
     // To make use of steady_clock and duration_cast shorter
     using namespace std::chrono;
 
-    template <class Protocol>
-    class DynamixelLoop {
-        using hw_int = typename dynamixel::DynamixelHardwareInterface<Protocol>;
-
+    class CombinedRobotLoop {
     public:
-        DynamixelLoop(
-            ros::NodeHandle& nh,
-            std::shared_ptr<hw_int> hardware_interface)
-            : _nh(nh),
-              _hardware_interface(hardware_interface)
+        CombinedRobotLoop(ros::NodeHandle& nh, ros::NodeHandle& nh_private)
+            : _nh(nh)
         {
-            // Create the controller manager
-            _controller_manager.reset(new controller_manager::ControllerManager(_hardware_interface.get(), _nh));
+            if (!_hardware_interface.init(nh, nh_private)) {
+                const char error_message[]
+                    = "The creation of the combined "
+                      "hardware interface failed.";
+                ROS_FATAL(error_message);
+                throw std::runtime_error(error_message);
+            }
 
-            // Load rosparams
+            // Create the controller manager
+            _controller_manager.reset(
+                new controller_manager::ControllerManager(
+                    &_hardware_interface, _nh));
+
+            // Load ROS parameters
             int error = 0;
-            ros::NodeHandle np("~");
-            error += !np.getParam("loop_frequency", _loop_hz);
-            error += !np.getParam("cycle_time_error_threshold", _cycle_time_error_threshold);
+            error += !nh_private.getParam("loop_frequency", _loop_hz);
+            error += !nh_private.getParam("cycle_time_error_threshold",
+                _cycle_time_error_threshold);
             if (error > 0) {
-                char error_message[] = "could not retrieve one of the required parameters\n\tdynamixel_hw/loop_hz or dynamixel_hw/cycle_time_error_threshold";
+                const char error_message[]
+                    = "could not retrieve one of the required parameters"
+                      "\n\tloop_hz or "
+                      "cycle_time_error_threshold";
                 ROS_ERROR_STREAM(error_message);
                 throw std::runtime_error(error_message);
             }
@@ -85,9 +92,11 @@ namespace dynamixel {
             // Get current time for use with first update
             _last_time = steady_clock::now();
 
-            // Start timer that will periodically call DynamixelLoop::update
-            _desired_update_freq = ros::Duration(1 / _loop_hz);
-            _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
+            // Start timer that will periodically call the update method of the
+            // hardware interfaces
+            _nominal_period = ros::Duration(1 / _loop_hz);
+            _non_realtime_loop = _nh.createTimer(_nominal_period,
+                &CombinedRobotLoop::update, this);
         }
 
         /** Timed method that reads current hardware's state, runs the controller
@@ -99,7 +108,7 @@ namespace dynamixel {
         **/
         void update(const ros::TimerEvent&)
         {
-            // Get change in time
+            // Get time difference
             _current_time = steady_clock::now();
             duration<double> time_span
                 = duration_cast<duration<double>>(_current_time - _last_time);
@@ -107,7 +116,7 @@ namespace dynamixel {
             _last_time = _current_time;
 
             // Check cycle time for excess delay
-            const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
+            const double cycle_time_error = (_elapsed_time - _nominal_period).toSec();
             if (cycle_time_error > _cycle_time_error_threshold) {
                 ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
                     << cycle_time_error - _cycle_time_error_threshold << "s, "
@@ -117,7 +126,7 @@ namespace dynamixel {
 
             // Input
             // get the hardware's state
-            _hardware_interface->read(ros::Time::now(), _elapsed_time);
+            _hardware_interface.read(ros::Time::now(), _elapsed_time);
 
             // Control
             // let the controller compute the new command (via the controller manager)
@@ -125,7 +134,7 @@ namespace dynamixel {
 
             // Output
             // send the new command to hardware
-            _hardware_interface->write(ros::Time::now(), _elapsed_time);
+            _hardware_interface.write(ros::Time::now(), _elapsed_time);
         }
 
     private:
@@ -133,7 +142,7 @@ namespace dynamixel {
         ros::NodeHandle _nh;
 
         // Settings
-        ros::Duration _desired_update_freq;
+        ros::Duration _nominal_period;
         double _cycle_time_error_threshold;
 
         // Timing
@@ -152,8 +161,8 @@ namespace dynamixel {
         std::shared_ptr<controller_manager::ControllerManager> _controller_manager;
 
         /// Abstract Hardware Interface for your robot
-        std::shared_ptr<hw_int> _hardware_interface;
+        combined_robot_hw::CombinedRobotHW _hardware_interface;
     };
-} // namespace dynamixel
+} // namespace combined_hw
 
 #endif

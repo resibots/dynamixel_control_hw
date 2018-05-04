@@ -10,8 +10,8 @@
 #include <ros/ros.h>
 #include <urdf/model.h>
 // ROS-related: to parse parameters
-#include <XmlRpcValue.h>
 #include <XmlRpcException.h>
+#include <XmlRpcValue.h>
 
 // ROS control
 #include <hardware_interface/joint_command_interface.h>
@@ -56,14 +56,14 @@ namespace dynamixel {
 
             Warning: do not get any information on torque
         **/
-        void read();
+        virtual void read(const ros::Time& time, const ros::Duration& elapsed_time);
 
         /** Send new joint's target position to dynamixels
 
             takes the target position from memory (given by a controller) and sends
             them to the dynamixels.
         **/
-        void write(ros::Duration& elapsed_time);
+        virtual void write(const ros::Time& time, const ros::Duration& elapsed_time);
 
     private:
         using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
@@ -82,7 +82,7 @@ namespace dynamixel {
         void _register_joint_limits(const hardware_interface::JointHandle& cmd_handle,
             id_t id);
 
-        void _enforce_limits(ros::Duration& loop_period);
+        void _enforce_limits(const ros::Duration& loop_period);
 
         // ROS's hardware interface instances
         hardware_interface::JointStateInterface _jnt_state_interface;
@@ -258,7 +258,8 @@ namespace dynamixel {
         }
 
         // At startup robot should keep the pose it has
-        read();
+        ros::Duration period(0);
+        read(ros::Time::now(), period);
 
         for (unsigned i = 0; i < _servos.size(); i++) {
             OperatingMode mode = _c_mode_map[_servos[i]->id()];
@@ -272,7 +273,8 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::read()
+    void DynamixelHardwareInterface<Protocol>::read(const ros::Time& time,
+        const ros::Duration& elapsed_time)
     {
         for (unsigned i = 0; i < _servos.size(); i++) {
             dynamixel::StatusPacket<Protocol> status;
@@ -337,7 +339,8 @@ namespace dynamixel {
     }
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::write(ros::Duration& loop_period)
+    void DynamixelHardwareInterface<Protocol>::write(const ros::Time& time,
+        const ros::Duration& loop_period)
     {
         // ensure that the joints limits are respected
         _enforce_limits(loop_period);
@@ -783,7 +786,7 @@ namespace dynamixel {
     } // namespace dynamixel
 
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::_enforce_limits(ros::Duration& loop_period)
+    void DynamixelHardwareInterface<Protocol>::_enforce_limits(const ros::Duration& loop_period)
     {
         // enforce joint limits
         _jnt_pos_lim_interface.enforceLimits(loop_period);

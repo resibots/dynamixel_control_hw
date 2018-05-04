@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   hardware_interface
+  combined_robot_hw
   controller_manager
 )
 
@@ -49,6 +50,9 @@ target_link_libraries(dynamixel_control_p1 ${catkin_LIBRARIES})
 
 add_executable(dynamixel_control_p2 src/dynamixel_control.cpp)
 target_link_libraries(dynamixel_control_p2 ${catkin_LIBRARIES})
+
+add_executable(combined_robot_control src/combined_control_main.cpp)
+target_link_libraries(combined_robot_control ${catkin_LIBRARIES})
 
 add_library(dynamixel_hw
   src/hardware_interface.cpp
