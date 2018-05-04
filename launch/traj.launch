@@ -21,8 +21,8 @@
 
   <!-- launch our hardware interface -->
   <group unless="$(arg fake_robot)">
-    <arg name="protocol_version" default="v1"
-         doc="Choses the dynamixel protocol variant to be used (v1 or v2)"/>
+    <arg name="protocol_version" default="p1"
+         doc="Choses the dynamixel protocol variant to be used (p1 or p2)"/>
     <node pkg="dynamixel_control"
           type="dynamixel_control_$(arg protocol_version)"
           name="dynamixel_control" output="screen" clear_params="true"
