@@ -424,7 +424,7 @@ namespace dynamixel {
                     id_t id;
                     if (it->second.hasMember("id")) {
                         id = static_cast<int>(servos_param[it->first]["id"]);
-                        ROS_DEBUG_STREAM("\tid: " << id);
+                        ROS_DEBUG_STREAM("\tid: " << (int)id);
                         _dynamixel_map[id] = it->first;
                     }
                     else {
@@ -557,7 +557,7 @@ namespace dynamixel {
         return _urdf_model->initString(urdf_string);
     }
 
-    /** Serach for the requested servos
+    /** Search for the requested servos
 
         Servos that were not requested are ignored and the software complain if
         any required one misses.
