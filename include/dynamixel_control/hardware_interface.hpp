@@ -583,6 +583,8 @@ namespace dynamixel {
             _dynamixel_controller.set_recv_timeout(_scan_timeout);
             _dynamixel_controller.open_serial(_usb_serial_interface, _baudrate);
             _servos = dynamixel::auto_detect<Protocol>(_dynamixel_controller, ids);
+            // restore recv timeout
+            _dynamixel_controller.set_recv_timeout(_read_timeout);
         }
         catch (dynamixel::errors::Error& e) {
             ROS_FATAL_STREAM("Caught a Dynamixel exception while trying to "
@@ -590,9 +592,6 @@ namespace dynamixel {
                 << e.msg());
             return false;
         }
-
-        // restore recv timeout
-        _dynamixel_controller.set_recv_timeout(_read_timeout);
 
         // remove servos that are not in the _dynamixel_map (i.e. that are not used)
         using servo = dynamixel::DynamixelHardwareInterface<Protocol>::dynamixel_servo;
