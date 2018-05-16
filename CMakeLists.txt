@@ -13,8 +13,24 @@ find_package(catkin REQUIRED COMPONENTS
   controller_manager
 )
 
+add_message_files(
+  FILES
+  ServoID.msg
+)
+
+add_service_files(
+  FILES
+  Reboot.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  dynamixel_control_hw
+)
+
 catkin_package(
- CATKIN_DEPENDS roscpp std_msgs message_runtime
+  CATKIN_DEPENDS roscpp std_msgs message_runtime
 )
 
 if ("$ENV{RESIBOTS_DIR}" STREQUAL "" AND "${LIBDYNAMIXEL}" STREQUAL "")

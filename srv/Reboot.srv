@@ -1,0 +1,3 @@
+dynamixel_control_hw/ServoID[] servos
+---
+bool[] results

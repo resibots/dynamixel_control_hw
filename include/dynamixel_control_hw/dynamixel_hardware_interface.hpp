@@ -89,6 +89,13 @@ namespace dynamixel {
         **/
         void write_joints();
 
+        /** Send a reboot command to a dynamixel
+
+            takes the target position from memory (given by a controller) and sends
+            them to the dynamixels.
+        **/
+        bool reboot_joint(const id_t& id);
+
     private:
         using dynamixel_servo = std::shared_ptr<dynamixel::servos::BaseServo<Protocol>>;
 
@@ -382,6 +389,44 @@ namespace dynamixel {
                 << "new commands:\n"
                 << e.msg());
         }
+    }
+
+    template <>
+    bool DynamixelHardwareInterface<Protocol1>::reboot_joint(const id_t& id)
+    {
+        // Reboot command not implemented in Protocol1
+        return false;
+    }
+
+    template <typename Protocol>
+    bool DynamixelHardwareInterface<Protocol>::reboot_joint(const id_t& id)
+    {
+        auto servo_it = std::find_if(_servos.begin(), _servos.end(),
+            [&id](const dynamixel_servo& s) {
+                return s->id() == id;
+            });
+        if (servo_it == _servos.end()) {
+            ROS_ERROR_STREAM("Cannot reboot non-existent ID: "
+                             << static_cast<int>(id));
+            return false;
+        }
+        auto& servo = *servo_it;
+
+        ROS_INFO_STREAM("Rebooting and enabling ID: "
+                        << static_cast<int>(id));
+
+        dynamixel::StatusPacket<Protocol2> status;
+        // Send reboot
+        dynamixel::instructions::Reboot<Protocol2> packet(id);
+        _dynamixel_controller.send(packet);
+        _dynamixel_controller.recv(status);
+
+        ros::Duration{0.1}.sleep();
+
+        // Enable
+        _dynamixel_controller.send(servo->set_torque_enable(1));
+        _dynamixel_controller.recv(status);
+        return true;
     }
 
     /** Serach for the requested servos
