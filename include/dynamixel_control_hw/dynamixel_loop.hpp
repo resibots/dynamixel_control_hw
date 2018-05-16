@@ -50,6 +50,9 @@
 // ROS control
 #include <controller_manager/controller_manager.h>
 
+// Service to reboot (only for Protocol2)
+#include <dynamixel_control_hw/Reboot.h>
+
 // The hardware interface to dynamixels
 #include <dynamixel_control_hw/dynamixel_hardware_interface.hpp>
 
@@ -88,6 +91,24 @@ namespace dynamixel {
             // Start timer that will periodically call DynamixelLoop::update
             _desired_update_freq = ros::Duration(1 / _loop_hz);
             _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
+            _service_server = _nh.advertiseService("reboot", &DynamixelLoop::reboot_joints, this);
+        }
+
+        bool reboot_joints(dynamixel_control_hw::Reboot::Request& req,
+                           dynamixel_control_hw::Reboot::Response& res)
+        {
+            bool all_success = true;
+            for (const auto& servo_id : req.servos) {
+                auto id = static_cast<typename hw_int::id_t>(servo_id.id);
+
+                dynamixel_access_mutex.lock();
+                auto result = _hardware_interface->reboot_joint(id);
+                dynamixel_access_mutex.unlock();
+
+                res.results.push_back(result);
+                all_success = all_success && result;
+            }
+            return all_success;
         }
 
         /** Timed method that reads current hardware's state, runs the controller
@@ -117,7 +138,9 @@ namespace dynamixel {
 
             // Input
             // get the hardware's state
+            dynamixel_access_mutex.lock();
             _hardware_interface->read_joints();
+            dynamixel_access_mutex.unlock();
 
             // Control
             // let the controller compute the new command (via the controller manager)
@@ -125,7 +148,9 @@ namespace dynamixel {
 
             // Output
             // send the new command to hardware
+            dynamixel_access_mutex.lock();
             _hardware_interface->write_joints();
+            dynamixel_access_mutex.unlock();
         }
 
     private:
@@ -142,6 +167,8 @@ namespace dynamixel {
         double _loop_hz;
         steady_clock::time_point _last_time;
         steady_clock::time_point _current_time;
+        boost::mutex dynamixel_access_mutex;
+        ros::ServiceServer _service_server;
 
         /** ROS Controller Manager and Runner
 
