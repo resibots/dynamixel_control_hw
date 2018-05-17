@@ -499,14 +499,12 @@ namespace dynamixel {
         if (robot_hw_nh.hasParam("urdf_param_name"))
             robot_hw_nh.getParam("urdf_param_name", urdf_param_name);
 
-        if (!_load_urdf(root_nh, urdf_param_name)) {
-            ROS_ERROR_STREAM("Unable to load the URDF model.");
-            return false;
-        }
-        else {
+        if (!_load_urdf(root_nh, urdf_param_name))
+            ROS_INFO_STREAM("Unable to find a URDF model.");
+        else
             ROS_DEBUG_STREAM("Received the URDF from param server.");
-            return true;
-        }
+
+        return true;
     }
 
     /** Convert a string to an operating mode for a Dynamixel servo
@@ -548,16 +546,10 @@ namespace dynamixel {
         if (_urdf_model == nullptr)
             _urdf_model = std::make_shared<urdf::Model>();
 
-        // search and wait for the urdf param on param server
-        while (urdf_string.empty() && ros::ok()) {
-            ROS_INFO_STREAM("Waiting for model URDF on the ROS param server "
-                << "at location: " << param_name);
-            nh.getParam(param_name, urdf_string);
+        // get the urdf param on param server
+        nh.getParam(param_name, urdf_string);
 
-            usleep(100000);
-        }
-
-        return _urdf_model->initString(urdf_string);
+        return !urdf_string.empty() && _urdf_model->initString(urdf_string);
     }
 
     /** Search for the requested servos
