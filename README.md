@@ -24,13 +24,13 @@ We are currently working on the following features:
 - it would be great to offer a service to reset one actuator after an overload error
 
 ## Installation and usage
-`dynamixel_control` depends on the [libdynamixel][] library. Please install it, it's light and quick.
+`dynamixel_control_hw` depends on the [libdynamixel][] library. Please install it, it's light and quick.
 
 Then, you'll need to store the installation path of libdynamixel in the `LIBDYNAMIXEL` environment variable.
 
 Install the ros package ros_control. In apt-get, it is called `ros-YourDistro-ros-control` (where *YourDistro* must be changed by the ROS distribution's name, like indigo or jade).
 
-Clone the `dynamixel_control` repository in your catkin workspace's source directory and run a `catkin_make`.
+Clone the `dynamixel_control_hw` repository in your catkin workspace's source directory and run a `catkin_make`.
 
 ### Parameters
 For examples cofiguration files, see the ones in `config/`. Here are the accepted parameters.
@@ -56,7 +56,7 @@ If you want to use the sample launch files or to use one of the default controll
 
 Have a look at the `launch/sample.launch` file. It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators.
 
-*Before starting* it, check `config/sample.yaml` for the `id` parameters, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can `roslaunch dynamixel_control sample.launch`. By looking at the available topics, you should find two, for the commands the joints, and one for the joint state.
+*Before starting* it, check `config/sample.yaml` for the `id` parameters, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can `roslaunch dynamixel_control_hw sample.launch`. By looking at the available topics, you should find two, for the commands the joints, and one for the joint state.
 
 ## Alternative software
 If you know of an other software offering similar functionalities to this one, feel free to open an issue so that we can add it here.

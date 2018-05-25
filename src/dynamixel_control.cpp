@@ -35,8 +35,8 @@
 /* Original Author: Dave Coleman (https://github.com/davetcoleman/ros_control_boilerplate) */
 
 // Local includes
-#include <dynamixel_control/hardware_interface.hpp>
-#include <dynamixel_control/control_loop.hpp>
+#include <dynamixel_control_hw/hardware_interface.hpp>
+#include <dynamixel_control_hw/control_loop.hpp>
 
 int main(int argc, char** argv)
 {

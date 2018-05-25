@@ -2,7 +2,7 @@
 
 In reverse chronological order:
 
-- rename everything for more concision and more meaning in the names; as a result, dynamixel_control_hw becomes dynamixel_control
+- rename the node executable so that the suffixes reflect the protocl version
 - make plugins for this hardware interface to be included in [combined hardware interfaces](http://wiki.ros.org/combined_robot_hw)
 - implement joint limits (parameterised through URDF or param server)
 - breaking change: the configuration parameter syntax has changed; see sample configuration files
