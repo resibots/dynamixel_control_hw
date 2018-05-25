@@ -150,14 +150,10 @@ namespace dynamixel {
     bool DynamixelHardwareInterface<Protocol>::init(
         ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
     {
+        // Get the relevant parameters from rosparam
+        // Search for the servos declared bu the user, in the parameters
         if (!_get_ros_parameters(root_nh, robot_hw_nh) || !_find_servos())
             return false;
-
-        _prev_commands.resize(_servos.size(), 0.0);
-        _joint_commands.resize(_servos.size(), 0.0);
-        _joint_angles.resize(_servos.size(), 0.0);
-        _joint_velocities.resize(_servos.size(), 0.0);
-        _joint_efforts.resize(_servos.size(), 0.0);
 
         // declare all available actuators to the control manager, provided a
         // name has been given for them
@@ -442,12 +438,6 @@ namespace dynamixel {
                         ROS_DEBUG_STREAM("\toffset: "
                             << _dynamixel_corrections[id]);
                     }
-                    if (it->second.hasMember("max_speed")) {
-                        _dynamixel_max_speed[id]
-                            = static_cast<double>(servos_param[it->first]["max_speed"]);
-                        ROS_DEBUG_STREAM("\tmax_speed: "
-                            << _dynamixel_max_speed[id]);
-                    }
 
                     if (it->second.hasMember("command_interface")) {
                         std::string mode_string
@@ -609,6 +599,12 @@ namespace dynamixel {
             return false;
         }
 
+        _prev_commands.resize(_servos.size(), 0.0);
+        _joint_commands.resize(_servos.size(), 0.0);
+        _joint_angles.resize(_servos.size(), 0.0);
+        _joint_velocities.resize(_servos.size(), 0.0);
+        _joint_efforts.resize(_servos.size(), 0.0);
+
         return true;
     }
 
@@ -621,22 +617,24 @@ namespace dynamixel {
             in dynamixel speech, joint, wheel, etc.)
     **/
     template <class Protocol>
-    void DynamixelHardwareInterface<Protocol>::_enable_and_configure_servo(dynamixel_servo servo, OperatingMode mode)
+    void DynamixelHardwareInterface<Protocol>::_enable_and_configure_servo(
+        dynamixel_servo servo, OperatingMode mode)
     {
         try {
-            // enable the actuator
+            // Enable the actuator
+            
             dynamixel::StatusPacket<Protocol> status;
             ROS_DEBUG_STREAM("Enabling servo " << servo->id());
             _dynamixel_controller.send(servo->set_torque_enable(1));
             _dynamixel_controller.recv(status);
 
-            // set max speed for actuators in position mode
-            // TODO: take joint limits for max_speed and remove it from parameters
-            typename std::unordered_map<id_t, double>::iterator dynamixel_max_speed_iterator
+            // Set max speed for actuators in position mode
+            
+            typename std::unordered_map<id_t, double>::iterator
+                dynamixel_max_speed_iterator
                 = _dynamixel_max_speed.find(servo->id());
             if (dynamixel_max_speed_iterator != _dynamixel_max_speed.end()) {
                 if (OperatingMode::joint == mode) {
-                    dynamixel::StatusPacket<Protocol> status;
                     ROS_DEBUG_STREAM("Setting velocity limit of servo "
                         << _dynamixel_map[servo->id()] << " to "
                         << dynamixel_max_speed_iterator->second << " rad/s.");
@@ -652,7 +650,6 @@ namespace dynamixel {
                 }
             }
             else if (OperatingMode::joint == mode) {
-                dynamixel::StatusPacket<Protocol> status;
                 ROS_DEBUG_STREAM("Resetting velocity limit of servo "
                     << _dynamixel_map[servo->id()] << ".");
                 _dynamixel_controller.send(servo->set_moving_speed_angle(0));
@@ -679,7 +676,8 @@ namespace dynamixel {
 
         // Get limits from URDF
         if (_urdf_model == NULL) {
-            ROS_WARN_STREAM("No URDF model loaded, unable to get joint limits");
+            ROS_WARN_STREAM("No URDF model loaded, cannot be used to load joint"
+                            " limits");
         }
         else {
             // Get limits from URDF
@@ -688,7 +686,8 @@ namespace dynamixel {
 
             // Get main joint limits
             if (urdf_joint == nullptr) {
-                ROS_ERROR_STREAM("URDF joint not found " << cmd_handle.getName());
+                ROS_ERROR_STREAM("URDF joint not found "
+                    << cmd_handle.getName());
                 return;
             }
 
@@ -741,6 +740,13 @@ namespace dynamixel {
         if (joint_limits.has_position_limits) {
             joint_limits.min_position += std::numeric_limits<double>::epsilon();
             joint_limits.max_position -= std::numeric_limits<double>::epsilon();
+        }
+
+        // Save the velocity limit for later if the joint is in position mode
+        // it is going to be sent to the servo-motor which will enforce it.
+        if (joint_limits.has_velocity_limits
+            && OperatingMode::joint == _c_mode_map[id]) {
+            _dynamixel_max_speed[id] = joint_limits.max_velocity;
         }
 
         if (has_soft_limits) // Use soft limits
