@@ -62,6 +62,12 @@ Have a look at the `launch/sample.launch` file. It will by default launch two fe
 
 *Before starting* it, check `config/sample.yaml` for the `id` parameters, the `serial_interface` and `baudrate` settings. Once you are sure that it's correct, you can `roslaunch dynamixel_control_hw sample.launch`. By looking at the available topics, you should find two, for the commands the joints, and one for the joint state.
 
+## Troubleshooting read time
+
+If the reading time seems too long, check the value of the USB latency timer. On ubuntu this value is retrieved with this command `cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer`. It is the time, in milliseconds, for which the device driver buffers data before making it available.
+
+You can change this timer with the command `echo 4 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer` which sets it to 4 ms for the device `/dev/ttyUSB0`.
+
 ## Alternative software
 
 If you know of an other software offering similar functionalities to this one, feel free to open an issue so that we can add it here.
