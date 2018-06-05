@@ -499,8 +499,8 @@ namespace dynamixel {
                             << "'default_command_interface'.");
                     }
 
-                    if (it->second.hasMember("invert_velocity")) {
-                        _invert[id] = servos_param[it->first]["invert_velocity"];
+                    if (it->second.hasMember("reverse")) {
+                        _invert[id] = servos_param[it->first]["reverse"];
                     }
                 }
             }
