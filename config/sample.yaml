@@ -3,15 +3,15 @@ dynamixel_controllers:
     type: joint_state_controller/JointStateController
     publish_rate: 10
 
-  velocity_controller:
-    type: velocity_controllers/JointVelocityController
-    joint: first
-
-  position_controller:
+  pos_controller:
     type: position_controllers/JointPositionController
-    joint: second
+    joint: arm_joint_2
 
-dynamixel_control_hw:
+  vel_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: arm_joint_1
+
+dynamixel_control:
   serial_interface: /dev/ttyUSB0
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
@@ -20,17 +20,19 @@ dynamixel_control_hw:
   scan_timeout: 0.05 # in seconds
   # Cofniguration of the servos
   servos:
-    first:
+    arm_joint_1:
       # hardware ID of the actuator
-      id: 1
+      id: 2
       # offset to be added, in radians, to the position of an actuator
-      offset: 4.5
+      offset: 4.5 # in rad
       command_interface: velocity
-    second:
-      id: 26
-      # max joint speed, in rad/s
+    arm_joint_2:
+      id: 1
+      # max joint speed
       # it shoud NOT be used for actuators in velocity mode
-      max-speed: 4
+      max-speed: 4 # in rad/s
+      # this actuator is set in reverse mode for the speed and position
+      reverse: true
   # default mode
   default_command_interface: position
 

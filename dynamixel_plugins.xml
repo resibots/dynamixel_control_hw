@@ -1,0 +1,19 @@
+<library path="lib/libdynamixel_hw">
+
+  <class name="dynamixel/hardware_interface_p1"
+      type="dynamixel::DynamixelHardwareInterfaceP1"
+      base_class_type="hardware_interface::RobotHW">
+    <description>
+      Hardware interface for Dynamixel actuators, using protocol 1.
+    </description>
+  </class>
+
+  <class name="dynamixel/hardware_interface_p2"
+      type="dynamixel::DynamixelHardwareInterfaceP2"
+      base_class_type="hardware_interface::RobotHW">
+    <description>
+      Hardware interface for Dynamixel actuators, using protocol 2.
+    </description>
+  </class>
+
+</library>

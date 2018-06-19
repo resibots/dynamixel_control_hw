@@ -2,6 +2,11 @@
 
 In reverse chronological order:
 
+- allow an actuator to be inverted (angle and speed)
+- send velocity limits to the actuators, if they are in position mode
+- rename the node executable so that the suffixes reflect the protocl version
+- make plugins for this hardware interface to be included in [combined hardware interfaces](http://wiki.ros.org/combined_robot_hw)
+- implement joint limits (parameterised through URDF or param server)
 - breaking change: the configuration parameter syntax has changed; see sample configuration files
 - velocity control mode integrated
 - replace c-style code with std::chrono for time-related code
