@@ -116,6 +116,8 @@ namespace dynamixel {
         std::unordered_map<id_t, std::string> _dynamixel_map;
         // Map from dynamixel ID to actuator's command interface (ID: velocity/position)
         std::unordered_map<id_t, OperatingMode> _c_mode_map;
+        // Map for servos in velocity mode which speed needs to be inverted
+        std::unordered_map<id_t, bool> _invert;
         // Map for max speed (ID: max speed)
         std::unordered_map<id_t, double> _dynamixel_max_speed;
         // Map for angle offsets (ID: correction in radians)
@@ -294,8 +296,17 @@ namespace dynamixel {
                         << e.msg());
                 }
 
+                // Invert the orientation, if configured
+                typename std::unordered_map<id_t, bool>::iterator
+                    invert_iterator
+                    = _invert.find(_servos[i]->id());
+                if (invert_iterator != _invert.end()) {
+                    _joint_angles[i] = 2 * M_PI - _joint_angles[i];
+                }
+
                 // Apply angle correction to joint, if any
-                typename std::unordered_map<id_t, double>::iterator dynamixel_corrections_iterator
+                typename std::unordered_map<id_t, double>::iterator
+                    dynamixel_corrections_iterator
                     = _dynamixel_corrections.find(_servos[i]->id());
                 if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                     _joint_angles[i] -= dynamixel_corrections_iterator->second;
@@ -319,7 +330,15 @@ namespace dynamixel {
             }
             if (status_speed.valid()) {
                 try {
-                    _joint_velocities[i] = _servos[i]->parse_joint_speed(status_speed);
+                    _joint_velocities[i]
+                        = _servos[i]->parse_joint_speed(status_speed);
+
+                    typename std::unordered_map<id_t, bool>::iterator
+                        invert_iterator
+                        = _invert.find(_servos[i]->id());
+                    if (invert_iterator != _invert.end()
+                        && invert_iterator->second)
+                        _joint_velocities[i] = -_joint_velocities[i];
                 }
                 catch (dynamixel::errors::Error& e) {
                     ROS_ERROR_STREAM("Unpack exception while getting  "
@@ -353,22 +372,42 @@ namespace dynamixel {
 
                 OperatingMode mode = _c_mode_map[_servos[i]->id()];
                 if (OperatingMode::joint == mode) {
-                    typename std::unordered_map<id_t, double>::iterator dynamixel_corrections_iterator
+                    typename std::unordered_map<id_t, double>::iterator
+                        dynamixel_corrections_iterator
                         = _dynamixel_corrections.find(_servos[i]->id());
                     if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
                         command += dynamixel_corrections_iterator->second;
                     }
 
+                    // Invert the orientation, if configured
+                    typename std::unordered_map<id_t, bool>::iterator
+                        invert_iterator
+                        = _invert.find(_servos[i]->id());
+                    if (invert_iterator != _invert.end()) {
+                        command = 2 * M_PI - command;
+                    }
+
                     ROS_DEBUG_STREAM("Setting position for joint "
                         << _dynamixel_map[_servos[i]->id()] << " to " << command
                         << " rad.");
-                    _dynamixel_controller.send(_servos[i]->reg_goal_position_angle(command));
+                    _dynamixel_controller.send(
+                        _servos[i]->reg_goal_position_angle(command));
                     _dynamixel_controller.recv(status);
                 }
                 else if (OperatingMode::wheel == mode) {
+                    // Invert the orientation, if configured
+                    const short sign = 1; // formerly: _invert[_servos[i]->id()] ? -1 : 1;
+                    typename std::unordered_map<id_t, bool>::iterator
+                        invert_iterator
+                        = _invert.find(_servos[i]->id());
+                    if (invert_iterator != _invert.end()
+                        && invert_iterator->second) {
+                        command = -command;
+                    }
                     ROS_DEBUG_STREAM("Setting velocity for joint "
                         << _servos[i]->id() << " to " << command);
-                    _dynamixel_controller.send(_servos[i]->reg_moving_speed_angle(command, mode));
+                    _dynamixel_controller.send(
+                        _servos[i]->reg_moving_speed_angle(command, mode));
                     _dynamixel_controller.recv(status);
                 }
             }
@@ -412,7 +451,7 @@ namespace dynamixel {
         bool has_default_command_interface = robot_hw_nh.getParam(
             "default_command_interface", default_command_interface);
 
-        // Retrieve the srevo parameter and fill maps above with its content.
+        // Retrieve the servo parameter and fill maps above with its content.
         XmlRpc::XmlRpcValue servos_param; // temporary map, from parameter server
         if (got_all_params &= robot_hw_nh.getParam("servos", servos_param)) {
             ROS_ASSERT(servos_param.getType() == XmlRpc::XmlRpcValue::TypeStruct);
@@ -458,6 +497,10 @@ namespace dynamixel {
                             << "should be declared for the actuator " << it->first
                             << " or a default one should be defined with the parameter "
                             << "'default_command_interface'.");
+                    }
+
+                    if (it->second.hasMember("reverse")) {
+                        _invert[id] = servos_param[it->first]["reverse"];
                     }
                 }
             }
@@ -622,14 +665,14 @@ namespace dynamixel {
     {
         try {
             // Enable the actuator
-            
+
             dynamixel::StatusPacket<Protocol> status;
             ROS_DEBUG_STREAM("Enabling servo " << servo->id());
             _dynamixel_controller.send(servo->set_torque_enable(1));
             _dynamixel_controller.recv(status);
 
             // Set max speed for actuators in position mode
-            
+
             typename std::unordered_map<id_t, double>::iterator
                 dynamixel_max_speed_iterator
                 = _dynamixel_max_speed.find(servo->id());
@@ -736,7 +779,7 @@ namespace dynamixel {
                                           << joint_limits.max_velocity << "]");
         } // the else debug message provided internally by joint_limits_interface
 
-        // Slighly reduce the joint limits to prevent floating point errors
+        // Slightly reduce the joint limits to prevent floating point errors
         if (joint_limits.has_position_limits) {
             joint_limits.min_position += std::numeric_limits<double>::epsilon();
             joint_limits.max_position -= std::numeric_limits<double>::epsilon();

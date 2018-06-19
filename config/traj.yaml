@@ -39,5 +39,7 @@ dynamixel_control:
       id: 3
       offset: 3.14159265359
       command_interface: position
+      # this actuator is set in reverse mode for the speed and position
+      reverse: true
   # default mode
   default_command_interface: position
