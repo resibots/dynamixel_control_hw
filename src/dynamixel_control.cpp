@@ -67,13 +67,13 @@ int main(int argc, char** argv)
             dynamixel_hw_interface = std::make_shared<dynamixel::DynamixelHardwareInterface<Protocol>>();
         // Initialise the hardware interface:
         // 1. retrieve configuration from rosparam
-        // 2. initialize the hardware and interface with ros_control
+        // 2. initialize the hardware and interface it with ros_control
         dynamixel_hw_interface->init(nh, robot_hw_nh);
 
         // Start the control loop
         dynamixel::DynamixelLoop<Protocol> control_loop(nh, dynamixel_hw_interface);
 
-        // Wait until shutdown signal recieved
+        // Wait until shutdown signal received
         ros::waitForShutdown();
     }
     catch (const ros::Exception& e) {
