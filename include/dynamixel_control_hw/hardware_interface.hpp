@@ -527,7 +527,7 @@ namespace dynamixel {
         // Get joint limits from the URDF or the parameter server
         // ------------------------------------------------------
 
-        std::string urdf_param_name("/robot_description");
+        std::string urdf_param_name("robot_description");
         // TODO: document this feature
         if (robot_hw_nh.hasParam("urdf_param_name"))
             robot_hw_nh.getParam("urdf_param_name", urdf_param_name);
