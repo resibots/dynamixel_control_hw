@@ -5,6 +5,8 @@
   <description>An interface to the Dynamixel actuators for ROS control</description>
 
   <maintainer email="dorian.goepp@inria.fr">Dorian Goepp</maintainer>
+  <maintainer email="pierre.desreumaux@inria.fr">Pierre Desreumaux</maintainer>
+  <maintainer email="eloise.dalin@inria.fr">Eloise Dalin</maintainer>
 
   <license>CeCILL</license>
 

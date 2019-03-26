@@ -1,0 +1,22 @@
+dynamixel_controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 10
+    joint: motor1
+
+  pos_controller:
+    type: position_controllers/JointPositionController
+    joint: motor1
+
+dynamixel_control:
+  serial_interface: /dev/ttyUSB0
+  servos:
+    motor1:
+      id: 3
+      offset: 0.0 # in rad
+  loop_frequency: 1000
+  cycle_time_error_threshold: 0.005
+  baudrate: 1000000 # in bauds
+  read_timeout: 0.1 # in seconds
+  scan_timeout: 0.05 # in seconds
+  default_command_interface: position

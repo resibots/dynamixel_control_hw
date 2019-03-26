@@ -12,10 +12,10 @@ dynamixel_controllers:
     joint: arm_joint_1
 
 dynamixel_control:
-  serial_interface: /dev/ttyUSB0
+  serial_interface: /dev/usb2ax0
   loop_frequency: 50
   cycle_time_error_threshold: 0.1
-  baudrate: 1000000 # in bauds
+  baudrate: 115200 # in bauds
   read_timeout: 0.05 # in seconds
   scan_timeout: 0.05 # in seconds
   # Cofniguration of the servos
@@ -24,10 +24,10 @@ dynamixel_control:
       # hardware ID of the actuator
       id: 2
       # offset to be added, in radians, to the position of an actuator
-      offset: 4.5 # in rad
-      command_interface: velocity
+      offset: -4.5 # in rad
+      command_interface: position
     arm_joint_2:
-      id: 1
+      id: 3
       # max joint speed
       # it shoud NOT be used for actuators in velocity mode
       max-speed: 4 # in rad/s
@@ -35,4 +35,3 @@ dynamixel_control:
       reverse: true
   # default mode
   default_command_interface: position
-

@@ -38,7 +38,9 @@
 #define CONTROL_LOOP
 
 #include <chrono>
-
+#include <fstream>
+#include <iostream>
+#include <string>
 // for shared pointer
 #include <memory>
 // for runtime_error
@@ -68,6 +70,7 @@ namespace dynamixel {
             : _nh(nh),
               _hardware_interface(hardware_interface)
         {
+
             // Create the controller manager
             _controller_manager.reset(new controller_manager::ControllerManager(_hardware_interface.get(), _nh));
 
@@ -84,10 +87,16 @@ namespace dynamixel {
 
             // Get current time for use with first update
             _last_time = steady_clock::now();
-
+            _num_seconds = 0;
             // Start timer that will periodically call DynamixelLoop::update
-            _desired_update_freq = ros::Duration(1 / _loop_hz);
-            _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
+            _desired_update_time = ros::Duration(1 / _loop_hz);
+            _non_realtime_loop = _nh.createTimer(_desired_update_time, &DynamixelLoop::update, this);
+        }
+
+        ~DynamixelLoop()
+        {
+            _fichier.close();
+            //std::cout << "file closed" << std::endl;
         }
 
         /** Timed method that reads current hardware's state, runs the controller
@@ -99,20 +108,31 @@ namespace dynamixel {
         **/
         void update(const ros::TimerEvent&)
         {
+
             // Get change in time
             _current_time = steady_clock::now();
-            duration<double> time_span
-                = duration_cast<duration<double>>(_current_time - _last_time);
+            auto duration_in_seconds = std::chrono::duration<double>(_current_time.time_since_epoch());
+
+            duration<double> time_span = duration_cast<duration<double>>(_current_time - _last_time);
             _elapsed_time = ros::Duration(time_span.count());
             _last_time = _current_time;
 
             // Check cycle time for excess delay
-            const double cycle_time_error = (_elapsed_time - _desired_update_freq).toSec();
+            _num_seconds += _elapsed_time.toSec();
+            const double real_frequency = 1 / ((_elapsed_time).toSec());
+            double cycle_time_error = (_elapsed_time - _desired_update_time).toSec();
+            if (cycle_time_error < 0) {
+                cycle_time_error = 0;
+            }
+            const double error_pourcentage = (cycle_time_error / (_desired_update_time).toSec()) * 100;
+            //  std::cout << "freq: " << real_frequency << std::endl;
             if (cycle_time_error > _cycle_time_error_threshold) {
                 ROS_WARN_STREAM("Cycle time exceeded error threshold by: "
                     << cycle_time_error - _cycle_time_error_threshold << "s, "
                     << "cycle time: " << _elapsed_time << "s, "
-                    << "threshold: " << _cycle_time_error_threshold << "s");
+                    << "threshold: " << _cycle_time_error_threshold << "s, "
+                    << "real frequency: " << real_frequency << "Hz, "
+                    << "error : " << error_pourcentage << "%");
             }
 
             // Input
@@ -131,9 +151,9 @@ namespace dynamixel {
     private:
         // Startup and shutdown of the internal node inside a roscpp program
         ros::NodeHandle _nh;
-
+        std::ofstream _fichier;
         // Settings
-        ros::Duration _desired_update_freq;
+        ros::Duration _desired_update_time;
         double _cycle_time_error_threshold;
 
         // Timing
@@ -142,6 +162,7 @@ namespace dynamixel {
         double _loop_hz;
         steady_clock::time_point _last_time;
         steady_clock::time_point _current_time;
+        float _num_seconds;
 
         /** ROS Controller Manager and Runner
 
