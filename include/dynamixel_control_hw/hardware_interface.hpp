@@ -274,82 +274,52 @@ namespace dynamixel {
     void DynamixelHardwareInterface<Protocol>::read(const ros::Time& time,
         const ros::Duration& elapsed_time)
     {
+        std::vector<id_t> _ids_vector;
         for (unsigned i = 0; i < _servos.size(); i++) {
-            dynamixel::StatusPacket<Protocol> status;
-            try {
-                // current position
-                _dynamixel_controller.send(_servos[i]->get_present_position_angle());
-                _dynamixel_controller.recv(status);
-            }
-            catch (dynamixel::errors::Error& e) {
-                ROS_ERROR_STREAM("Caught a Dynamixel exception while getting  "
-                    << _dynamixel_map[_servos[i]->id()] << "'s position\n"
-                    << e.msg());
-            }
+
+            _ids_vector.push_back(_servos[i]->id());
+        }
+        _dynamixel_controller.send(std::make_shared<servos::Mx28>(0)->get_current_positions_MX<id_t>(_ids_vector)); //servos::Mx28
+        dynamixel::StatusPacket<Protocol> status;
+        for (unsigned i = 0; i < _servos.size(); i++) {
+            _dynamixel_controller.recv(status);
             if (status.valid()) {
-                try {
-                    _joint_angles[i] = _servos[i]->parse_present_position_angle(status);
-                }
-                catch (dynamixel::errors::Error& e) {
-                    ROS_ERROR_STREAM("Unpack exception while getting  "
-                        << _dynamixel_map[_servos[i]->id()] << "'s position\n"
-                        << e.msg());
-                }
-
-                // Invert the orientation, if configured
-                typename std::unordered_map<id_t, bool>::iterator
-                    invert_iterator
-                    = _invert.find(_servos[i]->id());
-                if (invert_iterator != _invert.end()) {
-                    _joint_angles[i] = 2 * M_PI - _joint_angles[i];
-                }
-
-                // Apply angle correction to joint, if any
-                typename std::unordered_map<id_t, double>::iterator
-                    dynamixel_corrections_iterator
-                    = _dynamixel_corrections.find(_servos[i]->id());
-                if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
-                    _joint_angles[i] -= dynamixel_corrections_iterator->second;
-                }
+                _joint_angles[i] = _servos[i]->parse_present_position_angle(status);
             }
-            else {
-                ROS_WARN_STREAM("Did not receive any data when reading "
-                    << _dynamixel_map[_servos[i]->id()] << "'s position");
+        }
+        for (unsigned i = 0; i < _servos.size(); i++) {
+            // Invert the orientation, if configured
+            typename std::unordered_map<id_t, bool>::iterator
+                invert_iterator
+                = _invert.find(_servos[i]->id());
+            if (invert_iterator != _invert.end()) {
+                _joint_angles[i] = 2 * M_PI - _joint_angles[i];
             }
 
-            dynamixel::StatusPacket<Protocol> status_speed;
-            try {
-                // current speed
-                _dynamixel_controller.send(_servos[i]->get_present_speed());
-                _dynamixel_controller.recv(status_speed);
+            // Apply angle correction to joint, if any
+            typename std::unordered_map<id_t, double>::iterator
+                dynamixel_corrections_iterator
+                = _dynamixel_corrections.find(_servos[i]->id());
+            if (dynamixel_corrections_iterator != _dynamixel_corrections.end()) {
+                _joint_angles[i] -= dynamixel_corrections_iterator->second;
             }
-            catch (dynamixel::errors::Error& e) {
-                ROS_ERROR_STREAM("Caught a Dynamixel exception while getting  "
-                    << _dynamixel_map[_servos[i]->id()] << "'s velocity\n"
-                    << e.msg());
-            }
+        }
+
+        _dynamixel_controller.send(std::make_shared<servos::Mx28>(0)->get_current_speed_MX<id_t>(_ids_vector)); //servos::Mx28
+        dynamixel::StatusPacket<Protocol> status_speed;
+        for (unsigned i = 0; i < _servos.size(); i++) {
+            _dynamixel_controller.recv(status_speed);
             if (status_speed.valid()) {
-                try {
-                    _joint_velocities[i]
-                        = _servos[i]->parse_joint_speed(status_speed);
-
-                    typename std::unordered_map<id_t, bool>::iterator
-                        invert_iterator
-                        = _invert.find(_servos[i]->id());
-                    if (invert_iterator != _invert.end()
-                        && invert_iterator->second)
-                        _joint_velocities[i] = -_joint_velocities[i];
-                }
-                catch (dynamixel::errors::Error& e) {
-                    ROS_ERROR_STREAM("Unpack exception while getting  "
-                        << _dynamixel_map[_servos[i]->id()] << "'s velocity\n"
-                        << e.msg());
-                }
+                _joint_velocities[i] = _servos[i]->parse_joint_speed(status_speed);
             }
-            else {
-                ROS_WARN_STREAM("Did not receive any data when reading "
-                    << _dynamixel_map[_servos[i]->id()] << "'s velocity");
-            }
+        }
+        for (unsigned i = 0; i < _servos.size(); i++) {
+            typename std::unordered_map<id_t, bool>::iterator
+                invert_iterator
+                = _invert.find(_servos[i]->id());
+            if (invert_iterator != _invert.end()
+                && invert_iterator->second)
+                _joint_velocities[i] = -_joint_velocities[i];
         }
     }
 
