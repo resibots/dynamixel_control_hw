@@ -315,6 +315,8 @@ texinfo_documents = [
 
 # Configuration for intersphinx:
 intersphinx_mapping = {
-    'resibots': ('http://www.resibots.eu', None),
+     'resibots': ('http://www.resibots.eu/', None),
     'limbo': ('http://www.resibots.eu/limbo', None),
+'libdynamixel': ('http://www.resibots.eu/libdynamixel', None),
+'dynamixel_control_hw': ('http://www.resibots.eu/dynamixel_control_hw', None)
 } # FIXME

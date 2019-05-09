@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Testing the hardware interface &mdash; dynamixel_control_hw 0.1 alpha documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="../index.html"/>
+        <link rel="up" title="Tutorials" href="index.html"/>
+        <link rel="next" title="Our hexapod example" href="hexapod_example.html"/>
+<style type="text/css">
+/* This CSS displays small logos at the bottom of the page, on one line */
+
+.wy-footer-logo-container {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.wy-footer-logo {
+  display: inline-block;
+  width: 60px;
+}
+</style>
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+          
+
+          
+            <a href="http://www.resibots.eu">
+          
+
+          
+            
+            <img src="../_static/resibots_logo_black_200px.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="resibots-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+                  <a class="caption" href="http://www.resibots.eu">Project's website</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/limbo">limbo</a>
+              
+                  <a class="caption" href="http://www.sferes2.github.io">sferes2</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/libdynamixel">libdynamixel</a>
+              
+            
+
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Dynamixel ROS Control</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download_and_compilation.html">Download and Compilation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Testing the hardware interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hexapod_example.html">Our hexapod example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide ROS control</a></li>
+</ul>
+
+            
+
+            
+            
+              
+                <a class="caption" href="http://github.com/resibots">github</a>
+              
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">dynamixel_control_hw</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Yynamixel_control_hw</a> &raquo;</li>
+    
+      <li><a href="index.html">Tutorials</a> &raquo;</li>
+    
+    <li>Testing the hardware interface</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../_sources/tutorials/simple_example.rst.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="testing-the-hardware-interface">
+<h1>Testing the hardware interface<a class="headerlink" href="#testing-the-hardware-interface" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial assumes that you have already been able to compile and install the package. If not, please refer to the related instructions in the <a class="reference internal" href="download_and_compilation.html#download-and-compilation"><span class="std std-ref">building/installation instructions</span></a>.</p>
+<p>For this example, we are using 2 dynamixel actuators : <a class="reference external" href="http://emanual.robotis.com/docs/en/dxl/mx/mx-28/">MX28</a> .
+It will by default <strong>launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators</strong>.</p>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Connect motor</dt>
+<dd><p class="first last">with your <a class="reference external" href="http://emanual.robotis.com/docs/en/parts/interface/usb2dynamixel/">USB2DYNAMIXEL</a> device or your favorite dynamixel interface.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Supply power</dt>
+<dd><p class="first last">USB2Dynamixel does not supply power to Dynamixel. Therefore, the power must be supplied separately to operate Dynamixel.
+We are recommanded to use : one laboratory power supply or <a class="reference external" href="https://www.generationrobots.com/en/400867-smps2dynamixel-robotis.html">SMPS2Dynamixel</a> .</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>Go inside your <a class="reference external" href="https://github.com/resibots/libdynamixel">libdynamixel</a> directory</p>
+<ol class="arabic" start="3">
+<li><dl class="first docutils">
+<dt>Check serial interface</dt>
+<dd><p class="first">open a terminal and simply type : <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">/dev</span></code>.</p>
+<p class="last">check your serial interface’s name, in our case <code class="docutils literal notranslate"><span class="pre">ttyUSB0</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Check device’s ID</dt>
+<dd><p class="first last">open a terminal and simply go into your libdynamixel directory : <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/home/USER/Resibots/libdynamixel</span></code>.
+Now, you can check with our tools interface if your motors and the libdynamixel work correctly :</p>
+</dd>
+</dl>
+</li>
+</ol>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">./build/src/tools/dynamixel</span> <span class="pre">-p</span> <span class="pre">/dev/ttyUSB0</span> <span class="pre">-b</span> <span class="pre">3000000</span> <span class="pre">list</span></code></dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">-p</span></code> device interface</li>
+<li><code class="docutils literal notranslate"><span class="pre">-b</span></code> dynamixel’s baudrate (known)</li>
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code> command to list all connected dynamixel</li>
+</ul>
+</dd>
+</dl>
+<p>Go inside your  <a class="reference external" href="https://github.com/resibots/dynamixel_control_hw">dynamixel_control_hw</a> directory</p>
+<ol class="arabic" start="5">
+<li><dl class="first docutils">
+<dt>Configuration file</dt>
+<dd><dl class="first last docutils">
+<dt>check the example configuration file: <code class="docutils literal notranslate"><span class="pre">config/sample.yaml</span></code></dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">id</span></code> parameters</li>
+<li><code class="docutils literal notranslate"><span class="pre">serial_interface</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">baudrate</span></code></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Launch file</dt>
+<dd><p class="first">Check the <code class="docutils literal notranslate"><span class="pre">launch/sample.launch</span></code> file.</p>
+<p>It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators.</p>
+<p class="last">Once you are sure that it’s correct, you can <code class="docutils literal notranslate"><span class="pre">roslaunch</span> <span class="pre">dynamixel_control_hw</span> <span class="pre">sample.launch</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Check topics and params</dt>
+<dd><p class="first last">rostopic list
+rosparam list</p>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="hexapod_example.html" class="btn btn-neutral float-right" title="Our hexapod example" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="wy-footer">
+    <div role="contentinfo">
+      <p>
+          &copy; Copyright 2018-2019, Inria.
+
+      
+      
+        <br/>
+        <a href="mailto:jean-baptiste.mouret@inria.fr"> Contact us </a>
+      
+      </p>
+    </div>
+    <div class="wy-footer-aside">
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> modified for <a href="http://resibots.eu">Resibots</a>.
+    </div>
+    <div style="clear: both;"></div>
+  </div>
+<div class="wy-footer-logo-container">
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_eu.png"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_erc_nonofficial.svg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_loria.jpg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo-inria.svg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_cnrs.png"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_universite_lorraine.jpg"/></div>
+</div>
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1 alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxResibotsTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

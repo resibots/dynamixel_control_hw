@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dynamixel ROS Control &mdash; dynamixel_control_hw 0.1 alpha documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="#"/>
+        <link rel="next" title="Tutorials" href="tutorials/index.html"/>
+<style type="text/css">
+/* This CSS displays small logos at the bottom of the page, on one line */
+
+.wy-footer-logo-container {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.wy-footer-logo {
+  display: inline-block;
+  width: 60px;
+}
+</style>
+
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+          
+
+          
+            <a href="http://www.resibots.eu">
+          
+
+          
+            
+            <img src="_static/resibots_logo_black_200px.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="resibots-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+                  <a class="caption" href="http://www.resibots.eu">Project's website</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/limbo">limbo</a>
+              
+                  <a class="caption" href="http://www.sferes2.github.io">sferes2</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/libdynamixel">libdynamixel</a>
+              
+            
+
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dynamixel ROS Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide/index.html">Guide ROS control</a></li>
+</ul>
+
+            
+
+            
+            
+              
+                <a class="caption" href="http://github.com/resibots">github</a>
+              
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">dynamixel_control_hw</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Yynamixel_control_hw</a> &raquo;</li>
+    
+    <li>Dynamixel ROS Control</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dynamixel-ros-control">
+<h1>Dynamixel ROS Control<a class="headerlink" href="#dynamixel-ros-control" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dynamixel-control-hw">
+<h2>dynamixel_control_hw<a class="headerlink" href="#dynamixel-control-hw" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/resibots/dynamixel_control_hw">dynamixel_control_hw</a> is a high-performance <a class="reference external" href="http://wiki.ros.org/ros_control">ROS control</a> package for Dynamixel actuators (<a class="reference external" href="http://emanual.robotis.com/">ROBOTIS</a> ).</p>
+<p>ROS control is a framework for control loops in <a class="reference external" href="https://www.ros.org/">ROS</a> where the controller code is decoupled from the actual hardware interface.</p>
+<p>Dynamixel is a range of all-in-one actuators (motor, gearbox, control board, PID, etc.) addressed through a RS-485 bus, which are very popular in robotics.</p>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>simple, ROS-style control interface for your dynamixel-based robot</li>
+<li>not specific to a given number or set of actuators</li>
+<li>position and velocity control</li>
+<li>works with both version of Dynamixel protocol (1 and 2)</li>
+<li>uses radians uniformly over all Dynamixel models (no need to worry about ticks-to-angle conversion)</li>
+<li>you can set an offset for each actuator’s position</li>
+<li>set names for your dynamixels in a configuration file</li>
+<li>joint limits</li>
+</ul>
+</div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<a class="reference external image-reference" href="_static/roscontrol_dynamixel.png"><img alt="ROS control overview" class="align-center" src="_images/roscontrol_dynamixel.png" /></a>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dynamixel ROS Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/quick_start.html">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/download_and_compilation.html">Download and Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/simple_example.html">Testing the hardware interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/hexapod_example.html">Our hexapod example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/index.html">Guide ROS control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/what_ros_control.html">what’s exactly ROS control ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/controllers.html">Controllers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/hardware_interface.html">Hardware interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/transmission.html">Transmission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/joint_limits.html">Joint limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/write_controller.html">Writting a new controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/write_robot.html">Setting up a new robot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/set_joint_limit.html">Setting up a joint limit interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/write_combined.html">Writing combined hardware interface</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+<div class="section" id="support">
+<h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<p>If you need some help, feel free to <a class="reference external" href="https://github.com/resibots/dynamixel_control_hw/issues">fill an issue</a> on this repository. We’ll do our best to be responsive.</p>
+</div>
+<div class="section" id="license-and-authors">
+<h2>License and authors<a class="headerlink" href="#license-and-authors" title="Permalink to this headline">¶</a></h2>
+<p>This work is distributed under the terms of the <a class="reference external" href="http://www.cecill.info/licences.en.html">CeCILL-C</a> license. © INRIA.</p>
+<p>The authors for this library are Dorian Goepp, Eloise Dalin and Pierre Desreumaux.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="wy-footer">
+    <div role="contentinfo">
+      <p>
+          &copy; Copyright 2018-2019, Inria.
+
+      
+      
+        <br/>
+        <a href="mailto:jean-baptiste.mouret@inria.fr"> Contact us </a>
+      
+      </p>
+    </div>
+    <div class="wy-footer-aside">
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> modified for <a href="http://resibots.eu">Resibots</a>.
+    </div>
+    <div style="clear: both;"></div>
+  </div>
+<div class="wy-footer-logo-container">
+  <div class="wy-footer-logo"><img src="_static/logos/logo_eu.png"/></div>
+  <div class="wy-footer-logo"><img src="_static/logos/logo_erc_nonofficial.svg"/></div>
+  <div class="wy-footer-logo"><img src="_static/logos/logo_loria.jpg"/></div>
+  <div class="wy-footer-logo"><img src="_static/logos/logo-inria.svg"/></div>
+  <div class="wy-footer-logo"><img src="_static/logos/logo_cnrs.png"/></div>
+  <div class="wy-footer-logo"><img src="_static/logos/logo_universite_lorraine.jpg"/></div>
+</div>
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1 alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxResibotsTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
