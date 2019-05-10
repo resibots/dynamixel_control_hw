@@ -31,8 +31,8 @@
     <!-- Start a controller for our dummy robot -->
     <node name="controller" pkg="controller_manager" type="spawner"
           respawn="false" output="screen" clear_params="true"
-          args="/dynamixel_controllers/vel_controller
-                /dynamixel_controllers/pos_controller
+          args="/dynamixel_controllers/traj_controller
+                /dynamixel_controllers/vel_controller
                 /dynamixel_controllers/joint_state_controller" />
   </group>
 </launch>
