@@ -3,9 +3,10 @@ dynamixel_controllers:
     type: joint_state_controller/JointStateController
     publish_rate: 10
 
-  pos_controller:
-    type: position_controllers/JointPositionController
-    joint: arm_joint_2
+  traj_controller:
+    type: position_controllers/JointTrajectoryController
+    joints:
+      - arm_joint_2
 
   vel_controller:
     type: velocity_controllers/JointVelocityController
@@ -23,15 +24,16 @@ dynamixel_control:
     arm_joint_1:
       # hardware ID of the actuator
       id: 2
+      offset: 3.14159265359
       # offset to be added, in radians, to the position of an actuator
-      offset: 0.0 # in rad
+      #max-speed: 4.0 # in rad
       command_interface: velocity
     arm_joint_2:
       id: 1
       # max joint speed
       # it shoud NOT be used for actuators in velocity mode
-      max-speed: 4 # in rad/s
+      offset: 3.1 # in rad/s
       # this actuator is set in reverse mode for the speed and position
-      reverse: true
+      #reverse: false
   # default mode
   default_command_interface: position
