@@ -13,8 +13,6 @@ Dependencies :
 - `ROS control <https://github.com/ros-controls/ros_control>`__
 
 .. note:: You need to store the installation path of `libdynamixel <https://github.com/resibots/libdynamixel>`__ in your environment variable inside your  ``~/.bashrc`` file  ``export LIBDYNAMIXEL=/home/USER/Resibots`` .
-          Install the ros package ros_control. In apt-get, it is called ros-YourDistro-ros-control (where YourDistro must be changed by the ROS distribution's name, like indigo or jade).
-          Clone the dynamixel_control_hw repository in your catkin workspace's source directory and run a catkin_make
 
 
 ROS Dependencies :

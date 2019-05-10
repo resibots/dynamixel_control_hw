@@ -62,6 +62,11 @@ namespace dynamixel {
         using hw_int = typename dynamixel::DynamixelHardwareInterface<Protocol>;
 
     public:
+        /** With this constructor a controller manager is create, then it loads rosparams
+
+              @param nh ros node handle
+              @param hardware_interface abstract Hardware Interface of your robot
+          **/
         DynamixelLoop(
             ros::NodeHandle& nh,
             std::shared_ptr<hw_int> hardware_interface)
@@ -97,6 +102,13 @@ namespace dynamixel {
                 does NOT guarantee that the time source is strictly
                 linearly increasing.
         **/
+
+        /** Update function firstly get the hardware's state;  it compute the new command (via the controller manager),
+            then it send the new command to hardware
+
+              @param nh ros node handle
+              @param hardware_interface abstract Hardware Interface of your robot
+          **/
         void update(const ros::TimerEvent&)
         {
             // Get change in time
@@ -151,7 +163,7 @@ namespace dynamixel {
         **/
         std::shared_ptr<controller_manager::ControllerManager> _controller_manager;
 
-        /// Abstract Hardware Interface for your robot
+        // Abstract Hardware Interface for your robot
         std::shared_ptr<hw_int> _hardware_interface;
     };
 } // namespace dynamixel

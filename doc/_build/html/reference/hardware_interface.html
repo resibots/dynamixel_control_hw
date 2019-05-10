@@ -1,0 +1,1106 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Hardware interface &mdash; dynamixel_control_hw 0.1 alpha documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="../index.html"/>
+        <link rel="up" title="Reference" href="index.html"/>
+        <link rel="prev" title="Control loop" href="control_loop.html"/>
+<style type="text/css">
+/* This CSS displays small logos at the bottom of the page, on one line */
+
+.wy-footer-logo-container {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.wy-footer-logo {
+  display: inline-block;
+  width: 60px;
+}
+</style>
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+          
+
+          
+            <a href="http://www.resibots.eu">
+          
+
+          
+            
+            <img src="../_static/resibots_logo_black_200px.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="resibots-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+                  <a class="caption" href="http://www.resibots.eu">Project's website</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/limbo">limbo</a>
+              
+                  <a class="caption" href="http://www.sferes2.github.io">sferes2</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/libdynamixel">libdynamixel</a>
+              
+            
+
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Dynamixel ROS Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="control_loop.html">Control loop</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Hardware interface</a></li>
+</ul>
+</li>
+</ul>
+
+            
+
+            
+            
+              
+                <a class="caption" href="http://github.com/resibots">github</a>
+              
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">dynamixel_control_hw</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Yynamixel_control_hw</a> &raquo;</li>
+    
+      <li><a href="index.html">Reference</a> &raquo;</li>
+    
+    <li>Hardware interface</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../_sources/reference/hardware_interface.rst.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="hardware-interface">
+<h1>Hardware interface<a class="headerlink" href="#hardware-interface" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef dynamixel_hardware_interface</span>
+<span class="cp">#define dynamixel_hardware_interface</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;limits&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;math.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdexcept&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;unordered_map&gt;</span><span class="cp"></span>
+
+<span class="c1">// ROS</span>
+<span class="cp">#include</span> <span class="cpf">&lt;ros/ros.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;urdf/model.h&gt;</span><span class="cp"></span>
+<span class="c1">// ROS-related: to parse parameters</span>
+<span class="cp">#include</span> <span class="cpf">&lt;XmlRpcException.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;XmlRpcValue.h&gt;</span><span class="cp"></span>
+
+<span class="c1">// ROS control</span>
+<span class="cp">#include</span> <span class="cpf">&lt;hardware_interface/joint_command_interface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;hardware_interface/joint_state_interface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;hardware_interface/robot_hw.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;joint_limits_interface/joint_limits.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;joint_limits_interface/joint_limits_interface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;joint_limits_interface/joint_limits_rosparam.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;joint_limits_interface/joint_limits_urdf.h&gt;</span><span class="cp"></span>
+
+<span class="c1">// Library for access to the dynamixels</span>
+<span class="cp">#include</span> <span class="cpf">&lt;dynamixel/dynamixel.hpp&gt;</span><span class="cp"></span>
+
+<span class="n">namespace</span> <span class="n">dynamixel</span> <span class="p">{</span>
+  <span class="cm">/** Hardware interface for a set of dynamixel actuators.</span>
+
+<span class="cm">      This class fits in the ros_control framework for robot control.</span>
+
+<span class="cm">      Warning: this code is currently limited to joint-mode dynamixel actuators</span>
+<span class="cm">  **/</span>
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="n">class</span> <span class="nl">DynamixelHardwareInterface</span> <span class="p">:</span> <span class="n">public</span> <span class="n">hardware_interface</span><span class="o">::</span><span class="n">RobotHW</span> <span class="p">{</span>
+  <span class="nl">public</span><span class="p">:</span>
+      <span class="c1">// Actuator&#39;s id type</span>
+      <span class="n">using</span> <span class="kt">id_t</span> <span class="o">=</span> <span class="kr">typename</span> <span class="n">Protocol</span><span class="o">::</span><span class="kt">id_t</span><span class="p">;</span>
+
+      <span class="n">DynamixelHardwareInterface</span><span class="p">(){};</span>
+      <span class="o">~</span><span class="n">DynamixelHardwareInterface</span><span class="p">();</span>
+
+      <span class="cm">/** Initialise the whole hardware interface.</span>
+
+<span class="cm">          Set the essential parameters for communication with the hardware</span>
+<span class="cm">          and find all connected devices and register those referred in</span>
+<span class="cm">          dynamixel_map in the hardware interface.</span>
+<span class="cm">      **/</span>
+      <span class="kt">bool</span> <span class="nf">init</span><span class="p">(</span><span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">root_nh</span><span class="p">,</span> <span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">robot_hw_nh</span><span class="p">);</span>
+
+      <span class="cm">/** Copy joint&#39;s information to memory</span>
+
+<span class="cm">          firstly queries the information from the dynamixels, then put it in</span>
+<span class="cm">          private attributes, for use by a controller.</span>
+
+<span class="cm">          Warning: do not get any information on torque</span>
+<span class="cm">      **/</span>
+      <span class="n">virtual</span> <span class="kt">void</span> <span class="nf">read</span><span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="o">&amp;</span> <span class="n">time</span><span class="p">,</span> <span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="o">&amp;</span> <span class="n">elapsed_time</span><span class="p">);</span>
+
+      <span class="cm">/** Send new joint&#39;s target position to dynamixels</span>
+
+<span class="cm">          takes the target position from memory (given by a controller) and sends</span>
+<span class="cm">          them to the dynamixels.</span>
+<span class="cm">      **/</span>
+      <span class="n">virtual</span> <span class="kt">void</span> <span class="nf">write</span><span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="o">&amp;</span> <span class="n">time</span><span class="p">,</span> <span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="o">&amp;</span> <span class="n">elapsed_time</span><span class="p">);</span>
+
+  <span class="nl">private</span><span class="p">:</span>
+      <span class="n">using</span> <span class="n">dynamixel_servo</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">servos</span><span class="o">::</span><span class="n">BaseServo</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+
+      <span class="n">DynamixelHardwareInterface</span><span class="p">(</span><span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="k">const</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="n">delete</span><span class="p">;</span>
+      <span class="n">DynamixelHardwareInterface</span><span class="o">&amp;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="k">const</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="n">delete</span><span class="p">;</span>
+
+      <span class="c1">// Methods used for initialisation</span>
+      <span class="kt">bool</span> <span class="nf">_get_ros_parameters</span><span class="p">(</span><span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">root_nh</span><span class="p">,</span>
+          <span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">robot_hw_nh</span><span class="p">);</span>
+      <span class="n">dynamixel</span><span class="o">::</span><span class="n">OperatingMode</span> <span class="n">_str2mode</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">mode_string</span><span class="p">,</span>
+          <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">);</span>
+      <span class="kt">bool</span> <span class="nf">_load_urdf</span><span class="p">(</span><span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">nh</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">param_name</span><span class="p">);</span>
+      <span class="kt">bool</span> <span class="nf">_find_servos</span><span class="p">();</span>
+      <span class="kt">void</span> <span class="nf">_enable_and_configure_servo</span><span class="p">(</span><span class="n">dynamixel_servo</span> <span class="n">servo</span><span class="p">,</span> <span class="n">OperatingMode</span> <span class="n">mode</span><span class="p">);</span>
+      <span class="kt">void</span> <span class="nf">_register_joint_limits</span><span class="p">(</span><span class="k">const</span> <span class="n">hardware_interface</span><span class="o">::</span><span class="n">JointHandle</span><span class="o">&amp;</span> <span class="n">cmd_handle</span><span class="p">,</span>
+          <span class="kt">id_t</span> <span class="n">id</span><span class="p">);</span>
+
+      <span class="kt">void</span> <span class="nf">_enforce_limits</span><span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="o">&amp;</span> <span class="n">loop_period</span><span class="p">);</span>
+
+      <span class="c1">// ROS&#39;s hardware interface instances</span>
+      <span class="n">hardware_interface</span><span class="o">::</span><span class="n">JointStateInterface</span> <span class="n">_jnt_state_interface</span><span class="p">;</span>
+      <span class="n">hardware_interface</span><span class="o">::</span><span class="n">PositionJointInterface</span> <span class="n">_jnt_pos_interface</span><span class="p">;</span>
+      <span class="n">hardware_interface</span><span class="o">::</span><span class="n">VelocityJointInterface</span> <span class="n">_jnt_vel_interface</span><span class="p">;</span>
+
+      <span class="c1">// Joint limits (hard and soft)</span>
+      <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">PositionJointSoftLimitsInterface</span> <span class="n">_jnt_pos_lim_interface</span><span class="p">;</span>
+      <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">VelocityJointSoftLimitsInterface</span> <span class="n">_jnt_vel_lim_interface</span><span class="p">;</span>
+      <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">PositionJointSaturationInterface</span> <span class="n">_jnt_pos_sat_interface</span><span class="p">;</span>
+      <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">VelocityJointSaturationInterface</span> <span class="n">_jnt_vel_sat_interface</span><span class="p">;</span>
+
+      <span class="c1">// Memory space shared with the controller</span>
+      <span class="c1">// It reads here the latest robot&#39;s state and put here the next desired values</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">_prev_commands</span><span class="p">;</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">_joint_commands</span><span class="p">;</span> <span class="c1">// target joint angle or speed</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">_joint_angles</span><span class="p">;</span> <span class="c1">// actual joint angle</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">_joint_velocities</span><span class="p">;</span> <span class="c1">// actual joint velocity</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">_joint_efforts</span><span class="p">;</span> <span class="c1">// compulsory but not used</span>
+
+      <span class="c1">// USB to serial connection settings</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_usb_serial_interface</span><span class="p">;</span>
+      <span class="kt">int</span> <span class="n">_baudrate</span><span class="p">;</span>
+      <span class="kt">float</span> <span class="n">_read_timeout</span><span class="p">,</span> <span class="n">_scan_timeout</span><span class="p">;</span> <span class="c1">// in seconds</span>
+      <span class="c1">// Dynamixel&#39;s low level controller</span>
+      <span class="n">dynamixel</span><span class="o">::</span><span class="n">controllers</span><span class="o">::</span><span class="n">Usb2Dynamixel</span> <span class="n">_dynamixel_controller</span><span class="p">;</span>
+
+      <span class="c1">// List of actuators (collected at init. from the actuators)</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">dynamixel_servo</span><span class="o">&gt;</span> <span class="n">_servos</span><span class="p">;</span>
+      <span class="c1">// Map from dynamixel ID to actuator&#39;s name</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">_dynamixel_map</span><span class="p">;</span>
+      <span class="c1">// Map from dynamixel ID to actuator&#39;s command interface (ID: velocity/position)</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="n">OperatingMode</span><span class="o">&gt;</span> <span class="n">_c_mode_map</span><span class="p">;</span>
+      <span class="c1">// Map for servos in velocity mode which speed needs to be inverted</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">bool</span><span class="o">&gt;</span> <span class="n">_invert</span><span class="p">;</span>
+      <span class="c1">// Map for max speed (ID: max speed)</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">_dynamixel_max_speed</span><span class="p">;</span>
+      <span class="c1">// Map for angle offsets (ID: correction in radians)</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">_dynamixel_corrections</span><span class="p">;</span>
+
+      <span class="c1">// To get joint limits from the parameter server</span>
+      <span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span> <span class="n">_nh</span><span class="p">;</span>
+
+      <span class="c1">// URDF model of the robot, for joint limits</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">urdf</span><span class="o">::</span><span class="n">Model</span><span class="o">&gt;</span> <span class="n">_urdf_model</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::~</span><span class="n">DynamixelHardwareInterface</span><span class="p">()</span>
+  <span class="p">{</span>
+      <span class="c1">// stop all actuators</span>
+      <span class="n">try</span> <span class="p">{</span>
+          <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">dynamixel_servo</span> <span class="p">:</span> <span class="n">_servos</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">dynamixel</span><span class="o">::</span><span class="n">StatusPacket</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="n">status</span><span class="p">;</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">dynamixel_servo</span><span class="o">-&gt;</span><span class="n">set_torque_enable</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while trying to &quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot;power them off:</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">bool</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">init</span><span class="p">(</span>
+      <span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">root_nh</span><span class="p">,</span> <span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">robot_hw_nh</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="c1">// Get the relevant parameters from rosparam</span>
+      <span class="c1">// Search for the servos declared bu the user, in the parameters</span>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">_get_ros_parameters</span><span class="p">(</span><span class="n">root_nh</span><span class="p">,</span> <span class="n">robot_hw_nh</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="n">_find_servos</span><span class="p">())</span>
+          <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+
+      <span class="c1">// declare all available actuators to the control manager, provided a</span>
+      <span class="c1">// name has been given for them</span>
+      <span class="c1">// also enable the torque output on the actuators (sort of power up)</span>
+      <span class="n">try</span> <span class="p">{</span>
+          <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+              <span class="kt">id_t</span> <span class="n">id</span> <span class="o">=</span> <span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">();</span>
+
+              <span class="c1">// check that the actuator&#39;s name is in the map</span>
+              <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">dynamixel_iterator</span>
+                  <span class="o">=</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">dynamixel_iterator</span> <span class="o">!=</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+                  <span class="c1">// tell ros_control the in-memory addresses where to read the</span>
+                  <span class="c1">// information on joint angle, velocity and effort</span>
+                  <span class="n">hardware_interface</span><span class="o">::</span><span class="n">JointStateHandle</span> <span class="n">state_handle</span><span class="p">(</span>
+                      <span class="n">dynamixel_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">,</span>
+                      <span class="o">&amp;</span><span class="n">_joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                      <span class="o">&amp;</span><span class="n">_joint_velocities</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                      <span class="o">&amp;</span><span class="n">_joint_efforts</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+                  <span class="n">_jnt_state_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">state_handle</span><span class="p">);</span>
+
+                  <span class="c1">// check that the actuator control mode matches the declared</span>
+                  <span class="c1">// command interface (position/velocity)</span>
+                  <span class="n">OperatingMode</span> <span class="n">hardware_mode</span>
+                      <span class="o">=</span> <span class="n">operating_mode</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_dynamixel_controller</span><span class="p">,</span> <span class="n">id</span><span class="p">);</span>
+                  <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="n">OperatingMode</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">c_mode_map_i</span>
+                      <span class="o">=</span> <span class="n">_c_mode_map</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">c_mode_map_i</span> <span class="o">!=</span> <span class="n">_c_mode_map</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+                      <span class="k">if</span> <span class="p">(</span><span class="n">c_mode_map_i</span><span class="o">-&gt;</span><span class="n">second</span> <span class="o">!=</span> <span class="n">hardware_mode</span><span class="p">)</span> <span class="p">{</span>
+                          <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;The command interface declared &quot;</span>
+                              <span class="o">&lt;&lt;</span> <span class="n">mode2str</span><span class="p">(</span><span class="n">c_mode_map_i</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">)</span>
+                              <span class="o">&lt;&lt;</span> <span class="s">&quot; for joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">dynamixel_iterator</span><span class="o">-&gt;</span><span class="n">second</span>
+                              <span class="o">&lt;&lt;</span> <span class="s">&quot; but is set to &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mode2str</span><span class="p">(</span><span class="n">hardware_mode</span><span class="p">)</span>
+                              <span class="o">&lt;&lt;</span> <span class="s">&quot; in hardware. Disabling this joint.&quot;</span><span class="p">);</span>
+                          <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">OperatingMode</span><span class="o">::</span><span class="n">unknown</span><span class="p">;</span>
+                      <span class="p">}</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="p">{</span>
+                      <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;The command interface was not defined &quot;</span>
+                          <span class="o">&lt;&lt;</span> <span class="s">&quot;for joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">dynamixel_iterator</span><span class="o">-&gt;</span><span class="n">second</span>
+                          <span class="o">&lt;&lt;</span> <span class="s">&quot;. Disabling this joint.&quot;</span><span class="p">);</span>
+                      <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">OperatingMode</span><span class="o">::</span><span class="n">unknown</span><span class="p">;</span>
+                  <span class="p">}</span>
+
+                  <span class="c1">// tell ros_control the in-memory address to change to set new</span>
+                  <span class="c1">// position or velocity goal for the actuator (depending on</span>
+                  <span class="c1">// hardware_mode)</span>
+                  <span class="n">hardware_interface</span><span class="o">::</span><span class="n">JointHandle</span> <span class="n">cmd_handle</span><span class="p">(</span>
+                      <span class="n">_jnt_state_interface</span><span class="p">.</span><span class="n">getHandle</span><span class="p">(</span><span class="n">dynamixel_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">),</span>
+                      <span class="o">&amp;</span><span class="n">_joint_commands</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">hardware_mode</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="n">_jnt_pos_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">);</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">wheel</span> <span class="o">==</span> <span class="n">hardware_mode</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="n">_jnt_vel_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">);</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">unknown</span> <span class="o">!=</span> <span class="n">hardware_mode</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Servo &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">id</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; was not initialised &quot;</span>
+                                                <span class="o">&lt;&lt;</span> <span class="s">&quot;(operating mode &quot;</span>
+                                                <span class="o">&lt;&lt;</span> <span class="n">mode2str</span><span class="p">(</span><span class="n">hardware_mode</span><span class="p">)</span>
+                                                <span class="o">&lt;&lt;</span> <span class="s">&quot; is not supported)&quot;</span><span class="p">);</span>
+                      <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">OperatingMode</span><span class="o">::</span><span class="n">unknown</span><span class="p">;</span>
+                  <span class="p">}</span>
+
+                  <span class="c1">// Enable servos that were properly configured</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">unknown</span> <span class="o">!=</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">])</span> <span class="p">{</span>
+                      <span class="c1">// Set joint limits (saturation or soft for the joint)</span>
+                      <span class="n">_register_joint_limits</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">,</span> <span class="n">id</span><span class="p">);</span>
+                      <span class="c1">// enable torque output on the servo and set its configuration</span>
+                      <span class="c1">// including max speed</span>
+                      <span class="n">_enable_and_configure_servo</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">hardware_mode</span><span class="p">);</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="p">{</span>
+                      <span class="c1">// remove this servo</span>
+                      <span class="n">_servos</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
+                      <span class="o">--</span><span class="n">i</span><span class="p">;</span>
+                  <span class="p">}</span>
+              <span class="p">}</span>
+              <span class="k">else</span> <span class="p">{</span>
+                  <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;Servo &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">id</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; was not initialised &quot;</span>
+                                           <span class="o">&lt;&lt;</span> <span class="s">&quot;(not found in the parameters)&quot;</span><span class="p">);</span>
+                  <span class="c1">// remove this servo</span>
+                  <span class="n">_servos</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
+                  <span class="o">--</span><span class="n">i</span><span class="p">;</span>
+              <span class="p">}</span>
+          <span class="p">}</span>
+
+          <span class="c1">// register the hardware interfaces</span>
+          <span class="n">registerInterface</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_jnt_state_interface</span><span class="p">);</span>
+          <span class="n">registerInterface</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_jnt_pos_interface</span><span class="p">);</span>
+          <span class="n">registerInterface</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_jnt_vel_interface</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="n">catch</span> <span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Exception</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// TODO: disable actuators that were enabled ?</span>
+          <span class="n">ROS_FATAL_STREAM</span><span class="p">(</span><span class="s">&quot;Error during initialisation. BEWARE: some &quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot;actuators might have already been started.&quot;</span><span class="p">);</span>
+          <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="c1">// At startup robot should keep the pose it has</span>
+      <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span> <span class="n">period</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+      <span class="n">read</span><span class="p">(</span><span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="o">::</span><span class="n">now</span><span class="p">(),</span> <span class="n">period</span><span class="p">);</span>
+
+      <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">OperatingMode</span> <span class="n">mode</span> <span class="o">=</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()];</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">mode</span><span class="p">)</span>
+              <span class="n">_joint_commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+          <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">wheel</span> <span class="o">==</span> <span class="n">mode</span><span class="p">)</span>
+              <span class="n">_joint_commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">void</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">read</span><span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="o">&amp;</span> <span class="n">time</span><span class="p">,</span>
+      <span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="o">&amp;</span> <span class="n">elapsed_time</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">dynamixel</span><span class="o">::</span><span class="n">StatusPacket</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="n">status</span><span class="p">;</span>
+          <span class="n">try</span> <span class="p">{</span>
+              <span class="c1">// current position</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">get_present_position_angle</span><span class="p">());</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+          <span class="p">}</span>
+          <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while getting  &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;s position</span><span class="se">\n</span><span class="s">&quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+          <span class="p">}</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="n">valid</span><span class="p">())</span> <span class="p">{</span>
+              <span class="n">try</span> <span class="p">{</span>
+                  <span class="n">_joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">parse_present_position_angle</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+              <span class="p">}</span>
+              <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Unpack exception while getting  &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;s position</span><span class="se">\n</span><span class="s">&quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+              <span class="p">}</span>
+
+              <span class="c1">// Invert the orientation, if configured</span>
+              <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">bool</span><span class="o">&gt;::</span><span class="n">iterator</span>
+                  <span class="n">invert_iterator</span>
+                  <span class="o">=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">invert_iterator</span> <span class="o">!=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+                  <span class="n">_joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">M_PI</span> <span class="o">-</span> <span class="n">_joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+              <span class="p">}</span>
+
+              <span class="c1">// Apply angle correction to joint, if any</span>
+              <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;::</span><span class="n">iterator</span>
+                  <span class="n">dynamixel_corrections_iterator</span>
+                  <span class="o">=</span> <span class="n">_dynamixel_corrections</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">dynamixel_corrections_iterator</span> <span class="o">!=</span> <span class="n">_dynamixel_corrections</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+                  <span class="n">_joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="n">dynamixel_corrections_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">;</span>
+              <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="p">{</span>
+              <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;Did not receive any data when reading &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;s position&quot;</span><span class="p">);</span>
+          <span class="p">}</span>
+
+          <span class="n">dynamixel</span><span class="o">::</span><span class="n">StatusPacket</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="n">status_speed</span><span class="p">;</span>
+          <span class="n">try</span> <span class="p">{</span>
+              <span class="c1">// current speed</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">get_present_speed</span><span class="p">());</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status_speed</span><span class="p">);</span>
+          <span class="p">}</span>
+          <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while getting  &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;s velocity</span><span class="se">\n</span><span class="s">&quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+          <span class="p">}</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">status_speed</span><span class="p">.</span><span class="n">valid</span><span class="p">())</span> <span class="p">{</span>
+              <span class="n">try</span> <span class="p">{</span>
+                  <span class="n">_joint_velocities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                      <span class="o">=</span> <span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">parse_joint_speed</span><span class="p">(</span><span class="n">status_speed</span><span class="p">);</span>
+
+                  <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">bool</span><span class="o">&gt;::</span><span class="n">iterator</span>
+                      <span class="n">invert_iterator</span>
+                      <span class="o">=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">invert_iterator</span> <span class="o">!=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">end</span><span class="p">()</span>
+                      <span class="o">&amp;&amp;</span> <span class="n">invert_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">)</span>
+                      <span class="n">_joint_velocities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">_joint_velocities</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+              <span class="p">}</span>
+              <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Unpack exception while getting  &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;s velocity</span><span class="se">\n</span><span class="s">&quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+              <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="p">{</span>
+              <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;Did not receive any data when reading &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;s velocity&quot;</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">void</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">write</span><span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="o">&amp;</span> <span class="n">time</span><span class="p">,</span>
+      <span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="o">&amp;</span> <span class="n">loop_period</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="c1">// ensure that the joints limits are respected</span>
+      <span class="n">_enforce_limits</span><span class="p">(</span><span class="n">loop_period</span><span class="p">);</span>
+
+      <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Sending commands only when needed</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">abs</span><span class="p">(</span><span class="n">_joint_commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">_prev_commands</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;::</span><span class="n">epsilon</span><span class="p">())</span>
+              <span class="k">continue</span><span class="p">;</span>
+          <span class="n">_prev_commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_joint_commands</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+          <span class="n">try</span> <span class="p">{</span>
+              <span class="n">dynamixel</span><span class="o">::</span><span class="n">StatusPacket</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="n">status</span><span class="p">;</span>
+
+              <span class="kt">double</span> <span class="n">command</span> <span class="o">=</span> <span class="n">_joint_commands</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+              <span class="n">OperatingMode</span> <span class="n">mode</span> <span class="o">=</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()];</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">mode</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;::</span><span class="n">iterator</span>
+                      <span class="n">dynamixel_corrections_iterator</span>
+                      <span class="o">=</span> <span class="n">_dynamixel_corrections</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">dynamixel_corrections_iterator</span> <span class="o">!=</span> <span class="n">_dynamixel_corrections</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+                      <span class="n">command</span> <span class="o">+=</span> <span class="n">dynamixel_corrections_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">;</span>
+                  <span class="p">}</span>
+
+                  <span class="c1">// Invert the orientation, if configured</span>
+                  <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">bool</span><span class="o">&gt;::</span><span class="n">iterator</span>
+                      <span class="n">invert_iterator</span>
+                      <span class="o">=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">invert_iterator</span> <span class="o">!=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+                      <span class="n">command</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">M_PI</span> <span class="o">-</span> <span class="n">command</span><span class="p">;</span>
+                  <span class="p">}</span>
+
+                  <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Setting position for joint &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; to &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">command</span>
+                      <span class="o">&lt;&lt;</span> <span class="s">&quot; rad.&quot;</span><span class="p">);</span>
+                  <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span>
+                      <span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">reg_goal_position_angle</span><span class="p">(</span><span class="n">command</span><span class="p">));</span>
+                  <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+              <span class="p">}</span>
+              <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">wheel</span> <span class="o">==</span> <span class="n">mode</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="c1">// Invert the orientation, if configured</span>
+                  <span class="k">const</span> <span class="kt">short</span> <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// formerly: _invert[_servos[i]-&gt;id()] ? -1 : 1;</span>
+                  <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">bool</span><span class="o">&gt;::</span><span class="n">iterator</span>
+                      <span class="n">invert_iterator</span>
+                      <span class="o">=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">invert_iterator</span> <span class="o">!=</span> <span class="n">_invert</span><span class="p">.</span><span class="n">end</span><span class="p">()</span>
+                      <span class="o">&amp;&amp;</span> <span class="n">invert_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="n">command</span> <span class="o">=</span> <span class="o">-</span><span class="n">command</span><span class="p">;</span>
+                  <span class="p">}</span>
+                  <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Setting velocity for joint &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; to &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">command</span><span class="p">);</span>
+                  <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span>
+                      <span class="n">_servos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">reg_moving_speed_angle</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">mode</span><span class="p">));</span>
+                  <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+              <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while sending &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="s">&quot;new commands:</span><span class="se">\n</span><span class="s">&quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="n">try</span> <span class="p">{</span>
+          <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">instructions</span><span class="o">::</span><span class="n">Action</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Protocol</span><span class="o">::</span><span class="n">broadcast_id</span><span class="p">));</span>
+      <span class="p">}</span>
+      <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while sending &quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot;new commands:</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="cm">/** Retrieve all needed ROS parameters</span>
+<span class="cm">      @return true if and only if all went well</span>
+<span class="cm">  **/</span>
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">bool</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_get_ros_parameters</span><span class="p">(</span><span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">root_nh</span><span class="p">,</span> <span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">robot_hw_nh</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="kt">bool</span> <span class="n">got_all_params</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+      <span class="n">got_all_params</span> <span class="o">&amp;=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="s">&quot;serial_interface&quot;</span><span class="p">,</span> <span class="n">_usb_serial_interface</span><span class="p">);</span> <span class="c1">// path to the device</span>
+      <span class="kt">int</span> <span class="n">baudrate</span><span class="p">;</span>
+      <span class="n">got_all_params</span> <span class="o">&amp;=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="s">&quot;baudrate&quot;</span><span class="p">,</span> <span class="n">baudrate</span><span class="p">);</span> <span class="c1">// in bauds</span>
+      <span class="n">_baudrate</span> <span class="o">=</span> <span class="n">get_baudrate</span><span class="p">(</span><span class="n">baudrate</span><span class="p">);</span> <span class="c1">// convert to OS-defined values</span>
+      <span class="n">got_all_params</span> <span class="o">&amp;=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="s">&quot;read_timeout&quot;</span><span class="p">,</span> <span class="n">_read_timeout</span><span class="p">);</span> <span class="c1">// in seconds</span>
+      <span class="kt">bool</span> <span class="n">dyn_scan</span> <span class="o">=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="s">&quot;scan_timeout&quot;</span><span class="p">,</span> <span class="n">_scan_timeout</span><span class="p">);</span> <span class="c1">// in seconds</span>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dyn_scan</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;Dynamixel scanning timeout parameter was not found. &quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot;Setting to default: 0.05s.&quot;</span><span class="p">);</span>
+          <span class="n">_scan_timeout</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">default_command_interface</span><span class="p">;</span>
+      <span class="kt">bool</span> <span class="n">has_default_command_interface</span> <span class="o">=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span>
+          <span class="s">&quot;default_command_interface&quot;</span><span class="p">,</span> <span class="n">default_command_interface</span><span class="p">);</span>
+
+      <span class="c1">// Retrieve the servo parameter and fill maps above with its content.</span>
+      <span class="n">XmlRpc</span><span class="o">::</span><span class="n">XmlRpcValue</span> <span class="n">servos_param</span><span class="p">;</span> <span class="c1">// temporary map, from parameter server</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">got_all_params</span> <span class="o">&amp;=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="s">&quot;servos&quot;</span><span class="p">,</span> <span class="n">servos_param</span><span class="p">))</span> <span class="p">{</span>
+          <span class="n">ROS_ASSERT</span><span class="p">(</span><span class="n">servos_param</span><span class="p">.</span><span class="n">getType</span><span class="p">()</span> <span class="o">==</span> <span class="n">XmlRpc</span><span class="o">::</span><span class="n">XmlRpcValue</span><span class="o">::</span><span class="n">TypeStruct</span><span class="p">);</span>
+          <span class="n">try</span> <span class="p">{</span>
+              <span class="k">for</span> <span class="p">(</span><span class="n">XmlRpc</span><span class="o">::</span><span class="n">XmlRpcValue</span><span class="o">::</span><span class="n">ValueStruct</span><span class="o">::</span><span class="n">const_iterator</span> <span class="n">it</span> <span class="o">=</span> <span class="n">servos_param</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">it</span> <span class="o">!=</span> <span class="n">servos_param</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">it</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;servo: &quot;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">)(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">));</span>
+
+                  <span class="kt">id_t</span> <span class="n">id</span><span class="p">;</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">.</span><span class="n">hasMember</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">))</span> <span class="p">{</span>
+                      <span class="n">id</span> <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">servos_param</span><span class="p">[</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">][</span><span class="s">&quot;id&quot;</span><span class="p">]);</span>
+                      <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">id: &quot;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">id</span><span class="p">);</span>
+                      <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">;</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="p">{</span>
+                      <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Actuator &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span>
+                                                   <span class="o">&lt;&lt;</span> <span class="s">&quot; has no associated servo ID.&quot;</span><span class="p">);</span>
+                      <span class="k">continue</span><span class="p">;</span>
+                  <span class="p">}</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">.</span><span class="n">hasMember</span><span class="p">(</span><span class="s">&quot;offset&quot;</span><span class="p">))</span> <span class="p">{</span>
+                      <span class="n">_dynamixel_corrections</span><span class="p">[</span><span class="n">id</span><span class="p">]</span>
+                          <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">servos_param</span><span class="p">[</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">][</span><span class="s">&quot;offset&quot;</span><span class="p">]);</span>
+                      <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">offset: &quot;</span>
+                          <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_corrections</span><span class="p">[</span><span class="n">id</span><span class="p">]);</span>
+                  <span class="p">}</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">.</span><span class="n">hasMember</span><span class="p">(</span><span class="s">&quot;command_interface&quot;</span><span class="p">))</span> <span class="p">{</span>
+                      <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">mode_string</span>
+                          <span class="o">=</span> <span class="n">static_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span>
+                              <span class="n">servos_param</span><span class="p">[</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">][</span><span class="s">&quot;command_interface&quot;</span><span class="p">]);</span>
+                      <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">command_interface: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mode_string</span><span class="p">);</span>
+
+                      <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_str2mode</span><span class="p">(</span><span class="n">mode_string</span><span class="p">,</span> <span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">);</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">has_default_command_interface</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">]</span>
+                          <span class="o">=</span> <span class="n">_str2mode</span><span class="p">(</span><span class="n">default_command_interface</span><span class="p">,</span> <span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">);</span>
+                      <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">command_interface: &quot;</span>
+                          <span class="o">&lt;&lt;</span> <span class="n">default_command_interface</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; (default)&quot;</span><span class="p">);</span>
+                  <span class="p">}</span>
+                  <span class="k">else</span> <span class="p">{</span>
+                      <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;A command interface (speed or position) &quot;</span>
+                          <span class="o">&lt;&lt;</span> <span class="s">&quot;should be declared for the actuator &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span>
+                          <span class="o">&lt;&lt;</span> <span class="s">&quot; or a default one should be defined with the parameter &quot;</span>
+                          <span class="o">&lt;&lt;</span> <span class="s">&quot;&#39;default_command_interface&#39;.&quot;</span><span class="p">);</span>
+                  <span class="p">}</span>
+
+                  <span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">.</span><span class="n">hasMember</span><span class="p">(</span><span class="s">&quot;reverse&quot;</span><span class="p">))</span> <span class="p">{</span>
+                      <span class="n">_invert</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">servos_param</span><span class="p">[</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">][</span><span class="s">&quot;reverse&quot;</span><span class="p">];</span>
+                  <span class="p">}</span>
+              <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="n">catch</span> <span class="p">(</span><span class="n">XmlRpc</span><span class="o">::</span><span class="n">XmlRpcException</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">ROS_FATAL_STREAM</span><span class="p">(</span><span class="s">&quot;Exception raised by XmlRpc while reading the &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="s">&quot;configuration: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">getMessage</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;.</span><span class="se">\n</span><span class="s">&quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="s">&quot;Please check the configuration, particularly parameter types.&quot;</span><span class="p">);</span>
+              <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">got_all_params</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">sub_namespace</span> <span class="o">=</span> <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getNamespace</span><span class="p">();</span>
+          <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">error_message</span> <span class="o">=</span> <span class="s">&quot;One or more of the following parameters &quot;</span>
+                                      <span class="s">&quot;were not set:</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">+</span> <span class="n">sub_namespace</span> <span class="o">+</span> <span class="s">&quot;/serial_interface</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">+</span> <span class="n">sub_namespace</span> <span class="o">+</span> <span class="s">&quot;/baudrate</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">+</span> <span class="n">sub_namespace</span> <span class="o">+</span> <span class="s">&quot;/read_timeout</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">+</span> <span class="n">sub_namespace</span> <span class="o">+</span> <span class="s">&quot;/servos&quot;</span><span class="p">;</span>
+          <span class="n">ROS_FATAL_STREAM</span><span class="p">(</span><span class="n">error_message</span><span class="p">);</span>
+          <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Get joint limits from the URDF or the parameter server</span>
+      <span class="c1">// ------------------------------------------------------</span>
+
+      <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">urdf_param_name</span><span class="p">(</span><span class="s">&quot;robot_description&quot;</span><span class="p">);</span>
+      <span class="c1">// TODO: document this feature</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">hasParam</span><span class="p">(</span><span class="s">&quot;urdf_param_name&quot;</span><span class="p">))</span>
+          <span class="n">robot_hw_nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="s">&quot;urdf_param_name&quot;</span><span class="p">,</span> <span class="n">urdf_param_name</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">_load_urdf</span><span class="p">(</span><span class="n">root_nh</span><span class="p">,</span> <span class="n">urdf_param_name</span><span class="p">))</span>
+          <span class="n">ROS_INFO_STREAM</span><span class="p">(</span><span class="s">&quot;Unable to find a URDF model.&quot;</span><span class="p">);</span>
+      <span class="k">else</span>
+          <span class="nf">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Received the URDF from param server.&quot;</span><span class="p">);</span>
+
+      <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="cm">/** Convert a string to an operating mode for a Dynamixel servo</span>
+
+<span class="cm">      @param mode_string name of the operating mode (either velocity or position)</span>
+<span class="cm">      @param nam name of the joint</span>
+<span class="cm">      @return dynamixel::OperatingMode::unknown if mode_string is not recognized</span>
+<span class="cm">  **/</span>
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="n">dynamixel</span><span class="o">::</span><span class="n">OperatingMode</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_str2mode</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">mode_string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="n">dynamixel</span><span class="o">::</span><span class="n">OperatingMode</span> <span class="n">mode</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="s">&quot;velocity&quot;</span> <span class="o">==</span> <span class="n">mode_string</span><span class="p">)</span>
+          <span class="n">mode</span> <span class="o">=</span> <span class="n">dynamixel</span><span class="o">::</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">wheel</span><span class="p">;</span>
+      <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="s">&quot;position&quot;</span> <span class="o">==</span> <span class="n">mode_string</span><span class="p">)</span>
+          <span class="n">mode</span> <span class="o">=</span> <span class="n">dynamixel</span><span class="o">::</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span><span class="p">;</span>
+      <span class="k">else</span> <span class="p">{</span>
+          <span class="n">mode</span> <span class="o">=</span> <span class="n">dynamixel</span><span class="o">::</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">unknown</span><span class="p">;</span>
+          <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;The command mode &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mode_string</span>
+                                               <span class="o">&lt;&lt;</span> <span class="s">&quot; is not available (actuator &quot;</span>
+                                               <span class="o">&lt;&lt;</span> <span class="n">name</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;)&quot;</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="k">return</span> <span class="n">mode</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="cm">/** Search for the robot&#39;s URDF model on the parameter server and parse it</span>
+
+<span class="cm">      @param nh NodeHandle used to query for the URDF</span>
+<span class="cm">      @param param_name name of the ROS parameter holding the robot model</span>
+<span class="cm">      @param urdf_model pointer to be populated by this function</span>
+<span class="cm">  **/</span>
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">bool</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_load_urdf</span><span class="p">(</span><span class="n">ros</span><span class="o">::</span><span class="n">NodeHandle</span><span class="o">&amp;</span> <span class="n">nh</span><span class="p">,</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">param_name</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">urdf_string</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">_urdf_model</span> <span class="o">==</span> <span class="n">nullptr</span><span class="p">)</span>
+          <span class="n">_urdf_model</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">urdf</span><span class="o">::</span><span class="n">Model</span><span class="o">&gt;</span><span class="p">();</span>
+
+      <span class="c1">// get the urdf param on param server</span>
+      <span class="n">nh</span><span class="p">.</span><span class="n">getParam</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">urdf_string</span><span class="p">);</span>
+
+      <span class="k">return</span> <span class="o">!</span><span class="n">urdf_string</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">_urdf_model</span><span class="o">-&gt;</span><span class="n">initString</span><span class="p">(</span><span class="n">urdf_string</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="cm">/** Search for the requested servos</span>
+
+<span class="cm">      Servos that were not requested are ignored and the software complain if</span>
+<span class="cm">      any required one misses.</span>
+
+<span class="cm">      @return true if and only if there was no error</span>
+<span class="cm">  **/</span>
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">bool</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_find_servos</span><span class="p">()</span>
+  <span class="p">{</span>
+      <span class="c1">// extract servo IDs from _dynamixel_map</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kr">typename</span> <span class="n">Protocol</span><span class="o">::</span><span class="kt">id_t</span><span class="o">&gt;</span> <span class="n">ids</span><span class="p">(</span><span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+      <span class="n">using</span> <span class="n">dm_iter_t</span> <span class="o">=</span> <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;::</span><span class="n">iterator</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">dm_iter_t</span> <span class="n">dm_iter</span> <span class="o">=</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">dm_iter</span> <span class="o">!=</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">dm_iter</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ids</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">dm_iter</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="c1">// get the list of available actuators using the vector of IDs</span>
+      <span class="n">try</span> <span class="p">{</span>
+          <span class="c1">// small recv timeout for auto_detect</span>
+          <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">set_recv_timeout</span><span class="p">(</span><span class="n">_scan_timeout</span><span class="p">);</span>
+          <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">open_serial</span><span class="p">(</span><span class="n">_usb_serial_interface</span><span class="p">,</span> <span class="n">_baudrate</span><span class="p">);</span>
+          <span class="n">_servos</span> <span class="o">=</span> <span class="n">dynamixel</span><span class="o">::</span><span class="n">auto_detect</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_dynamixel_controller</span><span class="p">,</span> <span class="n">ids</span><span class="p">);</span>
+          <span class="c1">// restore recv timeout</span>
+          <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">set_recv_timeout</span><span class="p">(</span><span class="n">_read_timeout</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_FATAL_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while trying to &quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot;initialise them:</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+          <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="c1">// remove servos that are not in the _dynamixel_map (i.e. that are not used)</span>
+      <span class="n">using</span> <span class="n">servo</span> <span class="o">=</span> <span class="n">dynamixel</span><span class="o">::</span><span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">dynamixel_servo</span><span class="p">;</span>
+      <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">servo</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">servo_it</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">servo_it</span> <span class="o">=</span> <span class="n">_servos</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">servo_it</span> <span class="o">!=</span> <span class="n">_servos</span><span class="p">.</span><span class="n">end</span><span class="p">();)</span> <span class="p">{</span>
+          <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">dynamixel_iterator</span>
+              <span class="o">=</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">find</span><span class="p">((</span><span class="o">*</span><span class="n">servo_it</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+          <span class="c1">// the actuator&#39;s name is not in the map</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">dynamixel_iterator</span> <span class="o">==</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">end</span><span class="p">())</span>
+              <span class="n">servo_it</span> <span class="o">=</span> <span class="n">_servos</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">servo_it</span><span class="p">);</span>
+          <span class="k">else</span>
+              <span class="o">++</span><span class="n">servo_it</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Check that no actuator was declared by user but not found</span>
+      <span class="kt">int</span> <span class="n">missing_servos</span> <span class="o">=</span> <span class="n">_dynamixel_map</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">missing_servos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span>
+              <span class="n">missing_servos</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot; servo&quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">missing_servos</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">?</span> <span class="s">&quot;s were&quot;</span> <span class="o">:</span> <span class="s">&quot; was&quot;</span><span class="p">)</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot; declared to the hardware interface but could not be found&quot;</span><span class="p">);</span>
+          <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="n">_prev_commands</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">);</span>
+      <span class="n">_joint_commands</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">);</span>
+      <span class="n">_joint_angles</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">);</span>
+      <span class="n">_joint_velocities</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">);</span>
+      <span class="n">_joint_efforts</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">_servos</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">);</span>
+
+      <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="cm">/** Enable torque output for a joint and send it the relevant settings.</span>
+
+<span class="cm">      For now, these settings are only the speed limit.</span>
+
+<span class="cm">      @param servo the actuator concerned</span>
+<span class="cm">      @param mode operating mode of the actuator (e.g. position or velocity,</span>
+<span class="cm">          in dynamixel speech, joint, wheel, etc.)</span>
+<span class="cm">  **/</span>
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">void</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_enable_and_configure_servo</span><span class="p">(</span>
+      <span class="n">dynamixel_servo</span> <span class="n">servo</span><span class="p">,</span> <span class="n">OperatingMode</span> <span class="n">mode</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="n">try</span> <span class="p">{</span>
+          <span class="c1">// Enable the actuator</span>
+
+          <span class="n">dynamixel</span><span class="o">::</span><span class="n">StatusPacket</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;</span> <span class="n">status</span><span class="p">;</span>
+          <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Enabling servo &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">servo</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+          <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">servo</span><span class="o">-&gt;</span><span class="n">set_torque_enable</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+          <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+
+          <span class="c1">// Set max speed for actuators in position mode</span>
+
+          <span class="kr">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">id_t</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;::</span><span class="n">iterator</span>
+              <span class="n">dynamixel_max_speed_iterator</span>
+              <span class="o">=</span> <span class="n">_dynamixel_max_speed</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">servo</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">());</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">dynamixel_max_speed_iterator</span> <span class="o">!=</span> <span class="n">_dynamixel_max_speed</span><span class="p">.</span><span class="n">end</span><span class="p">())</span> <span class="p">{</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">mode</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Setting velocity limit of servo &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">servo</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; to &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">dynamixel_max_speed_iterator</span><span class="o">-&gt;</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; rad/s.&quot;</span><span class="p">);</span>
+                  <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span>
+                      <span class="n">servo</span><span class="o">-&gt;</span><span class="n">set_moving_speed_angle</span><span class="p">(</span>
+                          <span class="n">dynamixel_max_speed_iterator</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">));</span>
+                  <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+              <span class="p">}</span>
+              <span class="k">else</span> <span class="p">{</span>
+                  <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;A </span><span class="se">\&quot;</span><span class="s">max speed</span><span class="se">\&quot;</span><span class="s"> was defined for servo &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="n">servo</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; but it is currently only supported for &quot;</span>
+                      <span class="o">&lt;&lt;</span> <span class="s">&quot;servos in position mode. Ignoring the speed limit.&quot;</span><span class="p">);</span>
+              <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">mode</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Resetting velocity limit of servo &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">_dynamixel_map</span><span class="p">[</span><span class="n">servo</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;.&quot;</span><span class="p">);</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">servo</span><span class="o">-&gt;</span><span class="n">set_moving_speed_angle</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+              <span class="n">_dynamixel_controller</span><span class="p">.</span><span class="n">recv</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="n">catch</span> <span class="p">(</span><span class="n">dynamixel</span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="n">Error</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;Caught a Dynamixel exception while &quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="s">&quot;initializing:</span><span class="se">\n</span><span class="s">&quot;</span>
+              <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">msg</span><span class="p">());</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">void</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_register_joint_limits</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">hardware_interface</span><span class="o">::</span><span class="n">JointHandle</span><span class="o">&amp;</span> <span class="n">cmd_handle</span><span class="p">,</span>
+      <span class="kt">id_t</span> <span class="n">id</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="c1">// Limits datastructures</span>
+      <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">JointLimits</span> <span class="n">joint_limits</span><span class="p">;</span> <span class="c1">// Position</span>
+      <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">SoftJointLimits</span> <span class="n">soft_limits</span><span class="p">;</span> <span class="c1">// Soft Position</span>
+      <span class="kt">bool</span> <span class="n">has_joint_limits</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="kt">bool</span> <span class="n">has_soft_limits</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+      <span class="c1">// Get limits from URDF</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">_urdf_model</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;No URDF model loaded, cannot be used to load joint&quot;</span>
+                          <span class="s">&quot; limits&quot;</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">else</span> <span class="p">{</span>
+          <span class="c1">// Get limits from URDF</span>
+          <span class="n">urdf</span><span class="o">::</span><span class="n">JointConstSharedPtr</span> <span class="n">urdf_joint</span>
+              <span class="o">=</span> <span class="n">_urdf_model</span><span class="o">-&gt;</span><span class="n">getJoint</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">());</span>
+
+          <span class="c1">// Get main joint limits</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">urdf_joint</span> <span class="o">==</span> <span class="n">nullptr</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">ROS_ERROR_STREAM</span><span class="p">(</span><span class="s">&quot;URDF joint not found &quot;</span>
+                  <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">());</span>
+              <span class="k">return</span><span class="p">;</span>
+          <span class="p">}</span>
+
+          <span class="c1">// Get limits from URDF</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">getJointLimits</span><span class="p">(</span><span class="n">urdf_joint</span><span class="p">,</span> <span class="n">joint_limits</span><span class="p">))</span> <span class="p">{</span>
+              <span class="n">has_joint_limits</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+              <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                        <span class="o">&lt;&lt;</span> <span class="s">&quot; has URDF position limits [&quot;</span>
+                                        <span class="o">&lt;&lt;</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">min_position</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;, &quot;</span>
+                                        <span class="o">&lt;&lt;</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">max_position</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span><span class="p">);</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits</span><span class="p">.</span><span class="n">has_velocity_limits</span><span class="p">)</span>
+                  <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                            <span class="o">&lt;&lt;</span> <span class="s">&quot; has URDF velocity limit [&quot;</span>
+                                            <span class="o">&lt;&lt;</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">max_velocity</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span><span class="p">);</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="p">{</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">urdf_joint</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">!=</span> <span class="n">urdf</span><span class="o">::</span><span class="n">Joint</span><span class="o">::</span><span class="n">CONTINUOUS</span><span class="p">)</span>
+                  <span class="n">ROS_WARN_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                           <span class="o">&lt;&lt;</span> <span class="s">&quot; does not have a URDF &quot;</span>
+                                              <span class="s">&quot;position limit&quot;</span><span class="p">);</span>
+          <span class="p">}</span>
+
+          <span class="c1">// Get soft limits from URDF</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">getSoftJointLimits</span><span class="p">(</span><span class="n">urdf_joint</span><span class="p">,</span> <span class="n">soft_limits</span><span class="p">))</span> <span class="p">{</span>
+              <span class="n">has_soft_limits</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+              <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                        <span class="o">&lt;&lt;</span> <span class="s">&quot; has soft joint limits.&quot;</span><span class="p">);</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="p">{</span>
+              <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                        <span class="o">&lt;&lt;</span> <span class="s">&quot; does not have soft joint &quot;</span>
+                                           <span class="s">&quot;limits&quot;</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Get limits from ROS param</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">getJointLimits</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">(),</span> <span class="n">_nh</span><span class="p">,</span> <span class="n">joint_limits</span><span class="p">))</span> <span class="p">{</span>
+          <span class="n">has_joint_limits</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+          <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                    <span class="o">&lt;&lt;</span> <span class="s">&quot; has rosparam position limits [&quot;</span>
+                                    <span class="o">&lt;&lt;</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">min_position</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;, &quot;</span>
+                                    <span class="o">&lt;&lt;</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">max_position</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span><span class="p">);</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits</span><span class="p">.</span><span class="n">has_velocity_limits</span><span class="p">)</span>
+              <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Joint &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">cmd_handle</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span>
+                                        <span class="o">&lt;&lt;</span> <span class="s">&quot; has rosparam velocity limit [&quot;</span>
+                                        <span class="o">&lt;&lt;</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">max_velocity</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span><span class="p">);</span>
+      <span class="p">}</span> <span class="c1">// the else debug message provided internally by joint_limits_interface</span>
+
+      <span class="c1">// Slightly reduce the joint limits to prevent floating point errors</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits</span><span class="p">.</span><span class="n">has_position_limits</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">joint_limits</span><span class="p">.</span><span class="n">min_position</span> <span class="o">+=</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;::</span><span class="n">epsilon</span><span class="p">();</span>
+          <span class="n">joint_limits</span><span class="p">.</span><span class="n">max_position</span> <span class="o">-=</span> <span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;::</span><span class="n">epsilon</span><span class="p">();</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Save the velocity limit for later if the joint is in position mode</span>
+      <span class="c1">// it is going to be sent to the servo-motor which will enforce it.</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">joint_limits</span><span class="p">.</span><span class="n">has_velocity_limits</span>
+          <span class="o">&amp;&amp;</span> <span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">])</span> <span class="p">{</span>
+          <span class="n">_dynamixel_max_speed</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">joint_limits</span><span class="p">.</span><span class="n">max_velocity</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">has_soft_limits</span><span class="p">)</span> <span class="c1">// Use soft limits</span>
+      <span class="p">{</span>
+          <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Using soft saturation limits&quot;</span><span class="p">);</span>
+
+          <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">])</span> <span class="p">{</span>
+              <span class="k">const</span> <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">PositionJointSoftLimitsHandle</span>
+                  <span class="n">soft_handle_position</span><span class="p">(</span>
+                      <span class="n">cmd_handle</span><span class="p">,</span> <span class="n">joint_limits</span><span class="p">,</span> <span class="n">soft_limits</span><span class="p">);</span>
+              <span class="n">_jnt_pos_lim_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">soft_handle_position</span><span class="p">);</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">wheel</span> <span class="o">==</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">])</span> <span class="p">{</span>
+              <span class="k">const</span> <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">VelocityJointSoftLimitsHandle</span>
+                  <span class="n">soft_handle_velocity</span><span class="p">(</span>
+                      <span class="n">cmd_handle</span><span class="p">,</span> <span class="n">joint_limits</span><span class="p">,</span> <span class="n">soft_limits</span><span class="p">);</span>
+              <span class="n">_jnt_vel_lim_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">soft_handle_velocity</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">has_joint_limits</span><span class="p">)</span> <span class="c1">// Use saturation limits</span>
+      <span class="p">{</span>
+          <span class="n">ROS_DEBUG_STREAM</span><span class="p">(</span><span class="s">&quot;Using saturation limits (not soft limits)&quot;</span><span class="p">);</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">joint</span> <span class="o">==</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">])</span> <span class="p">{</span>
+              <span class="k">const</span> <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">PositionJointSaturationHandle</span>
+                  <span class="n">sat_handle_position</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">,</span> <span class="n">joint_limits</span><span class="p">);</span>
+              <span class="n">_jnt_pos_sat_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">sat_handle_position</span><span class="p">);</span>
+          <span class="p">}</span>
+          <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">OperatingMode</span><span class="o">::</span><span class="n">wheel</span> <span class="o">==</span> <span class="n">_c_mode_map</span><span class="p">[</span><span class="n">id</span><span class="p">])</span> <span class="p">{</span>
+              <span class="k">const</span> <span class="n">joint_limits_interface</span><span class="o">::</span><span class="n">VelocityJointSaturationHandle</span>
+                  <span class="n">sat_handle_velocity</span><span class="p">(</span><span class="n">cmd_handle</span><span class="p">,</span> <span class="n">joint_limits</span><span class="p">);</span>
+              <span class="n">_jnt_vel_sat_interface</span><span class="p">.</span><span class="n">registerHandle</span><span class="p">(</span><span class="n">sat_handle_velocity</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+  <span class="p">}</span> <span class="c1">// namespace dynamixel</span>
+
+  <span class="n">template</span> <span class="o">&lt;</span><span class="n">class</span> <span class="n">Protocol</span><span class="o">&gt;</span>
+  <span class="kt">void</span> <span class="n">DynamixelHardwareInterface</span><span class="o">&lt;</span><span class="n">Protocol</span><span class="o">&gt;::</span><span class="n">_enforce_limits</span><span class="p">(</span><span class="k">const</span> <span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="o">&amp;</span> <span class="n">loop_period</span><span class="p">)</span>
+  <span class="p">{</span>
+      <span class="c1">// enforce joint limits</span>
+      <span class="n">_jnt_pos_lim_interface</span><span class="p">.</span><span class="n">enforceLimits</span><span class="p">(</span><span class="n">loop_period</span><span class="p">);</span>
+      <span class="n">_jnt_vel_lim_interface</span><span class="p">.</span><span class="n">enforceLimits</span><span class="p">(</span><span class="n">loop_period</span><span class="p">);</span>
+      <span class="n">_jnt_pos_sat_interface</span><span class="p">.</span><span class="n">enforceLimits</span><span class="p">(</span><span class="n">loop_period</span><span class="p">);</span>
+      <span class="n">_jnt_vel_sat_interface</span><span class="p">.</span><span class="n">enforceLimits</span><span class="p">(</span><span class="n">loop_period</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span> <span class="c1">// namespace dynamixel</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="control_loop.html" class="btn btn-neutral" title="Control loop" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="wy-footer">
+    <div role="contentinfo">
+      <p>
+          &copy; Copyright 2018-2019, Inria.
+
+      
+      
+        <br/>
+        <a href="mailto:jean-baptiste.mouret@inria.fr"> Contact us </a>
+      
+      </p>
+    </div>
+    <div class="wy-footer-aside">
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> modified for <a href="http://resibots.eu">Resibots</a>.
+    </div>
+    <div style="clear: both;"></div>
+  </div>
+<div class="wy-footer-logo-container">
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_eu.png"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_erc_nonofficial.svg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_loria.jpg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo-inria.svg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_cnrs.png"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_universite_lorraine.jpg"/></div>
+</div>
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1 alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxResibotsTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

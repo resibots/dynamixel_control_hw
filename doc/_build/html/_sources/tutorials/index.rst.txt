@@ -6,6 +6,7 @@ Tutorials
 
   quick_start
   download_and_compilation
-  config_file
+  urdf
+  configuration
+  launch
   simple_example
-  hexapod_example

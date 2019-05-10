@@ -124,11 +124,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="download_and_compilation.html">Download and Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="urdf.html">URDF file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="launch.html">Launch file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simple_example.html">Testing the hardware interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hexapod_example.html">Our hexapod example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide ROS control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 </ul>
 
             
@@ -196,9 +198,7 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">You need to store the installation path of <a class="reference external" href="https://github.com/resibots/libdynamixel">libdynamixel</a> in your environment variable inside your  <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> file  <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">LIBDYNAMIXEL=/home/USER/Resibots</span></code> .
-Install the ros package ros_control. In apt-get, it is called ros-YourDistro-ros-control (where YourDistro must be changed by the ROS distribution’s name, like indigo or jade).
-Clone the dynamixel_control_hw repository in your catkin workspace’s source directory and run a catkin_make</p>
+<p class="last">You need to store the installation path of <a class="reference external" href="https://github.com/resibots/libdynamixel">libdynamixel</a> in your environment variable inside your  <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> file  <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">LIBDYNAMIXEL=/home/USER/Resibots</span></code> .</p>
 </div>
 <p>ROS Dependencies :</p>
 <ul class="simple">
@@ -226,7 +226,7 @@ Clone the dynamixel_control_hw repository in your catkin workspace’s source di
 <li><dl class="first docutils">
 <dt>Clone</dt>
 <dd><p class="first">simply clone the package <a class="reference external" href="https://github.com/resibots/dynamixel_control_hw">dynamixel_control_hw</a> into your catkin workspace source directory.</p>
-<div class="last highlight-shell notranslate"><div class="highlight"><pre><span class="nb">cd</span> $HOME/catkin_ws/src
+<div class="last highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$HOME</span>/catkin_ws/src
 git clone https://github.com/resibots/dynamixel_control_hw.git
 </pre></div>
 </div>
@@ -236,7 +236,7 @@ git clone https://github.com/resibots/dynamixel_control_hw.git
 <li><dl class="first docutils">
 <dt>Compilation</dt>
 <dd><p class="first">go into our workspace directory, then compile.</p>
-<div class="last highlight-shell notranslate"><div class="highlight"><pre><span class="nb">cd</span> ..
+<div class="last highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ..
 catkin_make
 </pre></div>
 </div>

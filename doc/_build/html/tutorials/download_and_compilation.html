@@ -32,6 +32,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="../index.html"/>
         <link rel="up" title="Tutorials" href="index.html"/>
+        <link rel="next" title="URDF file" href="urdf.html"/>
         <link rel="prev" title="Quick Start" href="quick_start.html"/>
 <style type="text/css">
 /* This CSS displays small logos at the bottom of the page, on one line */
@@ -125,11 +126,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#building-the-documentation">Building the documentation</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="urdf.html">URDF file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="launch.html">Launch file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simple_example.html">Testing the hardware interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hexapod_example.html">Our hexapod example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide ROS control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 </ul>
 
             
@@ -205,7 +208,7 @@
 <li><p class="first"><a class="reference external" href="https://github.com/resibots/libdynamixel">libdynamixel</a></p>
 </li>
 <li><p class="first">ROS Control:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">ros</span><span class="o">-</span><span class="n">control</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">ros</span><span class="o">-</span><span class="n">control</span>
 </pre></div>
 </div>
 </li>
@@ -237,7 +240,7 @@
 <li><p class="first">ros-controllers</p>
 </li>
 <li><p class="first">joint-state-publisher:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">catkin</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">rospy</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">roscpp</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">urdf</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">std</span><span class="o">-</span><span class="n">msgs</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">message</span><span class="o">-</span><span class="n">generation</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">hardware</span><span class="o">-</span><span class="n">interface</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">combined</span><span class="o">-</span><span class="n">robot</span><span class="o">-</span><span class="n">hw</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">ros</span><span class="o">-</span><span class="n">controllers</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">joint</span><span class="o">-</span><span class="n">state</span><span class="o">-</span><span class="n">publisher</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">catkin</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">rospy</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">roscpp</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">urdf</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">std</span><span class="o">-</span><span class="n">msgs</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">message</span><span class="o">-</span><span class="n">generation</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">hardware</span><span class="o">-</span><span class="n">interface</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">combined</span><span class="o">-</span><span class="n">robot</span><span class="o">-</span><span class="n">hw</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">ros</span><span class="o">-</span><span class="n">controllers</span> <span class="n">ros</span><span class="o">-</span><span class="n">kinetic</span><span class="o">-</span><span class="n">joint</span><span class="o">-</span><span class="n">state</span><span class="o">-</span><span class="n">publisher</span>
 </pre></div>
 </div>
 </li>
@@ -248,13 +251,13 @@
 <p>The build system for this package is <strong>catkin</strong> . Don’t run away yet. Here is how we compile and install it :</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">don’t forget to install <a class="reference external" href="http://wiki.ros.org/kinetic">ROS kinetic</a> before</p>
+<p class="last">don’t forget to install <a class="reference external" href="http://wiki.ros.org/kinetic">ROS kinetic</a> before and <a class="reference external" href="https://github.com/resibots/libdynamixel">libdynamixel</a> .</p>
 </div>
 <ol class="arabic">
 <li><dl class="first docutils">
 <dt>Clone</dt>
 <dd><p class="first">simply clone the package <a class="reference external" href="https://github.com/resibots/dynamixel_control_hw">dynamixel_control_hw</a> in our catkin workspace source folder</p>
-<div class="last highlight-shell notranslate"><div class="highlight"><pre><span class="nb">cd</span> $HOME/catkin_ws/src
+<div class="last highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$HOME</span>/catkin_ws/src
 git clone https://github.com/resibots/dynamixel_control_hw.git
 </pre></div>
 </div>
@@ -264,7 +267,7 @@ git clone https://github.com/resibots/dynamixel_control_hw.git
 <li><dl class="first docutils">
 <dt>Compilation</dt>
 <dd><p class="first">go into our workspace directory, then compile</p>
-<div class="last highlight-shell notranslate"><div class="highlight"><pre><span class="nb">cd</span> ..
+<div class="last highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ..
 catkin_make
 </pre></div>
 </div>
@@ -280,7 +283,7 @@ catkin_make
 <p class="last">This section is only useful for developers who need to update the documentation.</p>
 </div>
 <p>Install sphinx via pip:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre>sudo pip install Sphinx
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo pip install Sphinx
 sudo pip install sphinxcontrib-bibtex
 </pre></div>
 </div>
@@ -289,20 +292,20 @@ sudo pip install sphinxcontrib-bibtex
 <p class="last">On Mac OSX, do not use <cite>brew install sphinx</cite> because this is not the right sphinx</p>
 </div>
 <p>Install the Resibots theme for Sphinx:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre>git clone https://github.com/resibots/sphinx_resibots_theme
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/resibots/sphinx_resibots_theme
 <span class="nb">export</span> <span class="nv">SPHINX_RESIBOTS_THEME</span><span class="o">=</span><span class="s2">&quot;/home/me/path/to/sphinx_resibots_theme&quot;</span>
 </pre></div>
 </div>
 <p>Install <a class="reference external" href="https://breathe.readthedocs.io/en/latest/">breathe</a> via pip:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre>sudo pip install breathe
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo pip install breathe
 </pre></div>
 </div>
 <p>Install <a class="reference external" href="http://www.stack.nl/~dimitri/doxygen/">doxygen</a> via your package manager (e.g. apt-get / brew):</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre>apt-get install doxygen
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>apt-get install doxygen
 </pre></div>
 </div>
 <p>create a temporary folder where we generate the documentation:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre>rm -rf /tmp/doc_dynamixel_control_hw
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>rm -rf /tmp/doc_dynamixel_control_hw
 mkdir /tmp/doc_dynamixel_control_hw
 <span class="nb">cd</span> /tmp/doc_dynamixel_control_hw
 git clone git@github.com:resibots/dynamixel_control_hw.git
@@ -343,6 +346,8 @@ and the branch <strong>gh-pages</strong> which contains html files.</p>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="urdf.html" class="btn btn-neutral float-right" title="URDF file" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="quick_start.html" class="btn btn-neutral" title="Quick Start" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

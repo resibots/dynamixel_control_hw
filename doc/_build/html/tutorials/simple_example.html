@@ -32,7 +32,8 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="../index.html"/>
         <link rel="up" title="Tutorials" href="index.html"/>
-        <link rel="next" title="Our hexapod example" href="hexapod_example.html"/>
+        <link rel="next" title="Reference" href="../reference/index.html"/>
+        <link rel="prev" title="Launch file" href="launch.html"/>
 <style type="text/css">
 /* This CSS displays small logos at the bottom of the page, on one line */
 
@@ -119,11 +120,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="download_and_compilation.html">Download and Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="urdf.html">URDF file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="launch.html">Launch file</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Testing the hardware interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hexapod_example.html">Our hexapod example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide ROS control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 </ul>
 
             
@@ -178,22 +181,20 @@
            <div itemprop="articleBody">
             
   <div class="section" id="testing-the-hardware-interface">
-<h1>Testing the hardware interface<a class="headerlink" href="#testing-the-hardware-interface" title="Permalink to this headline">¶</a></h1>
+<span id="simple-example"></span><h1>Testing the hardware interface<a class="headerlink" href="#testing-the-hardware-interface" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial assumes that you have already been able to compile and install the package. If not, please refer to the related instructions in the <a class="reference internal" href="download_and_compilation.html#download-and-compilation"><span class="std std-ref">building/installation instructions</span></a>.</p>
 <p>For this example, we are using 2 dynamixel actuators : <a class="reference external" href="http://emanual.robotis.com/docs/en/dxl/mx/mx-28/">MX28</a> .
 It will by default <strong>launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators</strong>.</p>
-<ol class="arabic">
+<ol class="arabic simple">
 <li><dl class="first docutils">
 <dt>Connect motor</dt>
-<dd><p class="first last">with your <a class="reference external" href="http://emanual.robotis.com/docs/en/parts/interface/usb2dynamixel/">USB2DYNAMIXEL</a> device or your favorite dynamixel interface.</p>
-</dd>
+<dd>with your <a class="reference external" href="http://emanual.robotis.com/docs/en/parts/interface/usb2dynamixel/">USB2DYNAMIXEL</a> device or your favorite dynamixel interface.</dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt>Supply power</dt>
-<dd><p class="first last">USB2Dynamixel does not supply power to Dynamixel. Therefore, the power must be supplied separately to operate Dynamixel.
-We are recommanded to use : one laboratory power supply or <a class="reference external" href="https://www.generationrobots.com/en/400867-smps2dynamixel-robotis.html">SMPS2Dynamixel</a> .</p>
-</dd>
+<dd>USB2Dynamixel does not supply power to Dynamixel. Therefore, the power must be supplied separately to operate Dynamixel.
+We are recommanded to use : one laboratory power supply or <a class="reference external" href="https://www.generationrobots.com/en/400867-smps2dynamixel-robotis.html">SMPS2Dynamixel</a> .</dd>
 </dl>
 </li>
 </ol>
@@ -214,28 +215,40 @@ Now, you can check with our tools interface if your motors and the libdynamixel 
 </dl>
 </li>
 </ol>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">./build/src/tools/dynamixel</span> <span class="pre">-p</span> <span class="pre">/dev/ttyUSB0</span> <span class="pre">-b</span> <span class="pre">3000000</span> <span class="pre">list</span></code></dt>
-<dd><ul class="first last simple">
+<p><code class="docutils literal notranslate"><span class="pre">./build/src/tools/dynamixel</span> <span class="pre">-p</span> <span class="pre">/dev/ttyUSB0</span> <span class="pre">-b</span> <span class="pre">3000000</span> <span class="pre">list</span></code></p>
+<blockquote>
+<div><ul class="simple">
 <li><code class="docutils literal notranslate"><span class="pre">-p</span></code> device interface</li>
 <li><code class="docutils literal notranslate"><span class="pre">-b</span></code> dynamixel’s baudrate (known)</li>
 <li><code class="docutils literal notranslate"><span class="pre">list</span></code> command to list all connected dynamixel</li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <p>Go inside your  <a class="reference external" href="https://github.com/resibots/dynamixel_control_hw">dynamixel_control_hw</a> directory</p>
 <ol class="arabic" start="5">
 <li><dl class="first docutils">
+<dt>URDF File</dt>
+<dd><p class="first">check the URDF file : <code class="docutils literal notranslate"><span class="pre">urdf/sample.urdf</span></code></p>
+<blockquote class="last">
+<div><ul class="simple">
+<li>joints names</li>
+<li>joints limits</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+</ol>
+<ol class="arabic" start="5">
+<li><dl class="first docutils">
 <dt>Configuration file</dt>
-<dd><dl class="first last docutils">
-<dt>check the example configuration file: <code class="docutils literal notranslate"><span class="pre">config/sample.yaml</span></code></dt>
-<dd><ul class="first last simple">
+<dd><p class="first">check the example configuration file: <code class="docutils literal notranslate"><span class="pre">config/sample.yaml</span></code></p>
+<blockquote class="last">
+<div><ul class="simple">
 <li><code class="docutils literal notranslate"><span class="pre">id</span></code> parameters</li>
 <li><code class="docutils literal notranslate"><span class="pre">serial_interface</span></code></li>
 <li><code class="docutils literal notranslate"><span class="pre">baudrate</span></code></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd>
 </dl>
 </li>
@@ -243,18 +256,28 @@ Now, you can check with our tools interface if your motors and the libdynamixel 
 <dt>Launch file</dt>
 <dd><p class="first">Check the <code class="docutils literal notranslate"><span class="pre">launch/sample.launch</span></code> file.</p>
 <p>It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators.</p>
-<p class="last">Once you are sure that it’s correct, you can <code class="docutils literal notranslate"><span class="pre">roslaunch</span> <span class="pre">dynamixel_control_hw</span> <span class="pre">sample.launch</span></code>.</p>
+<p>Once you are sure that it’s correct, you can:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">roslaunch</span> <span class="n">dynamixel_control_hw</span> <span class="n">sample</span><span class="o">.</span><span class="n">launch</span>
+</pre></div>
+</div>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>Check topics and params</dt>
-<dd><p class="first last">rostopic list
-rosparam list</p>
-</dd>
-</dl>
+<li><p class="first">Check topics and params:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rostopic</span> <span class="nb">list</span>
+<span class="n">rosparam</span> <span class="nb">list</span>
+</pre></div>
+</div>
 </li>
 </ol>
+<blockquote>
+<div><p>or visualize it on rviz</p>
+<a class="reference external image-reference" href="../_static/rviz_tuto.png"><img alt="rviz" class="align-center" src="../_images/rviz_tuto.png" /></a>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">if the arm doesn’t appear on rviz, try to change <code class="docutils literal notranslate"><span class="pre">Fixed</span> <span class="pre">Frame</span></code> in global option display.</p>
+</div>
+</div></blockquote>
 </div>
 
 
@@ -264,8 +287,10 @@ rosparam list</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="hexapod_example.html" class="btn btn-neutral float-right" title="Our hexapod example" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../reference/index.html" class="btn btn-neutral float-right" title="Reference" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+      
+        <a href="launch.html" class="btn btn-neutral" title="Launch file" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

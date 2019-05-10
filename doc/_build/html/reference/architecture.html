@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Architecture &mdash; dynamixel_control_hw 0.1 alpha documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="../index.html"/>
+        <link rel="up" title="Reference" href="index.html"/>
+        <link rel="next" title="Control loop" href="control_loop.html"/>
+        <link rel="prev" title="Reference" href="index.html"/>
+<style type="text/css">
+/* This CSS displays small logos at the bottom of the page, on one line */
+
+.wy-footer-logo-container {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.wy-footer-logo {
+  display: inline-block;
+  width: 60px;
+}
+</style>
+
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+          
+
+          
+            <a href="http://www.resibots.eu">
+          
+
+          
+            
+            <img src="../_static/resibots_logo_black_200px.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="resibots-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+                  <a class="caption" href="http://www.resibots.eu">Project's website</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/limbo">limbo</a>
+              
+                  <a class="caption" href="http://www.sferes2.github.io">sferes2</a>
+              
+                  <a class="caption" href="http://www.resibots.eu/libdynamixel">libdynamixel</a>
+              
+            
+
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Dynamixel ROS Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#control-loop">Control loop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hardware-interface">Hardware interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamixel-control-loop">Dynamixel control_loop</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="control_loop.html">Control loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware_interface.html">Hardware interface</a></li>
+</ul>
+</li>
+</ul>
+
+            
+
+            
+            
+              
+                <a class="caption" href="http://github.com/resibots">github</a>
+              
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">dynamixel_control_hw</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Yynamixel_control_hw</a> &raquo;</li>
+    
+      <li><a href="index.html">Reference</a> &raquo;</li>
+    
+    <li>Architecture</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="../_sources/reference/architecture.rst.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
+<p>In this document we will describe how the package is built.</p>
+<div class="section" id="control-loop">
+<h2>Control loop<a class="headerlink" href="#control-loop" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">control_loop.hpp</span></code> initializes controller manager (load, unload controller dynamically) then it loads rosparams (<code class="docutils literal notranslate"><span class="pre">loop_frequency</span></code> and <code class="docutils literal notranslate"><span class="pre">cycle_time_error_threshold</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">update</span></code> function reads data from Hardware interface, let the controller computes the new command (via the controller manager), then it send new command to hardware.</p>
+</div>
+<div class="section" id="hardware-interface">
+<h2>Hardware interface<a class="headerlink" href="#hardware-interface" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">hardware_interface.hpp</span></code> class implement an Hardware Interface for a set of dynamixel actuators.
+This class fits in the <a class="reference external" href="http://wiki.ros.org/ros_control">ros_control</a> framework for robot control.
+Different method are implemented :</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="first docutils">
+<dt>init():</dt>
+<dd>Initialise the whole hardware interface. Set the essential parameters for communication with the hardware and find all connected devices and register those referred in dynamixel_map in the hardware interface.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>read():</dt>
+<dd>Copy joint’s information to memory, firstly queries the information from the dynamixels, then put it in private attributes, for use by a controller.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>write():</dt>
+<dd>Send new joint’s target position to dynamixels takes the target position from memory (given by a controller) and sends them to the dynamixels.</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Methods used for initialisation :</dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">_get_ros_parameters</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">_load_urdf</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">_find_servos</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">_enable_and_configure_servo</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">_register_joint_limits</span></code></li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="dynamixel-control-loop">
+<h2>Dynamixel control_loop<a class="headerlink" href="#dynamixel-control-loop" title="Permalink to this headline">¶</a></h2>
+<p>Run the hardware interface node, we run the ROS loop in a separate threads as external calls, such as service callbacks loading controllers, can’t block the control loop.
+It creates the hardware interface specific to your robot :</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>retrieve configuration from rosparam</li>
+<li>initialize the hardware and interface it with ros_control</li>
+<li>Start the control loop</li>
+<li>wait until shutdown signal received</li>
+</ol>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="control_loop.html" class="btn btn-neutral float-right" title="Control loop" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Reference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo" class="wy-footer">
+    <div role="contentinfo">
+      <p>
+          &copy; Copyright 2018-2019, Inria.
+
+      
+      
+        <br/>
+        <a href="mailto:jean-baptiste.mouret@inria.fr"> Contact us </a>
+      
+      </p>
+    </div>
+    <div class="wy-footer-aside">
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> modified for <a href="http://resibots.eu">Resibots</a>.
+    </div>
+    <div style="clear: both;"></div>
+  </div>
+<div class="wy-footer-logo-container">
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_eu.png"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_erc_nonofficial.svg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_loria.jpg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo-inria.svg"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_cnrs.png"/></div>
+  <div class="wy-footer-logo"><img src="../_static/logos/logo_universite_lorraine.jpg"/></div>
+</div>
+
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1 alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxResibotsTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

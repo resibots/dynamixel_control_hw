@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Our hexapod example &mdash; dynamixel_control_hw 0.1 alpha documentation</title>
+  <title>URDF file &mdash; dynamixel_control_hw 0.1 alpha documentation</title>
   
 
   
@@ -32,8 +32,8 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="dynamixel_control_hw 0.1 alpha documentation" href="../index.html"/>
         <link rel="up" title="Tutorials" href="index.html"/>
-        <link rel="next" title="Guide ROS control" href="../guide/index.html"/>
-        <link rel="prev" title="Testing the hardware interface" href="simple_example.html"/>
+        <link rel="next" title="Configuration file" href="configuration.html"/>
+        <link rel="prev" title="Download and Compilation" href="download_and_compilation.html"/>
 <style type="text/css">
 /* This CSS displays small logos at the bottom of the page, on one line */
 
@@ -120,11 +120,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="download_and_compilation.html">Download and Compilation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">URDF file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="launch.html">Launch file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simple_example.html">Testing the hardware interface</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Our hexapod example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide ROS control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
 </ul>
 
             
@@ -164,11 +166,11 @@
     
       <li><a href="index.html">Tutorials</a> &raquo;</li>
     
-    <li>Our hexapod example</li>
+    <li>URDF file</li>
     <li class="wy-breadcrumbs-aside">
       
         
-          <a href="../_sources/tutorials/hexapod_example.rst.txt" rel="nofollow"> View page source</a>
+          <a href="../_sources/tutorials/urdf.rst.txt" rel="nofollow"> View page source</a>
         
       
     </li>
@@ -178,8 +180,94 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="our-hexapod-example">
-<h1>Our hexapod example<a class="headerlink" href="#our-hexapod-example" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="urdf-file">
+<span id="urdf"></span><h1>URDF file<a class="headerlink" href="#urdf-file" title="Permalink to this headline">¶</a></h1>
+<p>the Unified Robot Description Format (URDF) is an XML format for representing a robot model.
+You need to generate one specific to your robot.</p>
+<p>You need to be care about <code class="docutils literal notranslate"><span class="pre">joint_name</span></code>, they should have exactly the same name inside the <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">configuration file</span></a> .</p>
+<p>Then, check <code class="docutils literal notranslate"><span class="pre">joint_limits</span></code> (hard and soft), changes it if needed.</p>
+<p>Below an URDF example  of a 3 DoF robot arm</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;robot name=&quot;dummy_robot&quot;&gt;
+  &lt;link name=&quot;base_link&quot;&gt;
+    &lt;visual&gt;
+      &lt;origin xyz=&quot;0 0 0.03&quot; rpy=&quot;0 0 0&quot;/&gt;
+      &lt;geometry&gt;
+        &lt;cylinder length=&quot;0.06&quot; radius=&quot;0.04&quot;/&gt;
+      &lt;/geometry&gt;
+    &lt;/visual&gt;
+  &lt;/link&gt;
+  &lt;link name=&quot;middle_link&quot;&gt;
+    &lt;visual&gt;
+      &lt;origin xyz=&quot;0 0 0.13&quot; rpy=&quot;0 0 0 &quot;/&gt;
+      &lt;geometry&gt;
+        &lt;cylinder length=&quot;0.26&quot; radius=&quot;0.04&quot;/&gt;
+      &lt;/geometry&gt;
+    &lt;/visual&gt;
+  &lt;/link&gt;
+  &lt;link name=&quot;second_middle_link&quot;&gt;
+    &lt;visual&gt;
+      &lt;origin xyz=&quot;0 0 0.13&quot; rpy=&quot;0 0 0 &quot;/&gt;
+      &lt;geometry&gt;
+        &lt;cylinder length=&quot;0.26&quot; radius=&quot;0.04&quot;/&gt;
+      &lt;/geometry&gt;
+    &lt;/visual&gt;
+  &lt;/link&gt;
+  &lt;link name=&quot;end_link&quot;&gt;
+    &lt;visual&gt;
+      &lt;origin xyz=&quot;0 0 0.075&quot; rpy=&quot;0 0 0 &quot;/&gt;
+      &lt;geometry&gt;
+        &lt;cylinder length=&quot;0.15&quot; radius=&quot;0.04&quot;/&gt;
+      &lt;/geometry&gt;
+    &lt;/visual&gt;
+  &lt;/link&gt;
+
+  &lt;joint name=&quot;arm_joint_1&quot; type=&quot;revolute&quot;&gt;
+    &lt;parent link=&quot;base_link&quot;/&gt;
+    &lt;child link=&quot;middle_link&quot;/&gt;
+    &lt;origin xyz=&quot;0 0 0.06&quot; rpy=&quot;0 0 0&quot;/&gt;
+    &lt;axis xyz=&quot;1 0 0&quot;/&gt;
+
+    &lt;!-- Joint limits --&gt;
+    &lt;limit lower=&quot;-10.1415&quot; upper=&quot;10.1415&quot; velocity=&quot;10&quot; effort=&quot;100&quot;/&gt;
+    &lt;!-- Soft limits --&gt;
+    &lt;safety_controller k_position=&quot;3&quot;
+                    k_velocity=&quot;1000&quot;
+                    soft_lower_limit=&quot;-10.1415&quot;
+                    soft_upper_limit=&quot;10.1415&quot; /&gt;
+  &lt;/joint&gt;
+
+  &lt;joint name=&quot;arm_joint_2&quot; type=&quot;revolute&quot;&gt;
+    &lt;parent link=&quot;middle_link&quot;/&gt;
+    &lt;child link=&quot;second_middle_link&quot;/&gt;
+    &lt;origin xyz=&quot;0 0 0.26&quot; rpy=&quot;0 0 0&quot;/&gt;
+    &lt;axis xyz=&quot;1 0 0&quot;/&gt;
+
+    &lt;!-- Joint limits --&gt;
+    &lt;limit lower=&quot;-3.1415&quot; upper=&quot;3.1415&quot; velocity=&quot;10&quot; effort=&quot;100&quot;/&gt;
+    &lt;!-- Soft limits --&gt;
+    &lt;safety_controller k_position=&quot;3&quot;
+                    k_velocity=&quot;1000&quot;
+                    soft_lower_limit=&quot;-3.1415&quot;
+                    soft_upper_limit=&quot;3.1415&quot; /&gt;
+  &lt;/joint&gt;
+
+  &lt;joint name=&quot;arm_joint_3&quot; type=&quot;revolute&quot;&gt;
+    &lt;parent link=&quot;second_middle_link&quot;/&gt;
+    &lt;child link=&quot;end_link&quot;/&gt;
+    &lt;origin xyz=&quot;0 0 0.26&quot; rpy=&quot;0 0 0&quot;/&gt;
+    &lt;axis xyz=&quot;1 0 0&quot;/&gt;
+
+    &lt;!-- Joint limits --&gt;
+    &lt;limit lower=&quot;-3.1415&quot; upper=&quot;3.1415&quot; velocity=&quot;10&quot; effort=&quot;100&quot;/&gt;
+    &lt;!-- Soft limits --&gt;
+    &lt;safety_controller k_position=&quot;3&quot;
+                    k_velocity=&quot;1000&quot;
+                    soft_lower_limit=&quot;-3.1415&quot;
+                    soft_upper_limit=&quot;3.1415&quot; /&gt;
+  &lt;/joint&gt;
+&lt;/robot&gt;
+</pre></div>
+</div>
 </div>
 
 
@@ -189,10 +277,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../guide/index.html" class="btn btn-neutral float-right" title="Guide ROS control" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="configuration.html" class="btn btn-neutral float-right" title="Configuration file" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="simple_example.html" class="btn btn-neutral" title="Testing the hardware interface" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="download_and_compilation.html" class="btn btn-neutral" title="Download and Compilation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

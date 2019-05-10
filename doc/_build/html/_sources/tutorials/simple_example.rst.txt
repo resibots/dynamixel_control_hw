@@ -1,3 +1,5 @@
+.. _simple_example:
+
 Testing the hardware interface
 ==================
 
@@ -25,14 +27,23 @@ Go inside your `libdynamixel <https://github.com/resibots/libdynamixel>`__ direc
     Now, you can check with our tools interface if your motors and the libdynamixel work correctly :
 
 ``./build/src/tools/dynamixel -p /dev/ttyUSB0 -b 3000000 list``
+
         * ``-p`` device interface
         * ``-b`` dynamixel's baudrate (known)
         * ``list`` command to list all connected dynamixel
 
 Go inside your  `dynamixel_control_hw <https://github.com/resibots/dynamixel_control_hw>`__ directory
 
+5. URDF File
+    check the URDF file : ``urdf/sample.urdf``
+
+      * joints names
+      * joints limits
+
+
 5. Configuration file
     check the example configuration file: ``config/sample.yaml``
+
       * ``id`` parameters
       * ``serial_interface``
       * ``baudrate``
@@ -42,8 +53,20 @@ Go inside your  `dynamixel_control_hw <https://github.com/resibots/dynamixel_con
 
     It will by default launch two feed-forward only controllers (one position and one velocity) and a virtual controller that publishes the states of the two actuators.
 
-    Once you are sure that it's correct, you can ``roslaunch dynamixel_control_hw sample.launch``.
+    Once you are sure that it's correct, you can::
 
-7. Check topics and params
+     roslaunch dynamixel_control_hw sample.launch
+
+7. Check topics and params::
+
     rostopic list
     rosparam list
+
+  or visualize it on rviz
+
+  .. image:: ../pics/rviz_tuto.png
+    :alt: rviz
+    :target: ../_static/rviz_tuto.png
+    :align: center
+
+  .. note:: if the arm doesn't appear on rviz, try to change ``Fixed Frame`` in global option display.

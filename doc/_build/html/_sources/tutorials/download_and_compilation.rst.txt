@@ -49,7 +49,7 @@ Building
 
 The build system for this package is **catkin** . Don't run away yet. Here is how we compile and install it :
 
-.. note:: don't forget to install `ROS kinetic <http://wiki.ros.org/kinetic>`__ before
+.. note:: don't forget to install `ROS kinetic <http://wiki.ros.org/kinetic>`__ before and `libdynamixel <https://github.com/resibots/libdynamixel>`__ .
 
 
 1. Clone

@@ -42,8 +42,7 @@ Contents
 
   self
   tutorials/index
-  guide/index
-  high_level_api.rst
+  reference/index
 
 
 Indices and tables
