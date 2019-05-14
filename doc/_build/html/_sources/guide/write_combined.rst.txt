@@ -1,2 +1,0 @@
-Writing combined hardware interface
-===================================
