@@ -61,4 +61,4 @@ License and authors
 
 This work is distributed under the terms of the `CeCILL-C <http://www.cecill.info/licences.en.html>`_ license. © INRIA.
 
-The authors for this library are Dorian Goepp, Eloise Dalin and Pierre Desreumaux.
+The authors for this library are Dorian Goepp, Eloïse Dalin and Pierre Desreumaux.
