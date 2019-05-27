@@ -6,6 +6,7 @@ This piece of software provides a hardware interface for ROS control. Its aim is
 
 We are using it for our robots and developing it for this purpose. Version 0.1.0 is clearly no final code but it works for the regular needs.
 
+Documentation : [http://www.resibots.eu/dynamixel_control_hw/][http://www.resibots.eu/dynamixel_control_hw/]
 ## Features
 
 - simple, ROS-style control interface for your dynamixel-based robot
