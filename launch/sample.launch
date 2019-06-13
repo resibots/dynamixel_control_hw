@@ -32,7 +32,7 @@
     <node name="controller" pkg="controller_manager" type="spawner"
           respawn="false" output="screen" clear_params="true"
           args="/dynamixel_controllers/traj_controller
-                /dynamixel_controllers/vel_controller
                 /dynamixel_controllers/joint_state_controller" />
+                <!--  /dynamixel_controllers/vel_controller -->
   </group>
 </launch>

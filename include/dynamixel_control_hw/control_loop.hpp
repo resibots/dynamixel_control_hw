@@ -53,6 +53,9 @@
 // The hardware interface to dynamixels
 #include <dynamixel_control_hw/hardware_interface.hpp>
 
+#include <fstream>
+#include <iostream>
+
 namespace dynamixel {
     // To make use of steady_clock and duration_cast shorter
     using namespace std::chrono;
@@ -88,6 +91,23 @@ namespace dynamixel {
             // Start timer that will periodically call DynamixelLoop::update
             _desired_update_freq = ros::Duration(1 / _loop_hz);
             _non_realtime_loop = _nh.createTimer(_desired_update_freq, &DynamixelLoop::update, this);
+
+            _test_file.open("/home/pdesreum/Documents/share/graphics/dynamixel_test.csv");
+            _test_file << "current_time"
+                       << ",";
+            _test_file << "freq"
+                       << ",";
+            _test_file << "elapsed_time"
+                       << ",";
+            _test_file << "desired_update_freq"
+                       << ",";
+            _test_file << "cycle_time_error"
+                       << "\n";
+        }
+
+        ~DynamixelLoop()
+        {
+            _test_file.close();
         }
 
         /** Timed method that reads current hardware's state, runs the controller
@@ -97,13 +117,16 @@ namespace dynamixel {
                 does NOT guarantee that the time source is strictly
                 linearly increasing.
         **/
-        void update(const ros::TimerEvent&)
+        void
+        update(const ros::TimerEvent&)
         {
             // Get change in time
             _current_time = steady_clock::now();
+
             duration<double> time_span
                 = duration_cast<duration<double>>(_current_time - _last_time);
             _elapsed_time = ros::Duration(time_span.count());
+            _current_time_ros = _elapsed_time + _current_time_ros;
             _last_time = _current_time;
 
             // Check cycle time for excess delay
@@ -114,7 +137,15 @@ namespace dynamixel {
                     << "cycle time: " << _elapsed_time << "s, "
                     << "threshold: " << _cycle_time_error_threshold << "s");
             }
-
+            double freq = (1.0 / _elapsed_time.toSec());
+            double current_time = _current_time_ros.toSec();
+            if (_test_file.is_open()) {
+                _test_file << current_time << ",";
+                _test_file << freq << ",";
+                _test_file << _elapsed_time << ",";
+                _test_file << _desired_update_freq << ",";
+                _test_file << cycle_time_error << "\n";
+            }
             // Input
             // get the hardware's state
             _hardware_interface->read(ros::Time::now(), _elapsed_time);
@@ -139,10 +170,12 @@ namespace dynamixel {
         // Timing
         ros::Timer _non_realtime_loop;
         ros::Duration _elapsed_time;
+        ros::Duration _current_time_ros;
         double _loop_hz;
         steady_clock::time_point _last_time;
         steady_clock::time_point _current_time;
 
+        std::ofstream _test_file;
         /** ROS Controller Manager and Runner
 
             This class advertises a ROS interface for loading, unloading, starting, and
@@ -153,7 +186,7 @@ namespace dynamixel {
 
         /// Abstract Hardware Interface for your robot
         std::shared_ptr<hw_int> _hardware_interface;
-    };
+    }; // namespace dynamixel
 } // namespace dynamixel
 
 #endif

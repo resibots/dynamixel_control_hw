@@ -1,33 +1,33 @@
 dynamixel_controllers:
   joint_state_controller:
     type: joint_state_controller/JointStateController
-    publish_rate: 10
+    publish_rate: 100
 
   traj_controller:
     type: position_controllers/JointTrajectoryController
     joints:
       - arm_joint_2
 
-  vel_controller:
-    type: velocity_controllers/JointVelocityController
-    joint: arm_joint_1
+  # vel_controller:
+  #   type: velocity_controllers/JointVelocityController
+  #   joint: arm_joint_1
 
 dynamixel_control:
   serial_interface: /dev/ttyUSB0
-  loop_frequency: 500
-  cycle_time_error_threshold: 0.002
+  loop_frequency: 3000
+  cycle_time_error_threshold: 0.001
   baudrate: 3000000 # in bauds
-  read_timeout: 0.005 # in seconds
-  scan_timeout: 0.005 # in seconds
+  read_timeout: 0.05 # in seconds
+  scan_timeout: 0.05 # in seconds
   # Cofniguration of the servos
   servos:
-    arm_joint_1:
-      # hardware ID of the actuator
-      id: 2
-      offset: 3.14159265359
-      # offset to be added, in radians, to the position of an actuator
-      #max-speed: 4.0 # in rad
-      command_interface: velocity
+    # arm_joint_1:
+    #   # hardware ID of the actuator
+    #   id: 2
+    #   offset: 3.14159265359
+    #   # offset to be added, in radians, to the position of an actuator
+    #   #max-speed: 4.0 # in rad
+    #   command_interface: velocity
     arm_joint_2:
       id: 1
       # max joint speed
