@@ -22,10 +22,10 @@ catkin_package(CATKIN_DEPENDS
 )
 
 # Searching for libdynamixel
-if ("$ENV{RESIBOTS_DIR}" STREQUAL "" AND "${LIBDYNAMIXEL}" STREQUAL "")
+if ("$ENV{RESIBOTS_DIR}" STREQUAL "" AND "$ENV{LIBDYNAMIXEL}" STREQUAL "")
   message("Using default location for libdynamixel : ~")
   set(libdynamixel_dir "~")
-elseif (NOT ("${LIBDYNAMIXEL}" STREQUAL ""))
+elseif (NOT ("$ENV{LIBDYNAMIXEL}" STREQUAL ""))
   message("Using user-defined location for libdynamixel : ${LIBDYNAMIXEL}")
   set(libdynamixel_dir "$ENV{LIBDYNAMIXEL}")
 elseif (NOT ("$ENV{RESIBOTS_DIR}" STREQUAL ""))
