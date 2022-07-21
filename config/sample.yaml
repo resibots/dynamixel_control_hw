@@ -19,7 +19,7 @@ dynamixel_control:
   baudrate: 3000000 # in bauds
   read_timeout: 0.005 # in seconds
   scan_timeout: 0.005 # in seconds
-  # Cofniguration of the servos
+  # Configuration of the servos
   servos:
     arm_joint_1:
       # hardware ID of the actuator
